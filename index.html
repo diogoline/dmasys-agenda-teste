@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DMA SYS - Gestão de Termos, Requisições, O.S., Locação e Compras</title>
+  <title>DMA SYS - Gestão de Termos, Requisições, O.S., Locação, Compras e Agenda</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    /* CORREÇÃO 1: Removido o display:flex e flex-direction:column que estava conflitando com o rodapé */
     body { background-color: #f0f2f5; color: #333; min-height: 100vh; padding: 16px; padding-bottom: 70px; overflow-x: hidden; }
     
     .header { background-color: #1a4d80; color: white; padding: 12px 24px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; box-shadow: 0 3px 6px rgba(0,0,0,0.12); position: relative; }
@@ -69,8 +68,8 @@
     .form-row { display: flex; gap: 12px; margin-bottom: 12px; }
     .form-group { flex: 1; display: flex; flex-direction: column; }
     label { font-size: 11px; font-weight: 700; color: #444; margin-bottom: 4px; text-transform: uppercase; }
-    input[type="text"], input[type="password"], input[type="month"], input[type="number"], select, textarea { width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; background: #fff; transition: border-color 0.2s; }
-    input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, select:focus, textarea:focus { border-color: #1a4d80; outline: none; }
+    input[type="text"], input[type="password"], input[type="month"], input[type="number"], input[type="datetime-local"], select, textarea { width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; background: #fff; transition: border-color 0.2s; }
+    input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, input[type="datetime-local"]:focus, select:focus, textarea:focus { border-color: #1a4d80; outline: none; }
     input[readonly] { background-color: #f8f9fa; color: #333; font-weight: 600; }
     
     .radio-group { display: flex; gap: 20px; align-items: center; padding: 6px 0; }
@@ -164,21 +163,15 @@
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* CORREÇÃO 2: z-index ajustado para 99999 */
     /* --- RODAPÉ FIXO --- */
     .system-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #1a4d80; color: #e2e8f0; font-size: 11px; padding: 8px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 99999; border-top: 2px solid #2563eb; }
     .system-footer a { color: #60a5fa; text-decoration: none; font-weight: bold; }
     
-    /* ===================================================================
-       TEMA VISUAL DMA SYS (v4) — SOMENTE cores, sombras, degradês e cantos.
-       Não altera tamanhos, margens, fontes, posições, HTML, JS nem PDFs.
-       =================================================================== */
     html { scrollbar-color:#b7c4da #eef2f8; }
     ::selection { background:#bfdbfe; color:#0b2545; }
     :focus-visible { outline:2px solid #60a5fa; outline-offset:2px; }
     body { background:radial-gradient(900px 420px at 8% -8%,rgba(37,99,235,.14),transparent 60%),radial-gradient(800px 380px at 100% 0%,rgba(6,182,212,.10),transparent 60%),#eef2f8; background-attachment:fixed; color:#1e293b; padding-bottom:70px; }
 
-    /* Cabeçalho */
     .header { background:linear-gradient(115deg,#0b2545 0%,#123a6b 45%,#1d5fa8 100%); border-radius:14px; box-shadow:0 10px 30px rgba(11,37,69,.35),inset 0 1px 0 rgba(255,255,255,.12); }
     .header h1 { text-shadow:0 1px 2px rgba(0,0,0,.25); }
     .status-badge { background:#fbbf24; box-shadow:0 2px 8px rgba(251,191,36,.35); }
@@ -190,13 +183,11 @@
     .notif-header { background:linear-gradient(180deg,#f4f8fe,#e9f1fc); }
     .notif-item:hover, .menu-ajuda-item:hover, .dropdown-content button:hover { background:#eaf2ff; color:#1d4ed8; }
 
-    /* Navegação */
     .nav-tabs { border-radius:14px; border-color:#e2e8f0; box-shadow:0 4px 18px rgba(11,37,69,.08); }
     .nav-tab { background:#eef2f9; color:#334155; border-radius:999px; transition:all .2s; }
     .nav-tab:hover { background:#dbe7fa; color:#1a4d80; transform:translateY(-1px); }
     .nav-tab.active { background:linear-gradient(135deg,#2563eb,#1a4d80); color:#fff; box-shadow:0 6px 16px rgba(37,99,235,.4); }
 
-    /* Cartões */
     .card { border-radius:14px; border-color:#e3e9f3; box-shadow:0 1px 2px rgba(11,37,69,.05),0 10px 28px rgba(11,37,69,.07),inset 0 3px 0 0 #2563eb; }
     .card-title { color:#0b2545; border-bottom:2px solid transparent; border-image:linear-gradient(90deg,#2563eb,#06b6d4 55%,#22c55e) 1; }
     .welcome-hero { position:relative; overflow:hidden; background:radial-gradient(520px 240px at 92% 0%,rgba(96,165,250,.45),transparent 70%),radial-gradient(380px 200px at 0% 100%,rgba(6,182,212,.28),transparent 70%),linear-gradient(135deg,#1a4d80 0%,#0b2545 100%); border-radius:18px; box-shadow:0 16px 38px rgba(11,37,69,.34); }
@@ -211,15 +202,13 @@
     .metric-value { color:#0b2545; }
     .bar-bg { background:#e8eef7; } .bar-fill { background:linear-gradient(90deg,#2563eb,#60a5fa); }
 
-    /* Campos */
     label { color:#475569; }
-    input[type="text"], input[type="password"], input[type="month"], input[type="number"], select, textarea { border-color:#d3dbe8; border-radius:10px; background:#fbfcfe; box-shadow:inset 0 1px 2px rgba(11,37,69,.04); }
+    input[type="text"], input[type="password"], input[type="month"], input[type="number"], input[type="datetime-local"], select, textarea { border-color:#d3dbe8; border-radius:10px; background:#fbfcfe; box-shadow:inset 0 1px 2px rgba(11,37,69,.04); }
     input[type="text"]:hover, input[type="number"]:hover, select:hover, textarea:hover { border-color:#9fb3d1; }
-    input[type="text"]:focus, input[type="password"]:focus, input[type="month"]:focus, input[type="number"]:focus, select:focus, textarea:focus { border-color:#2563eb; background:#fff; box-shadow:0 0 0 4px rgba(37,99,235,.16); }
+    input[type="text"]:focus, input[type="password"]:focus, input[type="month"]:focus, input[type="number"]:focus, input[type="datetime-local"]:focus, select:focus, textarea:focus { border-color:#2563eb; background:#fff; box-shadow:0 0 0 4px rgba(37,99,235,.16); }
     input[readonly] { background-color:#eef2f8; color:#1e293b; }
     input[type="radio"], input[type="checkbox"] { accent-color:#2563eb; }
 
-    /* Tabelas */
     .table-container { border-color:#dbe3ef; border-radius:12px; scrollbar-color:#b7c4da #f1f5fb; }
     th { background:linear-gradient(180deg,#f1f6fd,#e1ecf9); color:#0b2545; border-bottom-color:#2563eb; }
     td { border-bottom-color:#edf1f7; }
@@ -227,7 +216,6 @@
     tbody tr { transition:background .15s; }
     tbody tr:hover { background:#eef5ff; }
 
-    /* Botões */
     .btn-submit { background:linear-gradient(135deg,#2563eb,#1a4d80); border-radius:11px; box-shadow:0 8px 18px rgba(37,99,235,.32); transition:transform .15s,box-shadow .15s,background .15s; }
     .btn-submit:hover { background:linear-gradient(135deg,#3b82f6,#13427a); box-shadow:0 12px 24px rgba(37,99,235,.42); transform:translateY(-1px); }
     .btn-submit:active { transform:translateY(0); }
@@ -239,21 +227,18 @@
     .btn-editar-saldo:hover { background:linear-gradient(135deg,#3b82f6,#1e40af); transform:translateY(-1px); }
     .btn-logout { border-radius:10px; } .btn-logout:hover { background:#dc3545; border-color:#dc3545; }
 
-    /* Selos */
     .badge-pendente { background:#fffbeb; color:#b45309; border-color:#fcd34d; }
     .badge-atendido { background:#ecfdf5; color:#047857; border-color:#86efac; }
     .badge-recusado { background:#fef2f2; color:#b91c1c; border-color:#fca5a5; }
     .badge-encerrado { background:#fef2f2; color:#b91c1c; border-color:#fca5a5; }
     .badge-saldo-ok { background:#eef2f8; color:#334155; } .badge-saldo-pendente { background:#fef3c7; color:#92400e; } .badge-saldo-alerta { background:#fee2e2; color:#991b1b; }
 
-    /* Modais */
     .modal-overlay { background:rgba(11,37,69,.6); backdrop-filter:blur(4px); }
     .modal-box { border-radius:18px; box-shadow:0 30px 70px rgba(11,37,69,.45); }
     .modal-overlay.active .modal-box { animation:fadeIn .22s ease-out; }
     .modal-title { color:#0b2545; border-bottom:2px solid transparent; border-image:linear-gradient(90deg,#2563eb,#06b6d4 60%,#22c55e) 1; }
     .modal-manual-card { border-radius:18px; } .modal-manual-header { background:linear-gradient(115deg,#0b2545,#1a4d80); }
 
-    /* Chat */
     .chat-tabs { background:#eef2f9; } .chat-tab { background:#f6f9fd; } .chat-tab.active { color:#1a4d80; border-bottom-color:#2563eb; }
     .chat-messages { background:#f8fafc; }
     .chat-msg { border-color:#e2e8f0; border-radius:10px; box-shadow:0 1px 3px rgba(11,37,69,.06); }
@@ -264,8 +249,6 @@
     .chat-box-wa { border-radius:18px; box-shadow:0 22px 50px rgba(11,37,69,.3); }
     .chat-widget-btn { box-shadow:0 10px 24px rgba(37,211,102,.45); }
 
-    /* SEÇÃO B — itens que o seu arquivo usa mas NUNCA estilizou (hoje aparecem como botões crus do navegador).
-       Única parte do tema que altera tamanho, só nesses itens. Para manter exatamente como está hoje, apague SOMENTE esta seção B (até o comentário Login). */
     .btn-action-container { display:flex !important; flex-direction:row !important; flex-wrap:nowrap !important; align-items:center !important; justify-content:center !important; gap:4px !important; width:100% !important; white-space:nowrap !important; }
     .btn-atender, .btn-negar, .btn-vincular { color:#fff; border:none; padding:4px 10px; border-radius:7px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap; height:26px; display:inline-flex; align-items:center; gap:4px; justify-content:center; transition:filter .15s,transform .15s; }
     .btn-atender { background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 3px 8px rgba(217,119,6,.32); }
@@ -277,7 +260,6 @@
     .sig-box { flex:1; border:1px dashed #b9c7de; border-radius:12px; padding:10px; background:#f6f9fd; text-align:center; position:relative; }
     .sig-box canvas { touch-action:none; }
 
-    /* Login */
     #loginOverlay { background:radial-gradient(700px 400px at 18% 8%,rgba(37,99,235,.42),transparent 70%),radial-gradient(600px 400px at 92% 92%,rgba(6,182,212,.22),transparent 70%),#0a1424 !important; }
     #loginOverlay > div { border-radius:22px !important; box-shadow:0 34px 80px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.08) !important; }
     #loginOverlay > div > div:first-child { background:linear-gradient(120deg,#0b2545,#2563eb); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
@@ -287,12 +269,10 @@
     #btnEntrarLogin:hover { transform:translateY(-1px); box-shadow:0 14px 28px rgba(37,99,235,.5); }
     #loginOverlay::after { content:"DMA SYS v2.0 | Sistema de Gestão Operacional"; position:absolute; left:0; right:0; bottom:0; padding:10px 20px; text-align:center; font-size:11px; color:#94a3b8; background:rgba(11,27,51,.85); border-top:2px solid #2563eb; pointer-events:none; }
 
-    /* --- RODAPÉ FIXO (reforçado: sempre visível, acima de tudo) --- */
     .system-footer { position:fixed !important; left:0 !important; right:0 !important; bottom:0 !important; z-index:2147483000 !important; display:flex !important; visibility:visible !important; opacity:1 !important; transform:none !important; justify-content:space-between; align-items:center; background:linear-gradient(90deg,#0b1b33,#12305a 55%,#0b1b33); color:#cbd5e1; font-size:11px; padding:8px 20px; border-top:2px solid #2563eb; box-shadow:0 -6px 20px rgba(11,37,69,.25); }
     .system-footer a { color:#7dd3fc; text-decoration:none; font-weight:bold; }
     .system-footer a:hover { color:#fff; }
 
-    /* Evita o bug de iOS/Safari em que overflow-x:hidden no body esconde elementos fixos (rodapé). Visual idêntico. */
     @supports (overflow-x: clip) { body { overflow-x: clip !important; } }
   </style>
 </head>
@@ -398,6 +378,11 @@
         <i class="fa-solid fa-cart-shopping"></i> Módulo de Compras
       </button>
 
+      <!-- NOVA ABA AGENDA -->
+      <button type="button" class="nav-tab" id="btnNavAgenda" onclick="mudarAba('agenda')">
+        <i class="fa-solid fa-calendar-days"></i> Agenda de Serviços
+      </button>
+
       <div class="dropdown" id="dropQualidade">
         <button type="button" class="nav-tab" id="btnNavQualidade" onclick="toggleMenuDropdown(event, 'dropQualidade')">
           <i class="fa-solid fa-shield-halved"></i> Módulo Qualidade <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
@@ -444,6 +429,12 @@
       </div>
 
       <div class="quick-actions-grid">
+        <div class="quick-card" onclick="mudarAba('agenda')">
+          <div class="quick-icon"><i class="fa-solid fa-calendar-days"></i></div>
+          <div class="quick-title">Agenda de Serviços</div>
+          <div class="quick-desc">Agende calibrações, testes e preventivas com alerta antichoque de horários.</div>
+        </div>
+
         <div class="quick-card" onclick="mudarAba('locacao')">
           <div class="quick-icon"><i class="fa-solid fa-boxes-packing"></i></div>
           <div class="quick-title">Controle de Locação</div>
@@ -467,11 +458,99 @@
           <div class="quick-title">Ordens de Serviço (O.S.)</div>
           <div class="quick-desc">Gerencie manutenções corretivas e preventivas com visual por prioridade.</div>
         </div>
+      </div>
+    </div>
 
-        <div class="quick-card" onclick="mudarAba('emissao')">
-          <div class="quick-icon"><i class="fa-solid fa-file-contract"></i></div>
-          <div class="quick-title">Emitir Novo Termo</div>
-          <div class="quick-desc">Gere o Termo Duplo em PDF (Entrega + Higienização) com assinaturas.</div>
+    <!-- NOVO MÓDULO: AGENDA DE SERVIÇOS -->
+    <div id="abaAgenda" class="tab-content">
+      <div class="card">
+        <div class="card-title">
+          <span><i class="fa-solid fa-calendar-plus"></i> Novo Agendamento de Serviço Integrado</span>
+        </div>
+        <form id="formAgenda" onsubmit="return salvarAgendamento(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Setor Solicitante:</label>
+              <select id="agSetorSol" required>
+                <option value="QUALIDADE">Qualidade</option>
+                <option value="REFRIGERAÇÃO">Refrigeração</option>
+                <option value="MANUTENÇÃO">Manutenção</option>
+                <option value="ODONTO">Odonto</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Setor Executante:</label>
+              <select id="agSetorExe" required>
+                <option value="QUALIDADE">Qualidade</option>
+                <option value="REFRIGERAÇÃO">Refrigeração</option>
+                <option value="MANUTENÇÃO">Manutenção</option>
+                <option value="ODONTO">Odonto</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tipo de Serviço:</label>
+              <select id="agServico" required>
+                <option value="CALIBRAÇÃO">Calibração</option>
+                <option value="TESTE DE SEGURANÇA ELÉTRICA">Teste de Segurança Elétrica</option>
+                <option value="QUALIFICAÇÃO TÉRMICA">Qualificação Térmica</option>
+                <option value="MANUTENÇÃO PREVENTIVA">Manutenção Preventiva</option>
+                <option value="INSPEÇÃO TÉCNICA">Inspeção Técnica</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+              <label>Pesquisar Equipamento (TAG / Nome / Série):</label>
+              <input type="text" id="agBuscaEq" list="listEquipamentos" placeholder="Digite para buscar equipamento..." oninput="autoPreencherAgendaEquip()" required>
+            </div>
+            <div class="form-group" style="flex: 1;"><label>TAG:</label><input type="text" id="agTag" readonly placeholder="-"></div>
+            <div class="form-group" style="flex: 1.5;"><label>Equipamento:</label><input type="text" id="agEquipNome" readonly placeholder="-"></div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Data e Horário do Agendamento:</label>
+              <input type="datetime-local" id="agDataHora" required>
+            </div>
+            <div class="form-group">
+              <label>Técnico Responsável:</label>
+              <select id="agTecnico" required>
+                <option value="">Selecione o técnico...</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="text-align: right; margin-top: 10px;">
+            <button type="submit" id="btnSalvarAgenda" class="btn-submit">
+              <i class="fa-solid fa-calendar-check"></i> Agendar Serviço e Validar Conflito
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span><i class="fa-solid fa-list-check"></i> Painel de Controle da Agenda de Serviços</span>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th class="td-center" style="width: 70px;">Protocolo</th>
+                <th style="width: 130px;">Data / Horário</th>
+                <th>Solicitante ➔ Executante</th>
+                <th>Serviço</th>
+                <th class="td-center" style="width: 80px;">TAG</th>
+                <th>Equipamento</th>
+                <th>Técnico</th>
+                <th class="td-center" style="width: 90px;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="corpoTabelaAgenda">
+              <tr><td colspan="8" class="td-center" style="color: #888; padding: 20px;">Carregando agendamentos...</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -1102,7 +1181,6 @@
       </div>
     </div>
 
-    <!-- CORREÇÃO 3: RODAPÉ MOVIDO PARA DENTRO DO APP CONTAINER -->
     <!-- RODAPÉ DO SISTEMA -->
     <footer class="system-footer">
       <div><b>DMA SYS</b> v2.0 | Sistema de Gestão Operacional</div>
@@ -1223,10 +1301,10 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyO2lc933am-wANUezHCGcURMZjDeHE2HLaNC0HseSxIH92A9PfqO8QgMFZC6pOCRV_/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzlemt_vTpfx7Qq-JQUcCNroQ0IaP3QeK4Y8Lw6tzmhWxhWvjNm8up0pHtyhi4QEyf4FA/exec";
     const NUMERO_WHATSAPP_SUPORTE = "5511970116092";
 
-    let bancoDados = { clientes: [], equipamentos: [], usuarios: [], termosEmitidos: [], requisicoes: [], ordensServico: [], relacoesAuxiliares: [], locacoes: [], compras: [] };
+    let bancoDados = { clientes: [], equipamentos: [], usuarios: [], termosEmitidos: [], requisicoes: [], ordensServico: [], relacoesAuxiliares: [], locacoes: [], compras: [], agenda: [] };
     let equipamentoSelecionado = null;
     let protocoloReqEmVinculo = null;
     let usuarioLogado = null;
@@ -1573,8 +1651,8 @@
 
     function preencherSelectTecnicos() {
       const selTec = document.getElementById('selectTecnico');
-      if (!selTec) return;
-      const valAnterior = selTec.value;
+      const agTec = document.getElementById('agTecnico');
+      
       let htmlOptions = '<option value="">Selecione o técnico...</option>';
       if (bancoDados && bancoDados.usuarios) {
         bancoDados.usuarios.forEach((u) => {
@@ -1584,8 +1662,17 @@
           }
         });
       }
-      selTec.innerHTML = htmlOptions;
-      if (valAnterior !== "") selTec.value = valAnterior;
+      
+      if (selTec) {
+        const valAnterior = selTec.value;
+        selTec.innerHTML = htmlOptions;
+        if (valAnterior !== "") selTec.value = valAnterior;
+      }
+      if (agTec) {
+        const valAnteriorAg = agTec.value;
+        agTec.innerHTML = htmlOptions;
+        if (valAnteriorAg !== "") agTec.value = valAnteriorAg;
+      }
     }
 
     function verificarSessao() {
@@ -1683,6 +1770,7 @@
         try { renderizarTabelaOS(); } catch(e) {}
         try { renderizarTabelaLocacao(); } catch(e) {}
         try { renderizarTabelaCompras(); } catch(e) {}
+        try { renderizarTabelaAgenda(); } catch(e) {}
         try { atualizarDashboard(); } catch(e) {}
         try { atualizarNotificacoes(); } catch(e) {}
         try { renderizarUsuariosOnline(); } catch(e) {}
@@ -1806,6 +1894,102 @@
       });
 
       return false;
+    }
+
+    // =====================================================================
+    // MÓDULO DE AGENDA DE SERVIÇOS (FRONT-END & VALIDAÇÃO ANTICHOQUE)
+    // =====================================================================
+    function autoPreencherAgendaEq() {
+      const val = document.getElementById('agBuscaEq').value.toLowerCase().trim();
+      if (!val || !bancoDados.equipamentos) return;
+      const eq = bancoDados.equipamentos.find(i => `tag: ${i.tag} | ${i.nome} | série: ${i.serie}`.toLowerCase() === val || (i.tag || '').toLowerCase() === val);
+      if (eq) {
+        document.getElementById('agTag').value = eq.tag || "-";
+        document.getElementById('agEquipNome').value = `${eq.nome || ''} ${eq.modelo ? '(' + eq.modelo + ')' : ''}`.trim() || "-";
+      }
+    }
+
+    function salvarAgendamento(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      const setorSol = document.getElementById('agSetorSol').value;
+      const setorExe = document.getElementById('agSetorExe').value;
+      const servico = document.getElementById('agServico').value;
+      const tag = document.getElementById('agTag').value.trim();
+      const equip = document.getElementById('agEquipNome').value.trim();
+      const dataHora = document.getElementById('agDataHora').value;
+      const tecnico = document.getElementById('agTecnico').value;
+
+      if (!tag || !dataHora || !tecnico) {
+        alert("Preencha todos os campos obrigatórios do agendamento.");
+        return false;
+      }
+
+      const btn = document.getElementById('btnSalvarAgenda');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> VALIDANDO E AGENDANDO...';
+
+      const payload = {
+        acao: "CRIAR_AGENDAMENTO",
+        setorSolicitante: setorSol,
+        setorExecutante: setorExe,
+        servico: servico,
+        tag: tag,
+        equipamento: equip,
+        dataHora: dataHora,
+        tecnico: tecnico
+      };
+
+      fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+      .then(res => res.json())
+      .then(res => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Agendar Serviço e Validar Conflito';
+        
+        if (res.status === "sucesso") {
+          document.getElementById('formAgenda').reset();
+          document.getElementById('agTag').value = "";
+          document.getElementById('agEquipNome').value = "";
+          alert(`Serviço agendado com sucesso! Protocolo: ${res.protocolo}`);
+          buscarAtualizacoesSilenciosas();
+        } else {
+          alert("⚠️ " + res.mensagem);
+        }
+      })
+      .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Agendar Serviço e Validar Conflito';
+        alert("Falha de conexão ao registrar agendamento.");
+      });
+
+      return false;
+    }
+
+    function renderizarTabelaAgenda() {
+      const tbody = document.getElementById('corpoTabelaAgenda');
+      if (!tbody) return;
+      const lista = bancoDados.agenda || [];
+
+      if (lista.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="td-center" style="color: #888; padding: 20px;">Nenhum serviço agendado no momento.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = lista.map(a => `
+        <tr>
+          <td class="td-center"><b>${a.protocolo || '-'}</b></td>
+          <td>${a.dataHoraExibicao || '-'}</td>
+          <td><span style="font-weight:bold; color:#1a4d80;">${a.setorSolicitante}</span> ➔ <span style="font-weight:bold; color:#2563eb;">${a.setorExecutante}</span></td>
+          <td><b>${a.servico || '-'}</b></td>
+          <td class="td-center">${a.tag || '-'}</td>
+          <td>${a.equipamento || '-'}</td>
+          <td>${a.tecnico || '-'}</td>
+          <td class="td-center"><span class="badge-status badge-pendente">${a.status || 'AGENDADO'}</span></td>
+        </tr>
+      `).join('');
     }
 
     function abrirModalVisualizadorReq(pdfUrl, titulo) {
@@ -2301,6 +2485,7 @@
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
       if (nomeAba === 'inicio') { document.getElementById('btnNavInicio').classList.add('active'); document.getElementById('abaInicio').classList.add('active'); }
+      else if (nomeAba === 'agenda') { document.getElementById('btnNavAgenda').classList.add('active'); document.getElementById('abaAgenda').classList.add('active'); renderizarTabelaAgenda(); }
       else if (nomeAba === 'locacao') { document.getElementById('btnNavLocacao').classList.add('active'); document.getElementById('abaLocacao').classList.add('active'); renderizarTabelaLocacao(); }
       else if (nomeAba === 'compras') { document.getElementById('btnNavCompras').classList.add('active'); document.getElementById('abaCompras').classList.add('active'); renderizarTabelaCompras(); }
       else if (nomeAba === 'dashboard') { document.getElementById('btnNavDashboard').classList.add('active'); document.getElementById('abaDashboard').classList.add('active'); atualizarDashboard(); }
@@ -2723,79 +2908,4 @@
                   <span>${nome}</span>
                   <span style="color: #1a4d80;">${qtd} reqs</span>
                 </div>
-                <div style="background: #e2e8f0; border-radius: 4px; height: 10px; overflow: hidden;">
-                  <div style="background: #1a4d80; width: ${pct}%; height: 100%; border-radius: 4px;"></div>
-                </div>
-              </div>
-            `;
-          }).join('');
-        }
-      }
-
-      const divFam = document.getElementById('chartFamilias');
-      if (divFam) {
-        const topFamilias = Object.entries(contagemFamilias).sort((a, b) => b[1] - a[1]).slice(0, 5);
-        if (topFamilias.length === 0) {
-          divFam.innerHTML = '<div style="color:#888; text-align:center; padding: 20px;">Sem dados para o período.</div>';
-        } else {
-          const maxVal = topFamilias[0][1] || 1;
-          divFam.innerHTML = topFamilias.map(([nome, qtd]) => {
-            const pct = Math.round((qtd / maxVal) * 100);
-            return `
-              <div style="margin-bottom: 10px;">
-                <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; margin-bottom: 2px;">
-                  <span>${nome}</span>
-                  <span style="color: #2563eb;">${qtd} reqs</span>
-                </div>
-                <div style="background: #e2e8f0; border-radius: 4px; height: 10px; overflow: hidden;">
-                  <div style="background: #2563eb; width: ${pct}%; height: 100%; border-radius: 4px;"></div>
-                </div>
-              </div>
-            `;
-          }).join('');
-        }
-      }
-    }
-
-    function atualizarNotificacoes() {
-      if (!bancoDados || !bancoDados.requisicoes) return;
-      const pendentes = bancoDados.requisicoes.filter(r => r && (r.status || '').toUpperCase() === "PENDENTE");
-      const badge = document.getElementById('notifBadge');
-      const textCount = document.getElementById('notifCountText');
-      const listContainer = document.getElementById('notifList');
-
-      if (!badge || !textCount || !listContainer) return;
-
-      if (pendentes.length > 0) {
-        badge.innerText = pendentes.length;
-        badge.classList.add('active');
-        textCount.innerText = `${pendentes.length} pendente(s)`;
-        listContainer.innerHTML = pendentes.map(p => `
-          <div class="notif-item" onclick="irParaRequisicaoEspecifica(event, '${p.protocolo}')">
-            <div class="notif-item-title">
-              <span>${p.protocolo || '-'}</span>
-              <span style="color:#e0a800;"><i class="fa-solid fa-clock"></i> Pendente</span>
-            </div>
-            <div class="notif-item-sub"><b>${p.cliente || '-'}</b></div>
-            <div class="notif-item-sub">${p.equipamentoSolicitado || '-'}</div>
-          </div>
-        `).join('');
-      } else {
-        badge.innerText = "0";
-        badge.classList.remove('active');
-        textCount.innerText = "0 pendentes";
-        listContainer.innerHTML = '<div style="padding: 16px; text-align: center; color: #888; font-size: 12px;">Nenhuma pendência no momento.</div>';
-      }
-    }
-
-    function irParaRequisicaoEspecifica(e, protocolo) {
-      if (e) e.stopPropagation();
-      fecharTodosDropdowns();
-      if (document.getElementById('filtroStatusReq')) document.getElementById('filtroStatusReq').value = "PENDENTE";
-      if (document.getElementById('filtroTextoReq')) document.getElementById('filtroTextoReq').value = protocolo || "";
-      mudarAba('requisicoes');
-      filtrarRequisicoes();
-    }
-  </script>
-</body>
-</html>
+                <div style="background: #e2e8f0; border-radius:
