@@ -132,6 +132,15 @@
     .modal-box { background: white; padding: 24px; border-radius: 10px; width: 680px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
     .modal-title { font-size: 16px; font-weight: bold; color: #1a4d80; margin-bottom: 12px; display: flex; justify-content: space-between; border-bottom: 2px solid #1a4d80; padding-bottom: 6px; }
 
+    /* ESTILOS DA MODAL DE CALENDÁRIO MENSAL */
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
+    .cal-header-day { text-align: center; font-weight: bold; font-size: 11px; color: #1a4d80; padding: 6px 0; background: #e2e8f0; border-radius: 4px; }
+    .cal-cell { min-height: 80px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px; display: flex; flex-direction: column; justify-content: flex-start; cursor: pointer; transition: all 0.2s; }
+    .cal-cell:hover { background: #eef2f8; border-color: #1a4d80; }
+    .cal-cell.empty { background: transparent; border: none; cursor: default; }
+    .cal-day-num { font-size: 12px; font-weight: bold; color: #334155; margin-bottom: 4px; }
+    .cal-event-badge { font-size: 9px; background: #1a4d80; color: white; padding: 2px 4px; border-radius: 3px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
     .modal-manual-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(3px); z-index: 20000; align-items: center; justify-content: center; }
     .modal-manual-overlay.ativo { display: flex; }
     .modal-manual-card { background: #ffffff; width: 90%; max-width: 820px; height: 85vh; border-radius: 10px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; }
@@ -155,7 +164,6 @@
     .emoji-item { font-size: 16px; cursor: pointer; padding: 4px; border-radius: 4px; transition: background 0.1s; }
     .emoji-item:hover { background: #f1f5f9; }
 
-    /* WIDGET WHATSAPP FLUTUANTE */
     .chat-widget-btn { position: fixed; bottom: 45px; right: 20px; background: #25d366; color: white; border: none; width: 48px; height: 48px; border-radius: 50%; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.25); z-index: 101; transition: transform 0.2s; }
     .chat-widget-btn:hover { transform: scale(1.08); }
     .chat-box-wa { display: none; position: fixed; bottom: 105px; right: 20px; width: 300px; background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 102; overflow: hidden; border: 1px solid #e2e8f0; }
@@ -163,7 +171,6 @@
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* --- RODAPÉ FIXO --- */
     .system-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #1a4d80; color: #e2e8f0; font-size: 11px; padding: 8px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 99999; border-top: 2px solid #2563eb; }
     .system-footer a { color: #60a5fa; text-decoration: none; font-weight: bold; }
     
@@ -460,7 +467,7 @@
       </div>
     </div>
 
-    <!-- NOVO MÓDULO: AGENDA DE SERVIÇOS -->
+    <!-- MÓDULO: AGENDA DE SERVIÇOS COM CALENDÁRIO MODAL -->
     <div id="abaAgenda" class="tab-content">
       <div class="card">
         <div class="card-title">
@@ -531,6 +538,9 @@
       <div class="card">
         <div class="card-title">
           <span><i class="fa-solid fa-list-check"></i> Painel de Controle da Agenda de Serviços</span>
+          <button type="button" class="btn-submit" style="padding: 6px 12px; font-size: 11px;" onclick="abrirModalCalendarioMensal()">
+            <i class="fa-solid fa-calendar-days"></i> Ver Calendário do Mês
+          </button>
         </div>
         <div class="table-container">
           <table>
@@ -1188,6 +1198,41 @@
 
   </div> <!-- FIM DO APP CONTAINER -->
 
+  <!-- MODAL DE CALENDÁRIO MENSAL -->
+  <div id="modalCalendarioMensal" class="modal-overlay">
+    <div class="modal-box" style="width: 850px; max-width: 95vw;">
+      <div class="modal-title">
+        <span id="calTituloMesAno">Calendário de Agendamentos</span>
+        <span onclick="fecharModalCalendarioMensal()" style="cursor:pointer; color:#888;"><i class="fa-solid fa-xmark"></i></span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <button type="button" class="btn-submit" style="padding: 6px 12px; font-size: 11px;" onclick="mudarMesCalendario(-1)"><i class="fa-solid fa-chevron-left"></i> Mês Anterior</button>
+        <button type="button" class="btn-submit" style="padding: 6px 12px; font-size: 11px;" onclick="mudarMesCalendario(1)">Próximo Mês <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-header-day">Dom</div>
+        <div class="cal-header-day">Seg</div>
+        <div class="cal-header-day">Ter</div>
+        <div class="cal-header-day">Qua</div>
+        <div class="cal-header-day">Qui</div>
+        <div class="cal-header-day">Sex</div>
+        <div class="cal-header-day">Sáb</div>
+      </div>
+      <div id="calCorpoDias" class="cal-grid" style="margin-top: 6px;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL DETALHES DO DIA SELECIONADO -->
+  <div id="modalDetalhesDia" class="modal-overlay">
+    <div class="modal-box" style="width: 600px;">
+      <div class="modal-title">
+        <span id="tituloDetalhesDia">Agendamentos do Dia</span>
+        <span onclick="fecharModalDetalhesDia()" style="cursor:pointer; color:#888;"><i class="fa-solid fa-xmark"></i></span>
+      </div>
+      <div id="corpoDetalhesDia" style="max-height: 400px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
   <!-- MODAL VISUALIZADOR DE REQUISIÇÃO (PDF) -->
   <div id="modalVisualizadorReq" class="modal-overlay">
     <div class="modal-box" style="width: 800px; max-width: 95vw; height: 85vh; display: flex; flex-direction: column;">
@@ -1312,6 +1357,9 @@
     let tituloOriginalPagina = document.title;
     let timerPiscarTitulo = null;
     let ultimoTempoDigitandoEnviado = 0;
+    
+    // Variáveis para controle do Calendário Modal
+    let dataCalendarioAtual = new Date();
 
     function criarDebounce(func, wait = 200) {
       let timeout;
@@ -1895,13 +1943,16 @@
       return false;
     }
 
+    // =====================================================================
+    // MÓDULO DE AGENDA E CALENDÁRIO MENSAL
+    // =====================================================================
     function autoPreencherAgendaEq() {
       const val = document.getElementById('agBuscaEq').value.toLowerCase().trim();
       if (!val || !bancoDados.equipamentos) return;
-      const eq = bancoDados.equipamentos.find(i => `tag: ${i.tag} | ${i.nome} | série: ${i.serie}`.toLowerCase() === val || (i.tag || '').toLowerCase() === val);
+      const eq = bancoDados.equipamentos.find(i => `tag: ${i.tag} | ${i.nome} \vert{} série: ${i.serie}`.toLowerCase() === val || (i.tag || '').toLowerCase() === val);
       if (eq) {
         document.getElementById('agTag').value = eq.tag || "-";
-        document.getElementById('agEquipNome').value = `${eq.nome || ''} ${eq.modelo ? '(' + eq.modelo + ')' : ''}`.trim() || "-";
+        document.getElementById('agEquipNome').value = `${eq.nome \vert{}\vert{} ''}${eq.modelo ? '(' + eq.modelo + ')' : ''}`.trim() || "-";
       }
     }
 
@@ -1983,1000 +2034,3 @@
           <td class="td-center">${a.tag || '-'}</td>
           <td>${a.equipamento || '-'}</td>
           <td>${a.tecnico || '-'}</td>
-          <td class="td-center"><span class="badge-status badge-pendente">${a.status || 'AGENDADO'}</span></td>
-        </tr>
-      `).join('');
-    }
-
-    function abrirModalVisualizadorReq(pdfUrl, titulo) {
-      const modal = document.getElementById('modalVisualizadorReq');
-      const iframe = document.getElementById('iframeVisualizadorReq');
-      const tituloEl = document.getElementById('tituloModalReqPDF');
-      const btnLink = document.getElementById('btnAbrirNovaAbaPdfReq');
-
-      let embedUrl = pdfUrl;
-      if (embedUrl.includes('/file/d/')) {
-        embedUrl = embedUrl.replace(/\/view.*$/, '/preview').replace(/\/edit.*$/, '/preview');
-      }
-
-      if (iframe) iframe.src = embedUrl;
-      if (tituloEl) tituloEl.innerText = titulo || "Visualizar Requisição (PDF)";
-      if (btnLink) btnLink.href = pdfUrl;
-      if (modal) modal.classList.add('active');
-    }
-
-    function fecharModalVisualizadorReq() {
-      const modal = document.getElementById('modalVisualizadorReq');
-      const iframe = document.getElementById('iframeVisualizadorReq');
-      if (iframe) iframe.src = "";
-      if (modal) modal.classList.remove('active');
-    }
-
-    function renderizarTabelaLocacao() {
-      const tbody = document.getElementById('corpoTabelaLocacao');
-      if (!tbody) return;
-      const locacoes = bancoDados.locacoes || [];
-      if (locacoes.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" class="td-center" style="color:#888; padding:20px;">Nenhum registro de locação encontrado.</td></tr>';
-        atualizarMetricasLocacao([]);
-        return;
-      }
-
-      const cliFiltro = (document.getElementById('locFiltroCliente')?.value || "").toLowerCase();
-      const uniFiltro = (document.getElementById('locFiltroUnidade')?.value || "").toLowerCase();
-      const famFiltro = (document.getElementById('locFiltroFamilia')?.value || "").toLowerCase();
-      const sitFiltro = (document.getElementById('locFiltroSituacao')?.value || "TODOS").toUpperCase();
-      const txtFiltro = (document.getElementById('locFiltroTexto')?.value || "").toLowerCase().trim();
-
-      const filtrados = locacoes.filter(l => {
-        if (!l) return false;
-        const cCliente = (l.cliente || "").toLowerCase();
-        const cUnidade = (l.unidade || "").toLowerCase();
-        const cEquip = (l.equipamento || "").toLowerCase();
-        const cSituacao = (l.situacao || "").toUpperCase();
-
-        if (cliFiltro && !cCliente.includes(cliFiltro)) return false;
-        if (uniFiltro && !cUnidade.includes(uniFiltro)) return false;
-        if (famFiltro && !cEquip.includes(famFiltro)) return false;
-        
-        if (sitFiltro !== "TODOS") {
-          if (cSituacao !== sitFiltro) return false;
-        }
-
-        if (txtFiltro) {
-          const matchCont = (l.contrato || "").toLowerCase().includes(txtFiltro);
-          const matchId = (l.id || "").toString().toLowerCase().includes(txtFiltro);
-          const matchLoc = (l.localizacao || "").toLowerCase().includes(txtFiltro);
-          const matchCli = cCliente.includes(txtFiltro);
-          if (!matchCont && !matchId && !matchLoc && !matchCli) return false;
-        }
-        return true;
-      });
-
-      atualizarMetricasLocacao(filtrados);
-
-      if (filtrados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" class="td-center" style="color:#888; padding:20px;">Nenhum registro encontrado para o filtro.</td></tr>';
-        return;
-      }
-
-      const rows = filtrados.map(l => {
-        let badgeSaldo = "badge-saldo-ok";
-        const numSaldo = Number(l.saldo) || 0;
-        if (numSaldo > 0) badgeSaldo = "badge-saldo-pendente";
-        else if (numSaldo < 0) badgeSaldo = "badge-saldo-alerta";
-
-        const sitUp = (l.situacao || 'ATIVO').toUpperCase();
-        let badgeSitClass = "badge-atendido";
-        if (sitUp === "ENCERRADO") badgeSitClass = "badge-encerrado";
-
-        return `
-          <tr>
-            <td class="td-center"><b>${l.id || '-'}</b></td>
-            <td><b>${l.cliente || '-'}</b></td>
-            <td>${l.contrato || "-"}</td>
-            <td>${l.unidade || "-"}</td>
-            <td>${l.localizacao || "-"}</td>
-            <td><b>${l.equipamento || '-'}</b></td>
-            <td class="td-center" style="font-weight:bold;">${l.qtdContratada ?? 0}</td>
-            <td class="td-center" style="font-weight:bold; color:#1a4d80;">${l.qtdFisica ?? 0}</td>
-            <td class="td-center"><span class="badge-status ${badgeSaldo}">${numSaldo}</span></td>
-            <td class="td-center"><span class="badge-status ${badgeSitClass}">${sitUp}</span></td>
-            <td class="td-center">
-              <button type="button" class="btn-editar-saldo" onclick="abrirModalLocacao('${l.id}')"><i class="fa-solid fa-pen-to-square"></i> Ajustar</button>
-            </td>
-          </tr>
-        `;
-      });
-
-      tbody.innerHTML = rows.join('');
-    }
-
-    function filtrarTabelaLocacao() { renderizarTabelaLocacao(); }
-
-    function atualizarMetricasLocacao(lista) {
-      let totalReg = (lista || []).length, totalCont = 0, totalFis = 0;
-      (lista || []).forEach(l => { totalCont += Number(l.qtdContratada) || 0; totalFis += Number(l.qtdFisica) || 0; });
-      if (document.getElementById('locTotalRegistros')) document.getElementById('locTotalRegistros').innerText = totalReg;
-      if (document.getElementById('locTotalContratada')) document.getElementById('locTotalContratada').innerText = totalCont;
-      if (document.getElementById('locTotalFisica')) document.getElementById('locTotalFisica').innerText = totalFis;
-      if (document.getElementById('locTotalSaldo')) document.getElementById('locTotalSaldo').innerText = totalCont - totalFis;
-    }
-
-    function abrirModalLocacao(id) {
-      const loc = (bancoDados.locacoes || []).find(l => l && l.id && l.id.toString() === id.toString());
-      if (!loc) return;
-      document.getElementById('locModalId').value = loc.id;
-      document.getElementById('locModalDetalhes').innerHTML = `
-        <b>Cliente:</b> ${loc.cliente || '-'}<br><b>Contrato:</b> ${loc.contrato || "N/A"} | <b>Unidade:</b> ${loc.unidade || "N/A"}<br><b>Equipamento:</b> ${loc.equipamento || '-'}<br><b>Qtd Contratada:</b> ${loc.qtdContratada ?? 0}<br>${loc.observacaoLog ? '<span style="color:#1a4d80;"><b>Último Log:</b> ' + loc.observacaoLog + '</span>' : ''}
-      `;
-      document.getElementById('locModalQtdFisica').value = loc.qtdFisica ?? 0;
-      document.getElementById('locModalValUnit').value = loc.valorUnitario ?? "";
-      document.getElementById('locModalValTotal').value = loc.valorTotal ?? "";
-      document.getElementById('locModalObservacao').value = "";
-      document.getElementById('modalLocacao').classList.add('active');
-    }
-
-    function fecharModalLocacao() { document.getElementById('modalLocacao').classList.remove('active'); }
-
-    function calcularTotalLocModal() {
-      const qtd = parseFloat(document.getElementById('locModalQtdFisica')?.value) || 0;
-      const unit = parseFloat(document.getElementById('locModalValUnit')?.value) || 0;
-      const total = qtd * unit;
-      const totalEl = document.getElementById('locModalValTotal');
-      if (totalEl) totalEl.value = total.toFixed(2);
-    }
-
-    function confirmarAjusteLocacao() {
-      const id = document.getElementById('locModalId').value;
-      const novaQtd = document.getElementById('locModalQtdFisica').value;
-      const valUnit = document.getElementById('locModalValUnit').value;
-      const valTotal = document.getElementById('locModalValTotal').value;
-      const obs = document.getElementById('locModalObservacao').value.trim();
-
-      if (novaQtd === "" || isNaN(novaQtd) || Number(novaQtd) < 0) { alert("Informe uma quantidade física válida."); return; }
-
-      const btn = document.getElementById('btnSalvarLocModal');
-      btn.disabled = true;
-      btn.innerText = "SALVANDO AJUSTE...";
-
-      const nomeUsr = usuarioLogado ? (usuarioLogado.nome || usuarioLogado.usuario) : "Sistema";
-
-      fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-          acao: "ATUALIZAR_QTD_FISICA_LOCACAO",
-          id: id,
-          qtdFisica: Number(novaQtd),
-          valorUnitario: Number(valUnit) || 0,
-          valorTotal: Number(valTotal) || 0,
-          observacao: obs,
-          usuarioNome: nomeUsr
-        })
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res.status === "sucesso") {
-          fecharModalLocacao();
-          buscarAtualizacoesSilenciosas();
-        } else {
-          alert("Erro ao atualizar locação.");
-        }
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar Ajuste e Log';
-      })
-      .catch(err => {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar Ajuste e Log';
-      });
-    }
-
-    function renderizarTabelaCompras() {
-      const tbody = document.getElementById('corpoTabelaCompras');
-      if (!tbody) return;
-      const lista = bancoDados.compras || [];
-      if (lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="td-center" style="color:#888; padding:20px;">Nenhuma cotação de compra registrada.</td></tr>';
-        return;
-      }
-      tbody.innerHTML = lista.map(c => {
-        if (!c) return '';
-        const st = (c.status || "PENDENTE").toUpperCase();
-        let badgeClass = "badge-pendente";
-        if (st === "APROVADO") badgeClass = "badge-atendido";
-        if (st === "RECUSADO") badgeClass = "badge-recusado";
-
-        const linkPdf = c.pdfUrlCompra ? `<a href="${c.pdfUrlCompra}" target="_blank" class="btn-pdf"><i class="fa-solid fa-file-pdf"></i> Mapa PDF</a>` : '-';
-
-        return `
-          <tr>
-            <td class="td-center"><b>${c.protocolo || '-'}</b></td>
-            <td>${c.dataHora || '-'}</td>
-            <td><b>${c.osExterna || '-'}</b></td>
-            <td>${c.solicitante || '-'}</td>
-            <td>${c.produto || '-'}</td>
-            <td><b>${c.fornVencedor || '-'}</b></td>
-            <td class="td-center" style="font-weight:bold; color:#137333;">R$ ${Number(c.menorValor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-            <td class="td-center"><span class="badge-status ${badgeClass}">${st}</span></td>
-            <td class="td-center">${linkPdf}</td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    function calcularMenorPrecoCotacao() {
-      const f1 = document.getElementById('compForn1')?.value.trim() || "Fornecedor 1";
-      const v1 = parseFloat(document.getElementById('compVal1')?.value) || 0;
-      const f2 = document.getElementById('compForn2')?.value.trim() || "Fornecedor 2";
-      const v2 = parseFloat(document.getElementById('compVal2')?.value) || 0;
-      const f3 = document.getElementById('compForn3')?.value.trim() || "Fornecedor 3";
-      const v3 = parseFloat(document.getElementById('compVal3')?.value) || 0;
-
-      let opcoes = [];
-      if (v1 > 0) opcoes.push({ nome: f1, valor: v1 });
-      if (v2 > 0) opcoes.push({ nome: f2, valor: v2 });
-      if (v3 > 0) opcoes.push({ nome: f3, valor: v3 });
-
-      const lblVencedor = document.getElementById('lblFornVencedor');
-      const lblValor = document.getElementById('lblMenorValor');
-
-      if (opcoes.length === 0) {
-        if (lblVencedor) lblVencedor.innerText = "-";
-        if (lblValor) lblValor.innerText = "R$ 0,00";
-        return;
-      }
-
-      opcoes.sort((a, b) => a.valor - b.valor);
-      const vencedor = opcoes[0];
-
-      if (lblVencedor) lblVencedor.innerText = vencedor.nome;
-      if (lblValor) lblValor.innerText = "R$ " + vencedor.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    function salvarSolicitacaoCompra(e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      const osExterna = document.getElementById('compOsExterna').value.trim();
-      const solicitante = document.getElementById('compSolicitante').value.trim();
-      const produto = document.getElementById('compProduto').value.trim();
-
-      if (!osExterna || !solicitante || !produto) {
-        alert("Preencha os campos obrigatórios (Nº O.S. Externa, Solicitante e Produto).");
-        return false;
-      }
-
-      const btn = document.getElementById('btnSalvarCompra');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> GERANDO COTAÇÃO...';
-
-      const payload = {
-        acao: "CRIAR_SOLICITACAO_COMPRA",
-        osExterna: osExterna,
-        solicitante: solicitante,
-        produto: produto,
-        observacao: document.getElementById('compObservacao').value.trim(),
-        forn1: document.getElementById('compForn1').value.trim(),
-        val1: parseFloat(document.getElementById('compVal1').value) || 0,
-        forn2: document.getElementById('compForn2').value.trim(),
-        val2: parseFloat(document.getElementById('compVal2').value) || 0,
-        forn3: document.getElementById('compForn3').value.trim(),
-        val3: parseFloat(document.getElementById('compVal3').value) || 0,
-        prazo: document.getElementById('compPrazo').value.trim(),
-        condPagto: document.getElementById('compCondPagto').value.trim(),
-        frete: document.getElementById('compFrete').value.trim()
-      };
-
-      fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-      .then(res => res.json())
-      .then(res => {
-        if (res.status === "sucesso") {
-          document.getElementById('formCompras').reset();
-          calcularMenorPrecoCotacao();
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-file-signature"></i> Salvar Cotação';
-          buscarAtualizacoesSilenciosas();
-          alert(`Cotação ${res.protocolo} criada com sucesso!`);
-        } else {
-          alert("Erro ao salvar cotação: " + (res.mensagem || "Erro desconhecido."));
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-file-signature"></i> Salvar Cotação';
-        }
-      })
-      .catch(err => {
-        alert("Falha de conexão ao salvar cotação.");
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-file-signature"></i> Salvar Cotação';
-      });
-
-      return false;
-    }
-
-    function renderizarTabelaRequisicoes(lista) {
-      const tbody = document.getElementById('corpoRequisicoes');
-      if (!tbody) return;
-      if (!lista || lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="td-center" style="color: #888; padding: 20px;">Nenhuma requisição encontrada para o filtro selecionado.</td></tr>';
-        return;
-      }
-
-      lista.sort((a, b) => {
-        const stA = (a.status || "").toUpperCase();
-        const stB = (b.status || "").toUpperCase();
-        if (stA === "PENDENTE" && stB !== "PENDENTE") return -1;
-        if (stA !== "PENDENTE" && stB === "PENDENTE") return 1;
-        return 0;
-      });
-
-      tbody.innerHTML = lista.map(r => {
-        if (!r) return '';
-        let st = (r.status || "PENDENTE").toUpperCase();
-        const isPendente = st === "PENDENTE";
-        const isRecusado = st === "RECUSADO";
-
-        let badgeClass = "badge-pendente";
-        if (st === "ATENDIDO") badgeClass = "badge-atendido";
-        if (isRecusado) badgeClass = "badge-recusado";
-        
-        const linkPdfReq = r.pdfUrlReq ? `<button type="button" class="btn-pdf" onclick="abrirModalVisualizadorReq('${r.pdfUrlReq}', 'Visualizar Requisição: ${r.protocolo}')" title="Visualizar Requisição"><i class="fa-solid fa-eye"></i></button>` : '';
-        
-        let btnAcao = "";
-        if (isPendente) {
-          btnAcao = `<div class="btn-action-container">
-            ${linkPdfReq}
-            <button type="button" class="btn-atender" onclick="atenderRequisicao('${r.protocolo}', '${(r.cliente || '').replace(/'/g, "\\'")}', '${r.operacao || 'LOCAÇÃO'}')"><i class="fa-solid fa-check"></i> Atender</button>
-            <button type="button" class="btn-vincular" onclick="abrirModalVincularTermo('${r.protocolo}', '${(r.cliente || '').replace(/'/g, "\\'")}')"><i class="fa-solid fa-link"></i> Vincular</button>
-            <button type="button" class="btn-negar" onclick="abrirModalRecusa('${r.protocolo}')"><i class="fa-solid fa-xmark"></i> Negar</button>
-          </div>`;
-        } else if (isRecusado) {
-          btnAcao = `<div class="btn-action-container">${linkPdfReq}<span style="color:#dc3545; font-weight:bold; font-size:11px;">Recusado</span></div>`;
-        } else {
-          let termoTexto = r.protocoloTermo ? `Termo: ${r.protocoloTermo}` : 'Termo Gerado';
-          btnAcao = `<div class="btn-action-container">${linkPdfReq}<span class="btn-termo-link">${termoTexto}</span></div>`;
-        }
-
-        return `
-          <tr>
-            <td class="td-center"><b>${r.protocolo || '-'}</b></td>
-            <td>${r.dataHora || '-'}</td>
-            <td>${r.cliente || '-'}</td>
-            <td><b>${r.equipamentoSolicitado || '-'}</b></td>
-            <td style="color:#555; font-style:italic;">${r.motivo || "-"}</td>
-            <td class="td-center"><b>${r.operacao || 'LOCAÇÃO'}</b></td>
-            <td class="td-center"><span class="badge-status ${badgeClass}">${st}</span></td>
-            <td class="td-center">${btnAcao}</td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    function filtrarRequisicoes() {
-      const requisicoes = bancoDados.requisicoes || [];
-      const statusFiltro = document.getElementById('filtroStatusReq')?.value || "TODOS";
-      const mesFiltro = document.getElementById('filtroMesReq')?.value || "";
-      const textoFiltro = (document.getElementById('filtroTextoReq')?.value || "").toLowerCase().trim();
-
-      let filtradas = requisicoes.filter(r => {
-        if (!r) return false;
-        const st = (r.status || "PENDENTE").toUpperCase();
-        if (statusFiltro !== "TODOS" && st !== statusFiltro) return false;
-
-        if (mesFiltro && r.dataHora) {
-          const partesData = String(r.dataHora).split(' ')[0].split('/');
-          if (partesData.length === 3) {
-            const anoMesReg = `${partesData[2]}-${partesData[1].padStart(2, '0')}`;
-            if (anoMesReg !== mesFiltro) return false;
-          }
-        }
-
-        if (textoFiltro) {
-          const matchProt = (r.protocolo || "").toLowerCase().includes(textoFiltro);
-          const matchCli = (r.cliente || "").toLowerCase().includes(textoFiltro);
-          const matchEq = (r.equipamentoSolicitado || "").toLowerCase().includes(textoFiltro);
-          const matchMotivo = (r.motivo || "").toLowerCase().includes(textoFiltro);
-          if (!matchProt && !matchCli && !matchEq && !matchMotivo) return false;
-        }
-
-        return true;
-      });
-
-      renderizarTabelaRequisicoes(filtradas);
-    }
-
-    function abrirModalVincularTermo(protReq, cliente) {
-      protocoloReqEmVinculo = protReq;
-      if (document.getElementById('lblProtReqVinculo')) document.getElementById('lblProtReqVinculo').innerText = protReq;
-      if (document.getElementById('lblClienteReqVinculo')) document.getElementById('lblClienteReqVinculo').innerText = cliente;
-      if (document.getElementById('inputProtocoloTermoVinculo')) document.getElementById('inputProtocoloTermoVinculo').value = "";
-
-      const listDL = document.getElementById('listTermosExistentes');
-      if (listDL && bancoDados.termosEmitidos) {
-        const termosDoCliente = bancoDados.termosEmitidos.filter(t => t && (t.cliente || "").toLowerCase().includes((cliente || "").toLowerCase()));
-        listDL.innerHTML = termosDoCliente.map(t => `<option value="${t.protocolo}">Termo ${t.protocolo} | ${t.equipamento || '-'} (${t.dataHora || '-'})</option>`).join('');
-      }
-      document.getElementById('modalVincularTermo').classList.add('active');
-    }
-
-    function fecharModalVincularTermo() {
-      protocoloReqEmVinculo = null;
-      document.getElementById('modalVincularTermo').classList.remove('active');
-    }
-
-    function confirmarVinculoTermo() {
-      const protTermo = document.getElementById('inputProtocoloTermoVinculo').value.trim().toUpperCase();
-      if (!protTermo) { alert("Por favor, informe o protocolo do Termo."); return; }
-
-      const btn = document.getElementById('btnConfirmarVinculo');
-      btn.disabled = true;
-      btn.innerText = "VINCULANDO...";
-
-      const protReqAlvo = protocoloReqEmVinculo;
-
-      fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ acao: "VINCULAR_TERMO_REQUISICAO", protocoloReq: protReqAlvo, protocoloTermo: protTermo })
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res.status === "sucesso") {
-          if (bancoDados && bancoDados.requisicoes) {
-            const reqLocal = bancoDados.requisicoes.find(r => r && r.protocolo === protReqAlvo && (r.status || "").toUpperCase() === "PENDENTE") ||
-                             bancoDados.requisicoes.find(r => r && r.protocolo === protReqAlvo);
-            if (reqLocal) {
-              reqLocal.status = "ATENDIDO";
-              reqLocal.protocoloTermo = protTermo;
-            }
-          }
-          fecharModalVincularTermo();
-          filtrarRequisicoes();
-          atualizarDashboard();
-          atualizarNotificacoes();
-          buscarAtualizacoesSilenciosas();
-        } else {
-          alert("Erro ao vincular termo: " + (res.mensagem || "Requisição não encontrada na planilha."));
-        }
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-link"></i> Confirmar Vinculação';
-      })
-      .catch(err => {
-        alert("Falha de conexão ao vincular termo.");
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-link"></i> Confirmar Vinculação';
-      });
-    }
-
-    function atenderRequisicao(protReq, cliente, operacao) {
-      const reqObj = (bancoDados.requisicoes || []).find(r => r && r.protocolo === protReq && (r.status || "").toUpperCase() === "PENDENTE") ||
-                     (bancoDados.requisicoes || []).find(r => r && r.protocolo === protReq);
-
-      if (reqObj && (reqObj.status || "").toUpperCase() === "ATENDIDO") {
-        alert(`A requisição ${protReq} já se encontra ATENDIDA!`);
-        buscarAtualizacoesSilenciosas();
-        return;
-      }
-
-      document.getElementById('reqVinculadaProtocolo').value = protReq;
-      document.getElementById('inputCliente').value = cliente;
-      
-      const banner = document.getElementById('bannerReqVinculada');
-      const lbl = document.getElementById('lblProtReqVinculada');
-      if (banner && lbl) { lbl.innerText = protReq; banner.style.display = "flex"; }
-
-      const radioOp = document.querySelector(`input[name="tipoOperacao"][value="${operacao}"]`);
-      if (radioOp) radioOp.checked = true;
-
-      mudarAba('emissao');
-    }
-
-    function desvincularRequisicao() {
-      document.getElementById('reqVinculadaProtocolo').value = "";
-      const banner = document.getElementById('bannerReqVinculada');
-      if (banner) banner.style.display = "none";
-    }
-
-    function mudarAba(nomeAba) {
-      fecharTodosDropdowns();
-      document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-      if (nomeAba === 'inicio') { document.getElementById('btnNavInicio').classList.add('active'); document.getElementById('abaInicio').classList.add('active'); }
-      else if (nomeAba === 'agenda') { document.getElementById('btnNavAgenda').classList.add('active'); document.getElementById('abaAgenda').classList.add('active'); renderizarTabelaAgenda(); }
-      else if (nomeAba === 'locacao') { document.getElementById('btnNavLocacao').classList.add('active'); document.getElementById('abaLocacao').classList.add('active'); renderizarTabelaLocacao(); }
-      else if (nomeAba === 'compras') { document.getElementById('btnNavCompras').classList.add('active'); document.getElementById('abaCompras').classList.add('active'); renderizarTabelaCompras(); }
-      else if (nomeAba === 'dashboard') { document.getElementById('btnNavDashboard').classList.add('active'); document.getElementById('abaDashboard').classList.add('active'); atualizarDashboard(); }
-      else if (nomeAba === 'requisicoes') { document.getElementById('btnNavQualidade').classList.add('active'); document.getElementById('abaRequisicoes').classList.add('active'); }
-      else if (nomeAba === 'emissao') { document.getElementById('btnNavQualidade').classList.add('active'); document.getElementById('abaEmissao').classList.add('active'); }
-      else if (nomeAba === 'consulta') { document.getElementById('btnNavQualidade').classList.add('active'); document.getElementById('abaConsulta').classList.add('active'); }
-      else if (nomeAba === 'os_gestao') { document.getElementById('btnNavManutencao').classList.add('active'); document.getElementById('abaOsGestao').classList.add('active'); renderizarTabelaOS(); }
-      else if (nomeAba === 'os_abertura') { document.getElementById('btnNavManutencao').classList.add('active'); document.getElementById('abaOsAbertura').classList.add('active'); }
-      else if (nomeAba === 'cad_equipamento') { document.getElementById('btnNavCadastros').classList.add('active'); document.getElementById('abaCadEquipamento').classList.add('active'); }
-      else if (nomeAba === 'cad_auxiliares') { document.getElementById('btnNavCadastros').classList.add('active'); document.getElementById('abaCadAuxiliares').classList.add('active'); }
-    }
-
-    function popularAutocomplete() {
-      let listaClientesUnicos = new Set();
-      if (bancoDados.clientes) bancoDados.clientes.forEach(c => c && listaClientesUnicos.add(c));
-      if (bancoDados.locacoes) bancoDados.locacoes.forEach(l => l && l.cliente && listaClientesUnicos.add(l.cliente));
-      
-      const listC = document.getElementById('listClientes');
-      if (listC) listC.innerHTML = Array.from(listaClientesUnicos).sort().map(c => `<option value="${c}">`).join('');
-
-      if (bancoDados.equipamentos) {
-        const listE = document.getElementById('listEquipamentos');
-        if (listE) listE.innerHTML = bancoDados.equipamentos.map(eq => `<option value="TAG: ${eq.tag} | ${eq.nome} | Série: ${eq.serie}">`).join('');
-      }
-
-      if (bancoDados.locacoes) {
-        const unidades = Array.from(new Set(bancoDados.locacoes.map(l => l ? l.unidade : '').filter(Boolean))).sort();
-        const familias = Array.from(new Set(bancoDados.locacoes.map(l => l ? l.equipamento : '').filter(Boolean))).sort();
-
-        const dlUni = document.getElementById('listUnidadesLocacao');
-        if (dlUni) dlUni.innerHTML = unidades.map(u => `<option value="${u}">`).join('');
-
-        const dlFam = document.getElementById('listFamiliasLocacao');
-        if (dlFam) dlFam.innerHTML = familias.map(f => `<option value="${f}">`).join('');
-      }
-    }
-
-    function autoPreencherEquipamento() {
-      const val = document.getElementById('buscaEquipamento').value.toLowerCase().trim();
-      if (!val || !bancoDados.equipamentos) return;
-      const eq = bancoDados.equipamentos.find(i => `tag: ${i.tag} | ${i.nome} | série: ${i.serie}`.toLowerCase() === val || (i.tag || '').toLowerCase() === val);
-      if (eq) {
-        equipamentoSelecionado = eq;
-        document.getElementById('eqTag').value = eq.tag || "-";
-        document.getElementById('eqSerie').value = eq.serie || "-";
-        document.getElementById('eqPatrimonio').value = eq.patrimonio || "-";
-        document.getElementById('eqNome').value = eq.nome || "-";
-        document.getElementById('eqModelo').value = eq.modelo || "-";
-        document.getElementById('eqFabricante').value = eq.fabricante || "-";
-
-        const tbodyAc = document.getElementById('corpoAcessorios');
-        if (tbodyAc) {
-          const rawAcs = eq.acessorios ? eq.acessorios.toString().trim() : "";
-          if (!rawAcs || rawAcs.toUpperCase() === "NÃO POSSUI" || rawNulo(rawAcs)) {
-            tbodyAc.innerHTML = '<tr><td colspan="4" class="td-center" style="color: #888; padding: 20px;">NÃO POSSUI ACESSÓRIOS CADASTRADOS.</td></tr>';
-          } else {
-            const listaAcs = rawAcs.split(';').map(a => a.trim()).filter(Boolean);
-            if (listaAcs.length === 0) {
-              tbodyAc.innerHTML = '<tr><td colspan="4" class="td-center" style="color: #888; padding: 20px;">NÃO POSSUI ACESSÓRIOS CADASTRADOS.</td></tr>';
-            } else {
-              tbodyAc.innerHTML = listaAcs.map((ac, idx) => `
-                <tr>
-                  <td class="td-center">${idx + 1}</td>
-                  <td class="td-center"><input type="number" class="qtd-acessorio" value="1" min="0" style="width: 50px; text-align: center; font-weight: bold; border: 1px solid #1a4d80; color: #1a4d80; border-radius: 4px; padding: 2px;"></td>
-                  <td><b>${ac.toUpperCase()}</b></td>
-                  <td class="td-center" style="color:#166534; font-weight:bold;">CONFORME</td>
-                </tr>
-              `).join('');
-            }
-          }
-        }
-      }
-    }
-
-    function rawNulo(v) { return !v || v === "" || v === "-"; }
-
-    function autoPreencherOSEquipamento() {
-      const val = document.getElementById('osBuscaEquip').value.toLowerCase().trim();
-      if (!val || !bancoDados.equipamentos) return;
-      const eq = bancoDados.equipamentos.find(i => `tag: ${i.tag} | ${i.nome} | série: ${i.serie}`.toLowerCase() === val || (i.tag || '').toLowerCase() === val);
-      if (eq) {
-        document.getElementById('osTag').value = eq.tag || "-";
-        document.getElementById('osSerie').value = eq.serie || "-";
-        document.getElementById('osPatrimonio').value = eq.patrimonio || "-";
-        document.getElementById('osNomeEquip').value = `${eq.nome || ''} ${eq.modelo ? '(' + eq.modelo + ')' : ''}`.trim() || "-";
-      }
-    }
-
-    const canvas = document.getElementById('canvasAssinatura');
-    const ctx = canvas?.getContext('2d');
-    let desenhando = false;
-    function obterPosicao(e) {
-      const rect = canvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: clientX - rect.left, y: clientY - rect.top };
-    }
-    function iniciarDesenho(e) { desenhando = true; desenhar(e); }
-    function pararDesenho() { desenhando = false; ctx?.beginPath(); }
-    function desenhar(e) {
-      if (!desenhando || !ctx) return;
-      e.preventDefault();
-      const pos = obterPosicao(e);
-      ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.lineTo(pos.x, pos.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
-    }
-    if (canvas) {
-      canvas.addEventListener('mousedown', iniciarDesenho); canvas.addEventListener('mouseup', pararDesenho); canvas.addEventListener('mousemove', desenhar);
-      canvas.addEventListener('touchstart', iniciarDesenho); canvas.addEventListener('touchend', pararDesenho); canvas.addEventListener('touchmove', desenhar);
-    }
-    function limparAssinatura() { ctx?.clearRect(0, 0, canvas.width, canvas.height); }
-
-    function gerarTermo(e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      if (!equipamentoSelecionado) { alert("Selecione um equipamento válido."); return false; }
-
-      const nomeTec = document.getElementById('selectTecnico').value;
-      if (!nomeTec) { alert("Selecione o técnico responsável."); return false; }
-
-      let acessoriosList = [];
-      const trs = document.querySelectorAll('#corpoAcessorios tr');
-      trs.forEach((tr, idx) => {
-        const tds = tr.querySelectorAll('td');
-        if (tds.length >= 3 && !tr.innerText.includes("NÃO POSSUI")) {
-          const inputQtd = tr.querySelector('.qtd-acessorio');
-          const qtdVal = inputQtd ? (parseInt(inputQtd.value) || 1) : 1;
-          acessoriosList.push({
-            item: idx + 1,
-            qtd: qtdVal,
-            descricao: tds[2].innerText.trim(),
-            conformidade: "CONFORME"
-          });
-        }
-      });
-
-      const payload = {
-        acao: "CRIAR_TERMO",
-        cliente: document.getElementById('inputCliente').value,
-        equipamento: equipamentoSelecionado,
-        tipoOperacao: document.querySelector('input[name="tipoOperacao"]:checked').value,
-        acessorios: acessoriosList,
-        tecnico: { nome: nomeTec },
-        assinaturaCliente: canvas ? canvas.toDataURL() : "",
-        protocoloReq: document.getElementById('reqVinculadaProtocolo').value
-      };
-
-      const btn = document.getElementById('btnEnviar');
-      btn.disabled = true; btn.innerText = "GERANDO PDF NO SERVIDOR...";
-
-      fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-      .then(res => res.json())
-      .then(res => {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Gerar Termo Duplo PDF (Entrega + Higienização)';
-        
-        if(res.status === "sucesso") {
-          desvincularRequisicao();
-          document.getElementById('termoForm').reset();
-          limparAssinatura();
-          equipamentoSelecionado = null;
-          document.getElementById('corpoAcessorios').innerHTML = '<tr><td colspan="4" class="td-center" style="color: #888; padding: 24px;">Selecione um equipamento para visualizar os acessórios.</td></tr>';
-          
-          buscarAtualizacoesSilenciosas();
-
-          if (res.pdfUrl && confirm(`Termo ${res.protocolo} gerado com sucesso!\n\nDeseja abrir o PDF gerado agora?`)) {
-            window.open(res.pdfUrl, '_blank');
-          }
-          mudarAba('consulta');
-        } else {
-          alert("Erro ao gerar termo.");
-        }
-      })
-      .catch(err => {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Gerar Termo Duplo PDF (Entrega + Higienização)';
-        alert("Falha de conexão ao gerar termo.");
-      });
-
-      return false;
-    }
-
-    function renderizarTabelaOS() {
-      const tbody = document.getElementById('corpoOS');
-      if (!tbody) return;
-      const listaOS = bancoDados.ordensServico || [];
-
-      if (listaOS.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="td-center" style="color: #888; padding: 20px;">Nenhuma Ordem de Serviço registrada.</td></tr>';
-        return;
-      }
-
-      const statusFiltro = document.getElementById('filtroStatusOS')?.value || "TODOS";
-      const textoFiltro = (document.getElementById('filtroTextoOS')?.value || "").toLowerCase().trim();
-
-      let filtradas = listaOS.filter(os => {
-        if (!os) return false;
-        const st = (os.status || "").toUpperCase();
-        if (statusFiltro !== "TODOS" && st !== statusFiltro) return false;
-
-        if (textoFiltro) {
-          const matchProt = (os.protocoloOS || "").toLowerCase().includes(textoFiltro);
-          const matchCli = (os.cliente || "").toLowerCase().includes(textoFiltro);
-          const matchTag = (os.tag || "").toLowerCase().includes(textoFiltro);
-          const matchEq = (os.equipamento || "").toLowerCase().includes(textoFiltro);
-          if (!matchProt && !matchCli && !matchTag && !matchEq) return false;
-        }
-
-        return true;
-      });
-
-      if (filtradas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="td-center" style="color: #888; padding: 20px;">Nenhuma O.S. encontrada para os filtros.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = filtradas.map(os => `
-        <tr>
-          <td class="td-center"><b>${os.protocoloOS || '-'}</b></td>
-          <td>${os.dataAbertura || '-'}</td>
-          <td>${os.cliente || '-'}</td>
-          <td class="td-center"><b>${os.tag || '-'}</b></td>
-          <td>${os.equipamento || '-'}</td>
-          <td class="td-center">${os.tipoManutencao || '-'}</td>
-          <td class="td-center"><b>${os.prioridade || '-'}</b></td>
-          <td class="td-center"><span class="badge-status ${os.status === 'CONCLUÍDA' ? 'badge-atendido' : 'badge-pendente'}">${os.status || 'ABERTA'}</span></td>
-          <td class="td-center">
-            ${os.pdfUrlOS ? `<a href="${os.pdfUrlOS}" target="_blank" class="btn-pdf" style="padding:4px 8px; font-size:10px;"><i class="fa-solid fa-file-pdf"></i> PDF</a>` : '-'}
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    function salvarNovaOS(e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      const cliente = document.getElementById('osCliente').value.trim();
-      const tipo = document.getElementById('osTipo').value;
-      const prioridade = document.getElementById('osPrioridade').value;
-      const tag = document.getElementById('osTag').value.trim();
-      const equip = document.getElementById('osNomeEquip').value.trim();
-      const solicitante = document.getElementById('osSolicitante').value.trim();
-      const tecnico = document.getElementById('osTecnico').value.trim();
-      const defeito = document.getElementById('osDefeito').value.trim();
-      const diagnostico = document.getElementById('osDiagnostico').value.trim();
-      const servico = document.getElementById('osServico').value.trim();
-
-      if (!cliente || !solicitante || !defeito) {
-        alert("Preencha os campos obrigatórios da O.S.");
-        return false;
-      }
-
-      const btn = document.getElementById('btnSalvarOS');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> REGISTRANDO O.S...';
-
-      const payload = {
-        acao: "CRIAR_OS",
-        cliente: cliente,
-        tipoManutencao: tipo,
-        prioridade: prioridade,
-        tag: tag,
-        equipamento: equip,
-        solicitante: solicitante,
-        tecnico: tecnico,
-        defeitoRelatado: defeito,
-        diagnosticoTecnico: diagnostico,
-        servicoRealizado: servico
-      };
-
-      fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-      .then(res => res.json())
-      .then(res => {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Registrar O.S.';
-        if (res.status === "sucesso") {
-          document.getElementById('formNovaOS').reset();
-          alert(`Ordem de Serviço ${res.protocoloOS} criada com sucesso!`);
-          buscarAtualizacoesSilenciosas();
-          mudarAba('os_gestao');
-        } else {
-          alert("Erro ao criar O.S.: " + (res.mensagem || "Erro desconhecido."));
-        }
-      })
-      .catch(err => {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Registrar O.S.';
-        alert("Falha de conexão ao registrar O.S.");
-      });
-
-      return false;
-    }
-
-    function renderizarTabelaTermos(lista) {
-      const tbody = document.getElementById('corpoTermos');
-      if (!tbody) return;
-
-      if (!lista || lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="td-center" style="color: #888; padding: 20px;">Nenhum termo emitido encontrado.</td></tr>';
-        return;
-      }
-
-      const filtroVal = (document.getElementById('filtroTermos')?.value || "").toLowerCase().trim();
-      let dadosExibir = lista;
-      
-      if (filtroVal) {
-        dadosExibir = lista.filter(t => 
-          t && (
-            (t.protocolo || "").toLowerCase().includes(filtroVal) ||
-            (t.cliente || "").toLowerCase().includes(filtroVal) ||
-            (t.tag || "").toLowerCase().includes(filtroVal) ||
-            (t.equipamento || "").toLowerCase().includes(filtroVal) ||
-            (t.tecnico || "").toLowerCase().includes(filtroVal)
-          )
-        );
-      }
-
-      if (dadosExibir.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="td-center" style="color: #888; padding: 20px;">Nenhum termo encontrado.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = dadosExibir.map(t => `
-        <tr>
-          <td class="td-center"><b>${t.protocolo || '-'}</b></td>
-          <td>${t.dataHora || '-'}</td>
-          <td>${t.cliente || '-'}</td>
-          <td class="td-center"><b>${t.tag || '-'}</b></td>
-          <td>${t.equipamento || '-'}</td>
-          <td class="td-center">${t.tipo || '-'}</td>
-          <td>${t.tecnico || '-'}</td>
-          <td class="td-center">
-            ${t.pdfUrl ? `<button type="button" class="btn-pdf" onclick="abrirModalVisualizadorReq('${t.pdfUrl}', 'Visualizar Termo: ${t.protocolo}')"><i class="fa-solid fa-file-pdf"></i> PDF</button>` : '-'}
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    function renderizarListasAuxiliares() {
-      const rels = bancoDados.relacoesAuxiliares || [];
-      const descricoesUnicas = Array.from(new Set(rels.map(r => r ? r.descricao : '').filter(Boolean))).sort();
-      const dlDesc = document.getElementById('listDescricoesPadrao');
-      if (dlDesc) {
-        dlDesc.innerHTML = descricoesUnicas.map(d => `<option value="${d}">`).join('');
-      }
-
-      const tbody = document.getElementById('tabelaAuxiliaresList');
-      if (tbody) {
-        if (rels.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="3" class="td-center" style="color:#888;">Nenhuma combinação registrada.</td></tr>';
-        } else {
-          tbody.innerHTML = rels.map(r => `
-            <tr>
-              <td><b>${r.descricao || '-'}</b></td>
-              <td>${r.modelo || "-"}</td>
-              <td>${r.fabricante || "-"}</td>
-            </tr>
-          `).join('');
-        }
-      }
-    }
-
-    function atualizarDashboard() {
-      if (!bancoDados || !bancoDados.requisicoes) return;
-      const modo = document.getElementById('dashModoPeriodo')?.value || "MES";
-      const mesFiltro = document.getElementById('dashFiltroMes')?.value || "";
-
-      let reqs = bancoDados.requisicoes || [];
-
-      if (modo === "MES" && mesFiltro) {
-        reqs = reqs.filter(r => {
-          if (!r || !r.dataHora) return false;
-          const partesData = String(r.dataHora).split(' ')[0].split('/');
-          if (partesData.length === 3) {
-            const anoMesReg = `${partesData[2]}-${partesData[1].padStart(2, '0')}`;
-            return anoMesReg === mesFiltro;
-          }
-          return false;
-        });
-      }
-
-      if (document.getElementById('dashTotalReq')) document.getElementById('dashTotalReq').innerText = reqs.length;
-
-      let pendentes = 0, atendidos = 0, recusados = 0;
-      let contagemClientes = {};
-      let contagemFamilias = {};
-
-      reqs.forEach(r => {
-        let st = (r.status || "PENDENTE").toUpperCase();
-        if (st === "PENDENTE") pendentes++;
-        else if (st === "ATENDIDO") atendidos++;
-        else if (st === "RECUSADO") recusados++;
-
-        let cli = r.cliente || "Não informado";
-        contagemClientes[cli] = (contagemClientes[cli] || 0) + 1;
-
-        let eq = r.equipamentoSolicitado || "Diversos";
-        contagemFamilias[eq] = (contagemFamilias[eq] || 0) + 1;
-      });
-
-      if (document.getElementById('dashPendentes')) document.getElementById('dashPendentes').innerText = pendentes;
-      if (document.getElementById('dashAtendidos')) document.getElementById('dashAtendidos').innerText = atendidos;
-      if (document.getElementById('dashRecusados')) document.getElementById('dashRecusados').innerText = recusados;
-
-      const divCli = document.getElementById('chartClientes');
-      if (divCli) {
-        const topClientes = Object.entries(contagemClientes).sort((a, b) => b[1] - a[1]).slice(0, 5);
-        if (topClientes.length === 0) {
-          divCli.innerHTML = '<div style="color:#888; text-align:center; padding: 20px;">Sem dados para o período.</div>';
-        } else {
-          const maxVal = topClientes[0][1] || 1;
-          divCli.innerHTML = topClientes.map(([nome, qtd]) => {
-            const pct = Math.round((qtd / maxVal) * 100);
-            return `
-              <div style="margin-bottom: 10px;">
-                <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; margin-bottom: 2px;">
-                  <span>${nome}</span>
-                  <span style="color: #1a4d80;">${qtd} reqs</span>
-                </div>
-                <div style="background: #e2e8f0; border-radius: 4px; height: 10px; overflow: hidden;">
-                  <div style="background: #1a4d80; width: ${pct}%; height: 100%; border-radius: 4px;"></div>
-                </div>
-              </div>
-            `;
-          }).join('');
-        }
-      }
-
-      const divFam = document.getElementById('chartFamilias');
-      if (divFam) {
-        const topFamilias = Object.entries(contagemFamilias).sort((a, b) => b[1] - a[1]).slice(0, 5);
-        if (topFamilias.length === 0) {
-          divFam.innerHTML = '<div style="color:#888; text-align:center; padding: 20px;">Sem dados para o período.</div>';
-        } else {
-          const maxVal = topFamilias[0][1] || 1;
-          divFam.innerHTML = topFamilias.map(([nome, qtd]) => {
-            const pct = Math.round((qtd / maxVal) * 100);
-            return `
-              <div style="margin-bottom: 10px;">
-                <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; margin-bottom: 2px;">
-                  <span>${nome}</span>
-                  <span style="color: #2563eb;">${qtd} reqs</span>
-                </div>
-                <div style="background: #e2e8f0; border-radius: 4px; height: 10px; overflow: hidden;">
-                  <div style="background: #2563eb; width: ${pct}%; height: 100%; border-radius: 4px;"></div>
-                </div>
-              </div>
-            `;
-          }).join('');
-        }
-      }
-    }
-
-    function atualizarNotificacoes() {
-      if (!bancoDados || !bancoDados.requisicoes) return;
-      const pendentes = bancoDados.requisicoes.filter(r => r && (r.status || '').toUpperCase() === "PENDENTE");
-      const badge = document.getElementById('notifBadge');
-      const textCount = document.getElementById('notifCountText');
-      const listContainer = document.getElementById('notifList');
-
-      if (!badge || !textCount || !listContainer) return;
-
-      if (pendentes.length > 0) {
-        badge.innerText = pendentes.length;
-        badge.classList.add('active');
-        textCount.innerText = `${pendentes.length} pendente(s)`;
-        listContainer.innerHTML = pendentes.map(p => `
-          <div class="notif-item" onclick="irParaRequisicaoEspecifica(event, '${p.protocolo}')">
-            <div class="notif-item-title">
-              <span>${p.protocolo || '-'}</span>
-              <span style="color:#e0a800;"><i class="fa-solid fa-clock"></i> Pendente</span>
-            </div>
-            <div class="notif-item-sub"><b>${p.cliente || '-'}</b></div>
-            <div class="notif-item-sub">${p.equipamentoSolicitado || '-'}</div>
-          </div>
-        `).join('');
-      } else {
-        badge.innerText = "0";
-        badge.classList.remove('active');
-        textCount.innerText = "0 pendentes";
-        listContainer.innerHTML = '<div style="padding: 16px; text-align: center; color: #888; font-size: 12px;">Nenhuma pendência no momento.</div>';
-      }
-    }
-
-    function irParaRequisicaoEspecifica(e, protocolo) {
-      if (e) e.stopPropagation();
-      fecharTodosDropdowns();
-      if (document.getElementById('filtroStatusReq')) document.getElementById('filtroStatusReq').value = "PENDENTE";
-      if (document.getElementById('filtroTextoReq')) document.getElementById('filtroTextoReq').value = protocolo || "";
-      mudarAba('requisicoes');
-      filtrarRequisicoes();
-    }
-  </script>
-</body>
-</html>
