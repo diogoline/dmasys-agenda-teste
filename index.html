@@ -21,7 +21,6 @@
       overflow-x: hidden;
     }
 
-    /* Custom Scrollbars */
     .custom-scroll::-webkit-scrollbar,
     .table-container::-webkit-scrollbar {
       width: 6px;
@@ -331,7 +330,6 @@
       transform: translateY(-1px);
     }
 
-    /* Badges */
     .badge-status {
       padding: 4px 10px;
       border-radius: 9999px;
@@ -405,7 +403,6 @@
       margin-top: 6px;
     }
 
-    /* Modals & Dropdowns */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -499,7 +496,6 @@
       margin-top: 2px;
     }
 
-    /* Chat Panel */
     .chat-panel-container { display: flex; flex-direction: column; height: 330px; }
     .chat-tabs { display: flex; background: #020617; border-bottom: 1px solid #1e293b; }
     .chat-tab { flex: 1; padding: 9px; text-align: center; font-size: 11px; font-weight: 700; cursor: pointer; background: #020617; color: #94a3b8; border: none; border-bottom: 2px solid transparent; }
@@ -521,7 +517,6 @@
       50% { box-shadow: inset 0 0 0 2px rgba(244, 63, 94, 0.9), 0 0 0 5px rgba(244, 63, 94, 0); }
     }
 
-    /* Menu Lateral Acordeão & Alinhamento Rigoroso à Esquerda */
     .nav-tab {
       display: flex;
       align-items: center;
@@ -598,9 +593,6 @@
       animation: fadeIn 0.18s ease-out;
     }
 
-    /* =========================================================
-       SUPORTE COMPLETO AO TEMA CLARO (LIGHT MODE CORPORATIVO)
-       ========================================================= */
     html.light body {
       background-color: #f1f5f9 !important;
       color: #0f172a !important;
@@ -716,14 +708,6 @@
     html.light .quick-home-card .text-white {
       color: #0f172a !important;
     }
-    html.light .bg-slate-950\/60,
-    html.light .bg-slate-950\/70,
-    html.light .bg-slate-950\/80,
-    html.light .bg-slate-950\/90,
-    html.light .bg-slate-950 {
-      background-color: #f8fafc !important;
-      border-color: #cbd5e1 !important;
-    }
     html.light .notification-dropdown,
     html.light #menuAjudaDropdown {
       background: #ffffff !important;
@@ -771,7 +755,6 @@
 </head>
 <body class="bg-slate-950 text-slate-100 selection:bg-sky-500 selection:text-white">
 
-  <!-- ECRÃ DE LOGIN -->
   <div id="loginOverlay" class="fixed inset-0 z-[99999] bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-md p-8 rounded-2xl shadow-2xl text-center relative overflow-hidden">
       <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-sky-500/25">
@@ -804,13 +787,12 @@
     </div>
   </div>
 
-  <!-- CONTAINER PRINCIPAL DO SISTEMA -->
   <div id="appContainer" style="display: none;" class="min-h-screen flex flex-col lg:flex-row">
 
     <!-- Backdrop Mobile -->
     <div id="mobileSidebarBackdrop" onclick="toggleMobileSidebar(false)" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden lg:hidden"></div>
 
-    <!-- MENU LATERAL (SIDEBAR CORPORATIVA COM GRUPOS EXPANSÍVEIS) -->
+    <!-- SIDEBAR COM ACORDEÃO E CALENDÁRIO NO TOPO -->
     <aside id="mainSidebar" class="fixed lg:sticky lg:top-0 inset-y-0 left-0 z-40 w-64 h-screen pb-11 bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0 shrink-0">
       <div class="h-16 px-5 border-b border-slate-800 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-3">
@@ -830,7 +812,7 @@
         </button>
       </div>
 
-      <!-- Botão de Destaque Rápido: Calendário Mensal (Sempre Visível no Topo) -->
+      <!-- Botão de Destaque Rápido: Calendário Mensal -->
       <div class="p-3 border-b border-slate-800/80 shrink-0">
         <button type="button" onclick="openCalendarModal()" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-sky-600/25 flex items-center justify-center gap-2 transition cursor-pointer">
           <i class="fa-solid fa-calendar-days"></i>
@@ -838,10 +820,9 @@
         </button>
       </div>
 
-      <!-- Navegação Lateral Organizada em Acordeão -->
+      <!-- Navegação Lateral em Acordeão -->
       <nav class="flex-1 overflow-y-auto custom-scroll p-3 space-y-1.5">
 
-        <!-- Acesso Direto Principal -->
         <button type="button" id="btnNavInicio" onclick="mudarAba('inicio')" class="nav-tab active">
           <i class="fa-solid fa-house w-4 text-center text-sky-400"></i>
           <span class="flex-1 text-left">Início</span>
@@ -852,7 +833,7 @@
           <span class="flex-1 text-left">Dashboard &amp; Métricas</span>
         </button>
 
-        <!-- GRUPO 1: OPERAÇÕES & ESCALA -->
+        <!-- GRUPO 1 -->
         <div class="pt-1">
           <button type="button" id="grpBtn_operacoes" onclick="toggleSidebarGroup('operacoes')" class="nav-group-btn open">
             <span class="flex items-center gap-2.5">
@@ -880,7 +861,7 @@
           </div>
         </div>
 
-        <!-- GRUPO 2: MÓDULO QUALIDADE -->
+        <!-- GRUPO 2 -->
         <div>
           <button type="button" id="grpBtn_qualidade" onclick="toggleSidebarGroup('qualidade')" class="nav-group-btn">
             <span class="flex items-center gap-2.5">
@@ -910,7 +891,7 @@
           </div>
         </div>
 
-        <!-- GRUPO 3: MANUTENÇÃO (O.S.) -->
+        <!-- GRUPO 3 -->
         <div>
           <button type="button" id="grpBtn_manutencao" onclick="toggleSidebarGroup('manutencao')" class="nav-group-btn">
             <span class="flex items-center gap-2.5">
@@ -932,7 +913,7 @@
           </div>
         </div>
 
-        <!-- GRUPO 4: CADASTROS -->
+        <!-- GRUPO 4 -->
         <div>
           <button type="button" id="grpBtn_cadastros" onclick="toggleSidebarGroup('cadastros')" class="nav-group-btn">
             <span class="flex items-center gap-2.5">
@@ -957,10 +938,8 @@
       </nav>
     </aside>
 
-    <!-- ÁREA DE CONTEÚDO DIREITA -->
     <div class="flex-1 flex flex-col min-w-0 pb-14">
 
-      <!-- TOPBAR CORPORATIVA -->
       <header class="h-16 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between gap-3 sticky top-0 z-30">
         <div class="flex items-center gap-3">
           <button type="button" onclick="toggleMobileSidebar(true)" class="lg:hidden p-2 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 topbar-btn">
@@ -975,14 +954,13 @@
         </div>
 
         <div class="flex items-center gap-2 sm:gap-2.5 relative">
-          <!-- Botão Rápido Calendário -->
           <button type="button" onclick="openCalendarModal()" class="px-3 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-400 border border-sky-500/30 text-xs font-semibold flex items-center gap-2 transition cursor-pointer">
             <i class="fa-solid fa-calendar-days"></i>
             <span class="hidden md:inline">Grelha do Mês</span>
           </button>
 
           <!-- Usuários Online e Chat -->
-          <div class="relative inline-block" id="containerMenuUsuarioChat">
+          <div class="relative inline-block">
             <button type="button" onclick="toggleUsersDropdown(event)" class="topbar-btn px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 flex items-center gap-2 cursor-pointer" title="Usuários Conectados e Chat">
               <i class="fa-solid fa-circle text-emerald-400 text-[9px]"></i>
               <span id="onlineCountText">1 Online</span>
@@ -998,7 +976,7 @@
             </div>
           </div>
 
-          <!-- Notificações de Requisições -->
+          <!-- Notificações -->
           <div class="relative inline-block">
             <button type="button" onclick="toggleNotifications(event)" class="topbar-btn w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 flex items-center justify-center relative cursor-pointer" title="Notificações de Requisições">
               <i class="fa-solid fa-bell text-xs"></i>
@@ -1016,8 +994,7 @@
             </div>
           </div>
 
-          <!-- Status da Conexão -->
-          <span id="statusBadge" onclick="buscarAtualizacoesSilenciosas()" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 cursor-pointer" title="Clique para sincronizar com a Planilha">
+          <span id="statusBadge" onclick="buscarAtualizacoesSilenciosas()" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 cursor-pointer" title="Clique para sincronizar">
             <i class="fa-solid fa-plug"></i> <span class="hidden sm:inline">Conectando...</span>
           </span>
 
@@ -1041,14 +1018,12 @@
             </div>
           </div>
 
-          <!-- Botão Sair -->
           <button type="button" onclick="efetuarLogout()" class="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 text-xs font-bold flex items-center gap-1.5 cursor-pointer" title="Sair do Sistema">
             <i class="fa-solid fa-right-from-bracket"></i> <span class="hidden sm:inline">Sair</span>
           </button>
         </div>
       </header>
 
-      <!-- DATALISTS DINÂMICAS ORIGINAIS -->
       <datalist id="listDescricoesPadrao"></datalist>
       <datalist id="listModelosPadrao"></datalist>
       <datalist id="listFabricantesPadrao"></datalist>
@@ -1057,12 +1032,9 @@
       <datalist id="listClientes"></datalist>
       <datalist id="listEquipamentos"></datalist>
 
-      <!-- CONTEÚDO DAS ABAS -->
       <main class="p-4 sm:p-6 flex-1">
 
-        <!-- =========================================================
-             ABA 1: INÍCIO
-             ========================================================= -->
+        <!-- ABA 1: INÍCIO -->
         <div id="abaInicio" class="tab-content active">
           <div class="rounded-2xl bg-gradient-to-r from-sky-900/60 via-slate-900 to-indigo-950/60 border border-sky-500/30 p-6 sm:p-8 mb-6 shadow-xl relative overflow-hidden">
             <div class="max-w-3xl relative z-10">
@@ -1119,11 +1091,8 @@
           </div>
         </div>
 
-        <!-- =========================================================
-             ABA 2: AGENDA DE SERVIÇOS (COM CLIENTE E OBSERVAÇÃO)
-             ========================================================= -->
+        <!-- ABA 2: AGENDA DE SERVIÇOS -->
         <div id="abaAgenda" class="tab-content">
-          <!-- KPIs Rápidos da Agenda -->
           <div class="dash-metrics">
             <div class="metric-card blue">
               <div class="metric-title">Total de Serviços na Agenda</div>
@@ -1224,7 +1193,6 @@
                 <input type="text" id="agObservacao" placeholder="Ex: Acessar pela portaria lateral com crachá..." />
               </div>
 
-              <!-- Validador de Conflito em Tempo Real no Formulário Principal -->
               <div id="agRealtimeConflictBox" class="mb-4 p-3 rounded-xl border border-slate-800 bg-slate-950/80 text-xs text-slate-400 flex items-center justify-between gap-3">
                 <div class="flex items-center gap-2.5">
                   <i id="agRealtimeIcon" class="fa-solid fa-clock text-sky-400"></i>
@@ -1273,9 +1241,7 @@
           </div>
         </div>
 
-        <!-- =========================================================
-             ABA 3: CONTROLE DE LOCAÇÃO
-             ========================================================= -->
+        <!-- ABA 3: CONTROLE DE LOCAÇÃO -->
         <div id="abaLocacao" class="tab-content">
           <div class="dash-metrics">
             <div class="metric-card blue">
@@ -1356,9 +1322,7 @@
           </div>
         </div>
 
-        <!-- =========================================================
-             ABA 4: MÓDULO DE COMPRAS
-             ========================================================= -->
+        <!-- ABA 4: MÓDULO DE COMPRAS -->
         <div id="abaCompras" class="tab-content">
           <div class="card">
             <div class="card-title">
@@ -1468,9 +1432,7 @@
           </div>
         </div>
 
-        <!-- =========================================================
-             ABA 5: DASHBOARD & MÉTRICAS
-             ========================================================= -->
+        <!-- ABA 5: DASHBOARD & MÉTRICAS -->
         <div id="abaDashboard" class="tab-content">
           <div class="card">
             <div class="card-title"><span>Filtro de Período das Métricas</span></div>
@@ -1525,9 +1487,7 @@
           </div>
         </div>
 
-        <!-- =========================================================
-             ABA 6: REQUISIÇÕES INTERNAS (QUALIDADE)
-             ========================================================= -->
+        <!-- ABA 6: REQUISIÇÕES INTERNAS -->
         <div id="abaRequisicoes" class="tab-content">
           <div class="card">
             <div class="card-title">Nova Requisição de Equipamento (Administrativo)</div>
@@ -1620,9 +1580,7 @@
           </div>
         </div>
 
-        <!-- =========================================================
-             ABA 7: EMISSÃO DE TERMO DUPLO (QUALIDADE)
-             ========================================================= -->
+        <!-- ABA 7: EMISSÃO DE TERMO DUPLO -->
         <div id="abaEmissao" class="tab-content">
           <div id="bannerReqVinculada" style="display: none;" class="bg-amber-500/15 border border-amber-500/40 text-amber-300 px-4 py-3 rounded-xl mb-4 font-bold text-xs items-center justify-between">
             <span><i class="fa-solid fa-link mr-1"></i> Atendendo Requisição Pendente: <span id="lblProtReqVinculada" class="text-white underline">-</span></span>
@@ -1647,7 +1605,7 @@
                 <div class="card-title">2. Identificação do Equipamento</div>
 
                 <div class="form-group mb-3">
-                  <label>Pesquisar Equipamento (Digite a TAG, Série ou Patrimônio):</label>
+                  <label>Pesquisar Equipamento (TAG, Série ou Patrimônio):</label>
                   <input type="text" id="buscaEquipamento" list="listEquipamentos" placeholder="Ex: LMD-4654 ou 2329918..." oninput="autoPreencherEquipamento()" required />
                 </div>
 
@@ -1724,9 +1682,7 @@
           </form>
         </div>
 
-        <!-- =========================================================
-             ABA 8: CONSULTA DE TERMOS EMITIDOS
-             ========================================================= -->
+        <!-- ABA 8: CONSULTA DE TERMOS -->
         <div id="abaConsulta" class="tab-content">
           <div class="card">
             <div class="card-title">Histórico e Consulta de Termos Gerados</div>
@@ -1756,9 +1712,7 @@
           </div>
         </div>
 
-        <!-- =========================================================
-             ABA 9: CENTRAL DE GESTÃO DE O.S. (MANUTENÇÃO)
-             ========================================================= -->
+        <!-- ABA 9: GESTÃO DE O.S. -->
         <div id="abaOsGestao" class="tab-content">
           <div class="card">
             <div class="card-title">
@@ -1806,9 +1760,7 @@
           </div>
         </div>
 
-        <!-- =========================================================
-             ABA 10: ABERTURA DE NOVA O.S.
-             ========================================================= -->
+        <!-- ABA 10: ABERTURA DE O.S. -->
         <div id="abaOsAbertura" class="tab-content">
           <div class="card">
             <div class="card-title">Abrir Nova Ordem de Serviço (Manutenção)</div>
@@ -1870,9 +1822,7 @@
           </div>
         </div>
 
-        <!-- =========================================================
-             ABA 11: CADASTRAR NOVO EQUIPAMENTO
-             ========================================================= -->
+        <!-- ABA 11: CADASTRAR EQUIPAMENTO -->
         <div id="abaCadEquipamento" class="tab-content">
           <div class="card">
             <div class="card-title">Cadastrar Novo Equipamento (Aba EQUIP)</div>
@@ -1901,9 +1851,7 @@
           </div>
         </div>
 
-        <!-- =========================================================
-             ABA 12: NOMENCLATURAS PADRÃO
-             ========================================================= -->
+        <!-- ABA 12: NOMENCLATURAS -->
         <div id="abaCadAuxiliares" class="tab-content">
           <div class="card">
             <div class="card-title">Gerenciar Nomenclaturas &amp; Combinações Válidas</div>
@@ -1929,7 +1877,6 @@
 
       </main>
 
-      <!-- RODAPÉ FIXO -->
       <footer class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 text-slate-400 text-[11px] px-5 py-2.5 flex justify-between items-center z-40">
         <div><b class="text-white">DMA SYS</b> v2.0 | Sistema de Gestão Operacional</div>
         <div>Ambiente Integrado Google Drive &amp; Apps Script</div>
@@ -1938,13 +1885,10 @@
     </div>
   </div>
 
-  <!-- =========================================================
-       NOVO MODAL: CALENDÁRIO MENSAL INTERATIVO (GRELHA DE DIAS + CONFLITOS)
-       ========================================================= -->
+  <!-- MODAL: CALENDÁRIO MENSAL INTERATIVO -->
   <div id="calendarModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 lg:p-6">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-7xl h-[92vh] flex flex-col shadow-2xl overflow-hidden">
 
-      <!-- Cabeçalho do Modal de Calendário -->
       <div class="px-4 sm:px-6 py-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-4 bg-slate-900">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400">
@@ -1988,10 +1932,7 @@
         </div>
       </div>
 
-      <!-- Corpo do Modal: Grelha Mensal (Esquerda) + Inspetor e Agendamento Rápido (Direita) -->
       <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
-
-        <!-- Grelha de 7 Colunas -->
         <div class="lg:col-span-8 flex flex-col border-b lg:border-b-0 lg:border-r border-slate-800 overflow-hidden bg-slate-950/40">
           <div class="grid grid-cols-7 border-b border-slate-800 bg-slate-900/70 text-center text-[11px] font-bold uppercase tracking-wider text-slate-400 py-2.5">
             <div>Dom</div>
@@ -2015,7 +1956,6 @@
           </div>
         </div>
 
-        <!-- Inspetor do Dia + Agendamento Rápido no Modal -->
         <div class="lg:col-span-4 flex flex-col bg-slate-900 overflow-hidden">
           <div class="p-4 border-b border-slate-800 flex items-center justify-between">
             <div>
@@ -2035,7 +1975,7 @@
 
           <div id="inspectorEventsList" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-2.5"></div>
 
-          <!-- Formulário Rápido no Modal -->
+          <!-- Formulário Rápido no Modal com Cliente e Observação -->
           <div class="border-t border-slate-800 bg-slate-950/90 p-4 space-y-2.5">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
@@ -2045,7 +1985,7 @@
 
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="!text-[10px] !mb-1">Solicitante</label>
+                <label class="!text-[10px] !mb-1">Setor Solicitante</label>
                 <select id="modalAgSetorSol" class="!py-1.5 !text-xs">
                   <option value="QUALIDADE">Qualidade</option>
                   <option value="REFRIGERAÇÃO">Refrigeração</option>
@@ -2054,7 +1994,7 @@
                 </select>
               </div>
               <div>
-                <label class="!text-[10px] !mb-1">Executante</label>
+                <label class="!text-[10px] !mb-1">Setor Executante</label>
                 <select id="modalAgSetorExe" class="!py-1.5 !text-xs">
                   <option value="QUALIDADE">Qualidade</option>
                   <option value="REFRIGERAÇÃO">Refrigeração</option>
@@ -2067,7 +2007,7 @@
             <div class="grid grid-cols-2 gap-2">
               <div>
                 <label class="!text-[10px] !mb-1">Cliente / Hospital</label>
-                <input type="text" id="modalAgCliente" list="listClientes" placeholder="Selecione..." class="!py-1.5 !text-xs" />
+                <input type="text" id="modalAgCliente" list="listClientes" placeholder="Selecione o cliente..." class="!py-1.5 !text-xs" />
               </div>
               <div>
                 <label class="!text-[10px] !mb-1">Equipamento (TAG)</label>
@@ -2075,7 +2015,16 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-3 gap-2">
+              <div>
+                <label class="!text-[10px] !mb-1">Tipo Serviço</label>
+                <select id="modalAgServico" class="!py-1.5 !text-xs">
+                  <option value="CALIBRAÇÃO">Calibração</option>
+                  <option value="QUALIFICAÇÃO TÉRMICA">Qualif. Térmica</option>
+                  <option value="MANUTENÇÃO PREVENTIVA">Preventiva</option>
+                  <option value="TESTE DE SEGURANÇA ELÉTRICA">Segurança Elétrica</option>
+                </select>
+              </div>
               <div>
                 <label class="!text-[10px] !mb-1">Horário</label>
                 <input type="time" id="modalAgHora" value="09:00" oninput="checkModalRealtimeConflict()" class="!py-1.5 !text-xs" />
@@ -2089,8 +2038,8 @@
             </div>
 
             <div>
-              <label class="!text-[10px] !mb-1">Observações</label>
-              <input type="text" id="modalAgObservacao" placeholder="Obs ou detalhes..." class="!py-1.5 !text-xs" />
+              <label class="!text-[10px] !mb-1">Observações / Detalhes</label>
+              <input type="text" id="modalAgObservacao" placeholder="Ex: Acessar portaria lateral..." class="!py-1.5 !text-xs" />
             </div>
 
             <div id="modalRealtimeValidationBox" class="p-2.5 rounded-xl border text-xs flex items-center gap-2 bg-emerald-500/10 border-emerald-500/30 text-emerald-300">
@@ -2108,7 +2057,7 @@
     </div>
   </div>
 
-  <!-- MODAL VISUALIZADOR DE REQUISIÇÃO / TERMO (PDF) -->
+  <!-- MODAL VISUALIZADOR REQ -->
   <div id="modalVisualizadorReq" class="modal-overlay">
     <div class="modal-box" style="width: 820px; max-width: 95vw; height: 85vh; display: flex; flex-direction: column;">
       <div class="modal-title">
@@ -2125,7 +2074,7 @@
     </div>
   </div>
 
-  <!-- MODAL AJUSTE DE LOCAÇÃO -->
+  <!-- MODAL LOCAÇÃO -->
   <div id="modalLocacao" class="modal-overlay">
     <div class="modal-box" style="width: 520px;">
       <div class="modal-title">
@@ -2188,7 +2137,7 @@
     </div>
   </div>
 
-  <!-- MODAL RECUSAR REQUISIÇÃO -->
+  <!-- MODAL RECUSAR -->
   <div id="modalRecusaReq" class="modal-overlay">
     <div class="modal-box" style="width: 440px;">
       <div class="modal-title">
@@ -2206,7 +2155,7 @@
     </div>
   </div>
 
-  <!-- MODAL MANUAL DE APOIO -->
+  <!-- MODAL MANUAL -->
   <div id="modalManualUso" class="modal-overlay">
     <div class="modal-box" style="width: 760px;">
       <div class="modal-title">
@@ -2234,7 +2183,6 @@
     </div>
   </div>
 
-  <!-- WIDGET WHATSAPP SUPORTE -->
   <button type="button" onclick="toggleChatWhatsApp()" title="Suporte / WhatsApp" class="fixed bottom-14 right-5 w-12 h-12 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white text-xl flex items-center justify-center shadow-lg shadow-emerald-500/30 z-50 transition transform hover:scale-105 cursor-pointer">
     <i class="fa-brands fa-whatsapp"></i>
   </button>
@@ -2252,7 +2200,6 @@
     </div>
   </div>
 
-  <!-- CONTENTOR DE NOTIFICAÇÕES TOAST -->
   <div id="toastContainer" class="fixed bottom-14 left-1/2 -translate-x-1/2 z-[100000] flex flex-col gap-2 max-w-md w-full px-4 pointer-events-none"></div>
 
   <script>
@@ -2887,7 +2834,6 @@
       const infoB = extrairDataHoraAgenda(b);
       if (infoA.dateStr !== infoB.dateStr) return false;
 
-      // O conflito só ocorre se for EXATAMENTE o mesmo técnico na mesma janela horária
       const tecnicoA = (a.tecnico || '').toLowerCase().trim();
       const tecnicoB = (b.tecnico || '').toLowerCase().trim();
       if (!tecnicoA || !tecnicoB || tecnicoA !== tecnicoB) return false;
@@ -3402,13 +3348,21 @@
 
       const protLocal = `AG-${Math.floor(100 + Math.random() * 900)}`;
       adicionarAgendamentoLocal(protLocal, payload, dataHoraExibicao);
+      
       document.getElementById('modalAgBuscaEq').value = "";
       document.getElementById('modalAgCliente').value = "";
       document.getElementById('modalAgObservacao').value = "";
       checkModalRealtimeConflict();
       showToast(`Agendamento ${protLocal} registado para ${dataHoraExibicao}!`, "success");
 
-      fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).catch(() => {});
+      fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status === "sucesso") {
+          buscarAtualizacoesSilenciosas();
+        }
+      })
+      .catch(() => {});
     }
 
     function salvarRequisicao(e) {
