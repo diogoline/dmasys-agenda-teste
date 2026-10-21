@@ -520,6 +520,253 @@
       0%, 100% { box-shadow: inset 0 0 0 1px rgba(244, 63, 94, 0.6), 0 0 0 0 rgba(244, 63, 94, 0.35); }
       50% { box-shadow: inset 0 0 0 2px rgba(244, 63, 94, 0.9), 0 0 0 5px rgba(244, 63, 94, 0); }
     }
+
+    /* Menu Lateral Acordeão & Alinhamento Rigoroso à Esquerda */
+    .nav-tab {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      width: 100%;
+      text-align: left;
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #94a3b8;
+      border: 1px solid transparent;
+      transition: all 0.18s ease;
+      cursor: pointer;
+    }
+    .nav-tab:hover {
+      color: #f8fafc;
+      background: rgba(30, 41, 59, 0.75);
+    }
+    .nav-tab.active {
+      background: rgba(14, 165, 233, 0.15);
+      color: #38bdf8;
+      border-color: rgba(14, 165, 233, 0.35);
+      font-weight: 700;
+    }
+    .nav-group-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 11px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #cbd5e1;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(51, 65, 85, 0.45);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+    .nav-group-btn:hover {
+      background: rgba(30, 41, 59, 0.9);
+      color: #ffffff;
+      border-color: rgba(56, 189, 248, 0.35);
+    }
+    .nav-group-btn.open {
+      background: rgba(30, 41, 59, 0.95);
+      color: #38bdf8;
+      border-color: rgba(14, 165, 233, 0.35);
+    }
+    .nav-group-chevron {
+      transition: transform 0.22s ease;
+      font-size: 10px;
+      color: #64748b;
+    }
+    .nav-group-btn.open .nav-group-chevron {
+      transform: rotate(180deg);
+      color: #38bdf8;
+    }
+    .nav-submenu {
+      display: none;
+      padding-left: 12px;
+      margin-top: 4px;
+      margin-bottom: 6px;
+      border-left: 2px solid #1e293b;
+      margin-left: 14px;
+    }
+    .nav-submenu.open {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      animation: fadeIn 0.18s ease-out;
+    }
+
+    /* =========================================================
+       SUPORTE COMPLETO AO TEMA CLARO (LIGHT MODE CORPORATIVO)
+       ========================================================= */
+    html.light body {
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+    }
+    html.light #mainSidebar,
+    html.light header,
+    html.light footer {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      color: #0f172a !important;
+    }
+    html.light #headerPageTitle,
+    html.light .brand-title-text {
+      color: #0f172a !important;
+    }
+    html.light .nav-group-btn {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+      color: #334155;
+    }
+    html.light .nav-group-btn:hover {
+      background: #eff6ff;
+      color: #0284c7;
+      border-color: #bae6fd;
+    }
+    html.light .nav-group-btn.open {
+      background: #e0f2fe;
+      color: #0369a1;
+      border-color: #7dd3fc;
+    }
+    html.light .nav-submenu {
+      border-left-color: #cbd5e1;
+    }
+    html.light .nav-tab {
+      color: #475569;
+    }
+    html.light .nav-tab:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    html.light .nav-tab.active {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #0284c7;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+    }
+    html.light .nav-tab.active i {
+      color: #ffffff !important;
+    }
+    html.light .card,
+    html.light .metric-card,
+    html.light .modal-box {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06) !important;
+    }
+    html.light .card-title,
+    html.light .modal-title {
+      color: #0f172a !important;
+      border-bottom-color: #e2e8f0 !important;
+    }
+    html.light .metric-value {
+      color: #0f172a !important;
+    }
+    html.light .metric-title,
+    html.light label {
+      color: #475569 !important;
+    }
+    html.light input[type="text"],
+    html.light input[type="password"],
+    html.light input[type="month"],
+    html.light input[type="date"],
+    html.light input[type="time"],
+    html.light input[type="number"],
+    html.light input[type="datetime-local"],
+    html.light select,
+    html.light textarea {
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+      color-scheme: light;
+    }
+    html.light input[readonly] {
+      background-color: #e2e8f0 !important;
+      color: #334155 !important;
+    }
+    html.light .table-container {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+    }
+    html.light th {
+      background: #f1f5f9 !important;
+      color: #1e293b !important;
+      border-bottom-color: #cbd5e1 !important;
+    }
+    html.light td {
+      color: #1e293b !important;
+      border-bottom-color: #f1f5f9 !important;
+    }
+    html.light tbody tr:hover {
+      background: #f8fafc !important;
+    }
+    html.light .quick-home-card {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05) !important;
+    }
+    html.light .quick-home-card:hover {
+      border-color: #0284c7 !important;
+      background: #f8fafc !important;
+    }
+    html.light .quick-home-card .text-white {
+      color: #0f172a !important;
+    }
+    html.light .bg-slate-950\/60,
+    html.light .bg-slate-950\/70,
+    html.light .bg-slate-950\/80,
+    html.light .bg-slate-950\/90,
+    html.light .bg-slate-950 {
+      background-color: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+    }
+    html.light .notification-dropdown,
+    html.light #menuAjudaDropdown {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+      box-shadow: 0 15px 35px rgba(15, 23, 42, 0.15) !important;
+    }
+    html.light .notif-header {
+      background: #f1f5f9 !important;
+      border-bottom-color: #cbd5e1 !important;
+      color: #0284c7 !important;
+    }
+    html.light .notif-item {
+      border-bottom-color: #f1f5f9 !important;
+    }
+    html.light .notif-item:hover {
+      background: #f1f5f9 !important;
+    }
+    html.light .notif-item-title {
+      color: #0f172a !important;
+    }
+    html.light #calendarModal > div {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    html.light #calendarModal .bg-slate-900,
+    html.light #calendarModal .bg-slate-900\/70,
+    html.light #calendarModal .bg-slate-900\/40 {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+    }
+    html.light #calendarModal .text-white {
+      color: #0f172a !important;
+    }
+    html.light .topbar-btn {
+      background: #f1f5f9 !important;
+      border-color: #cbd5e1 !important;
+      color: #1e293b !important;
+    }
+    html.light .topbar-btn:hover {
+      background: #e2e8f0 !important;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 selection:bg-sky-500 selection:text-white">
@@ -563,16 +810,16 @@
     <!-- Backdrop Mobile -->
     <div id="mobileSidebarBackdrop" onclick="toggleMobileSidebar(false)" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden lg:hidden"></div>
 
-    <!-- MENU LATERAL (SIDEBAR CORPORATIVA ESCURA) -->
-    <aside id="mainSidebar" class="fixed lg:sticky lg:top-0 inset-y-0 left-0 z-40 w-64 h-screen bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0 shrink-0">
-      <div class="h-16 px-5 border-b border-slate-800 flex items-center justify-between">
+    <!-- MENU LATERAL (SIDEBAR CORPORATIVA COM GRUPOS EXPANSÍVEIS) -->
+    <aside id="mainSidebar" class="fixed lg:sticky lg:top-0 inset-y-0 left-0 z-40 w-64 h-screen pb-11 bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0 shrink-0">
+      <div class="h-16 px-5 border-b border-slate-800 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20">
             <i class="fa-solid fa-layer-group text-white text-sm"></i>
           </div>
           <div>
             <div class="flex items-center gap-1.5">
-              <span class="font-bold text-base tracking-tight text-white">DMA SYS</span>
+              <span class="font-bold text-base tracking-tight text-white brand-title-text">DMA SYS</span>
               <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-sky-500/15 text-sky-400 border border-sky-500/30">v2.0</span>
             </div>
             <p class="text-[11px] text-slate-400">Gestão Operacional</p>
@@ -583,92 +830,131 @@
         </button>
       </div>
 
-      <!-- Navegação Lateral com TODOS os módulos originais -->
-      <nav class="flex-1 overflow-y-auto custom-scroll p-3 space-y-1">
-        <p class="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">Visão Geral</p>
-
-        <button type="button" id="btnNavInicio" onclick="mudarAba('inicio')" class="nav-tab active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer bg-sky-500/15 text-sky-400 border border-sky-500/30">
-          <i class="fa-solid fa-house w-4 text-center"></i>
-          <span>Início</span>
-        </button>
-
-        <button type="button" id="btnNavDashboard" onclick="mudarAba('dashboard')" class="nav-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/70 transition cursor-pointer">
-          <i class="fa-solid fa-chart-pie w-4 text-center"></i>
-          <span>Dashboard &amp; Métricas</span>
-        </button>
-
-        <p class="px-3 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">Operações &amp; Escala</p>
-
-        <button type="button" id="btnNavAgenda" onclick="mudarAba('agenda')" class="nav-tab w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/70 transition cursor-pointer">
-          <span class="flex items-center gap-3">
-            <i class="fa-solid fa-calendar-days w-4 text-center text-sky-400"></i>
-            <span>Agenda de Serviços</span>
-          </span>
-          <span id="sidebarConflictBadge" class="hidden px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30">!</span>
-        </button>
-
-        <button type="button" id="btnNavLocacao" onclick="mudarAba('locacao')" class="nav-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/70 transition cursor-pointer">
-          <i class="fa-solid fa-boxes-packing w-4 text-center"></i>
-          <span>Controle de Locação</span>
-        </button>
-
-        <button type="button" id="btnNavCompras" onclick="mudarAba('compras')" class="nav-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/70 transition cursor-pointer">
-          <i class="fa-solid fa-cart-shopping w-4 text-center"></i>
-          <span>Módulo de Compras</span>
-        </button>
-
-        <p class="px-3 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">Módulo Qualidade</p>
-
-        <button type="button" id="btnNavRequisicoes" onclick="mudarAba('requisicoes')" class="nav-tab w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/70 transition cursor-pointer">
-          <span class="flex items-center gap-3">
-            <i class="fa-solid fa-clipboard-list w-4 text-center"></i>
-            <span>Requisições Internas</span>
-          </span>
-          <span id="sidebarReqBadge" class="hidden px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">0</span>
-        </button>
-
-        <button type="button" id="btnNavEmissao" onclick="mudarAba('emissao')" class="nav-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/70 transition cursor-pointer">
-          <i class="fa-solid fa-file-signature w-4 text-center"></i>
-          <span>Emitir Novo Termo</span>
-        </button>
-
-        <button type="button" id="btnNavConsulta" onclick="mudarAba('consulta')" class="nav-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/70 transition cursor-pointer">
-          <i class="fa-solid fa-magnifying-glass w-4 text-center"></i>
-          <span>Consultar Termos Emitidos</span>
-        </button>
-
-        <p class="px-3 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">Manutenção (O.S.)</p>
-
-        <button type="button" id="btnNavOsGestao" onclick="mudarAba('os_gestao')" class="nav-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/70 transition cursor-pointer">
-          <i class="fa-solid fa-list-check w-4 text-center"></i>
-          <span>Central de Gestão de O.S.</span>
-        </button>
-
-        <button type="button" id="btnNavOsAbertura" onclick="mudarAba('os_abertura')" class="nav-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/70 transition cursor-pointer">
-          <i class="fa-solid fa-square-plus w-4 text-center"></i>
-          <span>Abrir / Registrar Nova O.S.</span>
-        </button>
-
-        <p class="px-3 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">Cadastros</p>
-
-        <button type="button" id="btnNavCadEquipamento" onclick="mudarAba('cad_equipamento')" class="nav-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/70 transition cursor-pointer">
-          <i class="fa-solid fa-truck-medical w-4 text-center"></i>
-          <span>Cadastrar Equipamento</span>
-        </button>
-
-        <button type="button" id="btnNavCadAuxiliares" onclick="mudarAba('cad_auxiliares')" class="nav-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/70 transition cursor-pointer">
-          <i class="fa-solid fa-tags w-4 text-center"></i>
-          <span>Nomenclaturas Padrão</span>
-        </button>
-      </nav>
-
-      <!-- Atalho de Calendário Mensal na Sidebar -->
-      <div class="p-3 border-t border-slate-800 bg-slate-950/60 space-y-2">
+      <!-- Botão de Destaque Rápido: Calendário Mensal (Sempre Visível no Topo) -->
+      <div class="p-3 border-b border-slate-800/80 shrink-0">
         <button type="button" onclick="openCalendarModal()" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-sky-600/25 flex items-center justify-center gap-2 transition cursor-pointer">
-          <i class="fa-solid fa-calendar-week"></i>
+          <i class="fa-solid fa-calendar-days"></i>
           <span>Calendário Mensal (Grelha)</span>
         </button>
       </div>
+
+      <!-- Navegação Lateral Organizada em Acordeão -->
+      <nav class="flex-1 overflow-y-auto custom-scroll p-3 space-y-1.5">
+
+        <!-- Acesso Direto Principal -->
+        <button type="button" id="btnNavInicio" onclick="mudarAba('inicio')" class="nav-tab active">
+          <i class="fa-solid fa-house w-4 text-center text-sky-400"></i>
+          <span class="flex-1 text-left">Início</span>
+        </button>
+
+        <button type="button" id="btnNavDashboard" onclick="mudarAba('dashboard')" class="nav-tab">
+          <i class="fa-solid fa-chart-pie w-4 text-center text-amber-400"></i>
+          <span class="flex-1 text-left">Dashboard &amp; Métricas</span>
+        </button>
+
+        <!-- GRUPO 1: OPERAÇÕES & ESCALA -->
+        <div class="pt-1">
+          <button type="button" id="grpBtn_operacoes" onclick="toggleSidebarGroup('operacoes')" class="nav-group-btn open">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-briefcase w-4 text-center text-sky-400"></i>
+              <span>Operações &amp; Escala</span>
+            </span>
+            <i class="fa-solid fa-chevron-down nav-group-chevron"></i>
+          </button>
+          <div id="grpMenu_operacoes" class="nav-submenu open">
+            <button type="button" id="btnNavAgenda" onclick="mudarAba('agenda')" class="nav-tab">
+              <i class="fa-solid fa-calendar-check w-4 text-center text-sky-400"></i>
+              <span class="flex-1 text-left">Agenda de Serviços</span>
+              <span id="sidebarConflictBadge" class="hidden px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30">!</span>
+            </button>
+
+            <button type="button" id="btnNavLocacao" onclick="mudarAba('locacao')" class="nav-tab">
+              <i class="fa-solid fa-boxes-packing w-4 text-center text-indigo-400"></i>
+              <span class="flex-1 text-left">Controle de Locação</span>
+            </button>
+
+            <button type="button" id="btnNavCompras" onclick="mudarAba('compras')" class="nav-tab">
+              <i class="fa-solid fa-cart-shopping w-4 text-center text-emerald-400"></i>
+              <span class="flex-1 text-left">Módulo de Compras</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- GRUPO 2: MÓDULO QUALIDADE -->
+        <div>
+          <button type="button" id="grpBtn_qualidade" onclick="toggleSidebarGroup('qualidade')" class="nav-group-btn">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-shield-halved w-4 text-center text-emerald-400"></i>
+              <span>Módulo Qualidade</span>
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span id="sidebarReqBadge" class="hidden px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">0</span>
+              <i class="fa-solid fa-chevron-down nav-group-chevron"></i>
+            </span>
+          </button>
+          <div id="grpMenu_qualidade" class="nav-submenu">
+            <button type="button" id="btnNavRequisicoes" onclick="mudarAba('requisicoes')" class="nav-tab">
+              <i class="fa-solid fa-clipboard-list w-4 text-center"></i>
+              <span class="flex-1 text-left">Requisições Internas</span>
+            </button>
+
+            <button type="button" id="btnNavEmissao" onclick="mudarAba('emissao')" class="nav-tab">
+              <i class="fa-solid fa-file-signature w-4 text-center"></i>
+              <span class="flex-1 text-left">Emitir Novo Termo</span>
+            </button>
+
+            <button type="button" id="btnNavConsulta" onclick="mudarAba('consulta')" class="nav-tab">
+              <i class="fa-solid fa-magnifying-glass w-4 text-center"></i>
+              <span class="flex-1 text-left">Consultar Termos</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- GRUPO 3: MANUTENÇÃO (O.S.) -->
+        <div>
+          <button type="button" id="grpBtn_manutencao" onclick="toggleSidebarGroup('manutencao')" class="nav-group-btn">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-screwdriver-wrench w-4 text-center text-rose-400"></i>
+              <span>Manutenção (O.S.)</span>
+            </span>
+            <i class="fa-solid fa-chevron-down nav-group-chevron"></i>
+          </button>
+          <div id="grpMenu_manutencao" class="nav-submenu">
+            <button type="button" id="btnNavOsGestao" onclick="mudarAba('os_gestao')" class="nav-tab">
+              <i class="fa-solid fa-list-check w-4 text-center"></i>
+              <span class="flex-1 text-left">Central de Gestão O.S.</span>
+            </button>
+
+            <button type="button" id="btnNavOsAbertura" onclick="mudarAba('os_abertura')" class="nav-tab">
+              <i class="fa-solid fa-square-plus w-4 text-center"></i>
+              <span class="flex-1 text-left">Abrir Nova O.S.</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- GRUPO 4: CADASTROS -->
+        <div>
+          <button type="button" id="grpBtn_cadastros" onclick="toggleSidebarGroup('cadastros')" class="nav-group-btn">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-database w-4 text-center text-purple-400"></i>
+              <span>Cadastros</span>
+            </span>
+            <i class="fa-solid fa-chevron-down nav-group-chevron"></i>
+          </button>
+          <div id="grpMenu_cadastros" class="nav-submenu">
+            <button type="button" id="btnNavCadEquipamento" onclick="mudarAba('cad_equipamento')" class="nav-tab">
+              <i class="fa-solid fa-truck-medical w-4 text-center"></i>
+              <span class="flex-1 text-left">Cadastrar Equipamento</span>
+            </button>
+
+            <button type="button" id="btnNavCadAuxiliares" onclick="mudarAba('cad_auxiliares')" class="nav-tab">
+              <i class="fa-solid fa-tags w-4 text-center"></i>
+              <span class="flex-1 text-left">Nomenclaturas Padrão</span>
+            </button>
+          </div>
+        </div>
+
+      </nav>
     </aside>
 
     <!-- ÁREA DE CONTEÚDO DIREITA -->
@@ -677,7 +963,7 @@
       <!-- TOPBAR CORPORATIVA -->
       <header class="h-16 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between gap-3 sticky top-0 z-30">
         <div class="flex items-center gap-3">
-          <button type="button" onclick="toggleMobileSidebar(true)" class="lg:hidden p-2 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700">
+          <button type="button" onclick="toggleMobileSidebar(true)" class="lg:hidden p-2 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 topbar-btn">
             <i class="fa-solid fa-bars"></i>
           </button>
           <div>
@@ -690,14 +976,14 @@
 
         <div class="flex items-center gap-2 sm:gap-2.5 relative">
           <!-- Botão Rápido Calendário -->
-          <button type="button" onclick="openCalendarModal()" class="px-3 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 text-xs font-semibold flex items-center gap-2 transition cursor-pointer">
+          <button type="button" onclick="openCalendarModal()" class="px-3 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-400 border border-sky-500/30 text-xs font-semibold flex items-center gap-2 transition cursor-pointer">
             <i class="fa-solid fa-calendar-days"></i>
             <span class="hidden md:inline">Grelha do Mês</span>
           </button>
 
           <!-- Usuários Online e Chat -->
           <div class="relative inline-block" id="containerMenuUsuarioChat">
-            <button type="button" onclick="toggleUsersDropdown(event)" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 flex items-center gap-2 cursor-pointer" title="Usuários Conectados e Chat">
+            <button type="button" onclick="toggleUsersDropdown(event)" class="topbar-btn px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 flex items-center gap-2 cursor-pointer" title="Usuários Conectados e Chat">
               <i class="fa-solid fa-circle text-emerald-400 text-[9px]"></i>
               <span id="onlineCountText">1 Online</span>
             </button>
@@ -714,7 +1000,7 @@
 
           <!-- Notificações de Requisições -->
           <div class="relative inline-block">
-            <button type="button" onclick="toggleNotifications(event)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 flex items-center justify-center relative cursor-pointer" title="Notificações de Requisições">
+            <button type="button" onclick="toggleNotifications(event)" class="topbar-btn w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 flex items-center justify-center relative cursor-pointer" title="Notificações de Requisições">
               <i class="fa-solid fa-bell text-xs"></i>
               <span id="notifBadge" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white rounded-full px-1.5 py-0.5 text-[10px] font-bold">0</span>
             </button>
@@ -731,24 +1017,32 @@
           </div>
 
           <!-- Status da Conexão -->
-          <span id="statusBadge" onclick="buscarAtualizacoesSilenciosas()" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 cursor-pointer" title="Clique para sincronizar com a Planilha">
+          <span id="statusBadge" onclick="buscarAtualizacoesSilenciosas()" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 cursor-pointer" title="Clique para sincronizar com a Planilha">
             <i class="fa-solid fa-plug"></i> <span class="hidden sm:inline">Conectando...</span>
           </span>
 
-          <!-- Menu Ajuda / Manual -->
+          <!-- Menu Engrenagem (Configurações / Tema Claro & Escuro / Manual) -->
           <div class="relative inline-block">
-            <button type="button" onclick="alternarMenuAjuda(event)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 flex items-center justify-center cursor-pointer" title="Opções do Sistema">
+            <button type="button" onclick="alternarMenuAjuda(event)" class="topbar-btn w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 flex items-center justify-center cursor-pointer" title="Configurações e Tema">
               <i class="fa-solid fa-gear text-xs"></i>
             </button>
-            <div id="menuAjudaDropdown" class="hidden absolute right-0 top-11 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-52 z-50 overflow-hidden">
-              <div onclick="abrirModalManual()" class="px-4 py-3 text-xs font-semibold text-slate-200 hover:bg-slate-800 cursor-pointer flex items-center gap-2.5">
-                <i class="fa-solid fa-book-bookmark text-sky-400"></i> Material de Apoio
+            <div id="menuAjudaDropdown" class="hidden absolute right-0 top-11 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-60 z-50 overflow-hidden divide-y divide-slate-800">
+              <div onclick="alternarTemaSistema(event)" class="px-4 py-3 text-xs font-semibold text-slate-200 hover:bg-sky-500/15 hover:text-sky-400 cursor-pointer flex items-center justify-between transition">
+                <span class="flex items-center gap-2.5">
+                  <i id="iconeTemaMenu" class="fa-solid fa-sun text-amber-400 w-4 text-center"></i>
+                  <span id="textoTemaMenu">Ativar Tema Claro</span>
+                </span>
+                <span id="badgeTemaAtual" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Escuro</span>
+              </div>
+              <div onclick="abrirModalManual()" class="px-4 py-3 text-xs font-semibold text-slate-200 hover:bg-sky-500/15 hover:text-sky-400 cursor-pointer flex items-center gap-2.5 transition">
+                <i class="fa-solid fa-book-bookmark text-sky-400 w-4 text-center"></i>
+                <span>Material de Apoio</span>
               </div>
             </div>
           </div>
 
           <!-- Botão Sair -->
-          <button type="button" onclick="efetuarLogout()" class="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-bold flex items-center gap-1.5 cursor-pointer" title="Sair do Sistema">
+          <button type="button" onclick="efetuarLogout()" class="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 text-xs font-bold flex items-center gap-1.5 cursor-pointer" title="Sair do Sistema">
             <i class="fa-solid fa-right-from-bracket"></i> <span class="hidden sm:inline">Sair</span>
           </button>
         </div>
@@ -783,7 +1077,7 @@
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div onclick="mudarAba('agenda')" class="bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-5 cursor-pointer transition-all group shadow-lg">
+            <div onclick="mudarAba('agenda')" class="quick-home-card bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-5 cursor-pointer transition-all group shadow-lg">
               <div class="w-11 h-11 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 text-lg mb-4 group-hover:scale-110 transition">
                 <i class="fa-solid fa-calendar-days"></i>
               </div>
@@ -791,7 +1085,7 @@
               <div class="text-xs text-slate-400 leading-relaxed">Agende calibrações, testes e preventivas com grelha mensal e alerta antichoque de horários.</div>
             </div>
 
-            <div onclick="mudarAba('locacao')" class="bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-5 cursor-pointer transition-all group shadow-lg">
+            <div onclick="mudarAba('locacao')" class="quick-home-card bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-5 cursor-pointer transition-all group shadow-lg">
               <div class="w-11 h-11 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-lg mb-4 group-hover:scale-110 transition">
                 <i class="fa-solid fa-boxes-packing"></i>
               </div>
@@ -799,7 +1093,7 @@
               <div class="text-xs text-slate-400 leading-relaxed">Consulte o saldo contratado vs. físico por cliente, unidade e família de equipamento.</div>
             </div>
 
-            <div onclick="mudarAba('compras')" class="bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-5 cursor-pointer transition-all group shadow-lg">
+            <div onclick="mudarAba('compras')" class="quick-home-card bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-5 cursor-pointer transition-all group shadow-lg">
               <div class="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-lg mb-4 group-hover:scale-110 transition">
                 <i class="fa-solid fa-cart-shopping"></i>
               </div>
@@ -807,7 +1101,7 @@
               <div class="text-xs text-slate-400 leading-relaxed">Crie solicitações com mapa comparativo de 3 fornecedores e aprovação direta.</div>
             </div>
 
-            <div onclick="mudarAba('dashboard')" class="bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-5 cursor-pointer transition-all group shadow-lg">
+            <div onclick="mudarAba('dashboard')" class="quick-home-card bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-5 cursor-pointer transition-all group shadow-lg">
               <div class="w-11 h-11 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg mb-4 group-hover:scale-110 transition">
                 <i class="fa-solid fa-chart-line"></i>
               </div>
@@ -815,7 +1109,7 @@
               <div class="text-xs text-slate-400 leading-relaxed">Acompanhe indicadores gerais de movimentação e chamados em tempo real.</div>
             </div>
 
-            <div onclick="mudarAba('os_gestao')" class="bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-5 cursor-pointer transition-all group shadow-lg">
+            <div onclick="mudarAba('os_gestao')" class="quick-home-card bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-5 cursor-pointer transition-all group shadow-lg">
               <div class="w-11 h-11 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400 text-lg mb-4 group-hover:scale-110 transition">
                 <i class="fa-solid fa-wrench"></i>
               </div>
@@ -1796,7 +2090,7 @@
               <span id="modalRealtimeValidationText">Horário disponível para agendamento.</span>
             </div>
 
-            <button type="button" id="btnSalvarModalAgenda" onclick="salvarAgendamento PeloModal()" class="btn-submit w-full !py-2">
+            <button type="button" id="btnSalvarModalAgenda" onclick="salvarAgendamentoPeloModal()" class="btn-submit w-full !py-2">
               <i class="fa-solid fa-calendar-check"></i> Confirmar Agendamento no Dia
             </button>
           </div>
@@ -2069,6 +2363,62 @@
         sb?.classList.add('-translate-x-full');
         bd?.classList.add('hidden');
       }
+    }
+
+    function toggleSidebarGroup(groupId, forceOpen = null) {
+      const btn = document.getElementById(`grpBtn_${groupId}`);
+      const menu = document.getElementById(`grpMenu_${groupId}`);
+      if (!btn || !menu) return;
+
+      const isCurrentlyOpen = menu.classList.contains('open');
+      const shouldOpen = forceOpen !== null ? forceOpen : !isCurrentlyOpen;
+
+      if (shouldOpen) {
+        // Fecha outros grupos para manter o menu lateral limpo e organizado
+        ['operacoes', 'qualidade', 'manutencao', 'cadastros'].forEach(g => {
+          if (g !== groupId) {
+            document.getElementById(`grpBtn_${g}`)?.classList.remove('open');
+            document.getElementById(`grpMenu_${g}`)?.classList.remove('open');
+          }
+        });
+        btn.classList.add('open');
+        menu.classList.add('open');
+      } else {
+        btn.classList.remove('open');
+        menu.classList.remove('open');
+      }
+    }
+
+    function aplicarTemaSalvo() {
+      const tema = localStorage.getItem('dmasys_tema') || 'dark';
+      const htmlEl = document.documentElement;
+      const icone = document.getElementById('iconeTemaMenu');
+      const texto = document.getElementById('textoTemaMenu');
+      const badge = document.getElementById('badgeTemaAtual');
+
+      if (tema === 'light') {
+        htmlEl.classList.remove('dark');
+        htmlEl.classList.add('light');
+        if (icone) icone.className = 'fa-solid fa-moon text-indigo-500 w-4 text-center';
+        if (texto) texto.innerText = 'Ativar Tema Escuro';
+        if (badge) badge.innerText = 'Claro';
+      } else {
+        htmlEl.classList.remove('light');
+        htmlEl.classList.add('dark');
+        if (icone) icone.className = 'fa-solid fa-sun text-amber-400 w-4 text-center';
+        if (texto) texto.innerText = 'Ativar Tema Claro';
+        if (badge) badge.innerText = 'Escuro';
+      }
+    }
+
+    function alternarTemaSistema(e) {
+      if (e) e.stopPropagation();
+      const atual = localStorage.getItem('dmasys_tema') || 'dark';
+      const novo = atual === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('dmasys_tema', novo);
+      aplicarTemaSalvo();
+      document.getElementById('menuAjudaDropdown')?.classList.add('hidden');
+      showToast(novo === 'light' ? '☀️ Tema Claro ativado!' : '🌙 Tema Escuro ativado!', 'info');
     }
 
     function alternarMenuAjuda(e) {
@@ -3651,29 +4001,32 @@
       toggleMobileSidebar(false);
 
       document.querySelectorAll('.nav-tab').forEach(b => {
-        b.className = "nav-tab w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/70 transition cursor-pointer";
+        b.classList.remove('active');
       });
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
       const mapAba = {
         inicio: { btn: 'btnNavInicio', tab: 'abaInicio', title: 'Início | Visão Geral' },
-        agenda: { btn: 'btnNavAgenda', tab: 'abaAgenda', title: 'Agenda de Serviços & Grelha Mensal', fn: renderizarTabelaAgenda },
-        locacao: { btn: 'btnNavLocacao', tab: 'abaLocacao', title: 'Controle de Locação por Cliente / Unidade', fn: renderizarTabelaLocacao },
-        compras: { btn: 'btnNavCompras', tab: 'abaCompras', title: 'Módulo de Compras & Mapa Comparativo', fn: renderizarTabelaCompras },
         dashboard: { btn: 'btnNavDashboard', tab: 'abaDashboard', title: 'Dashboard Executivo & Métricas', fn: atualizarDashboard },
-        requisicoes: { btn: 'btnNavRequisicoes', tab: 'abaRequisicoes', title: 'Módulo Qualidade — Requisições Internas', fn: filtrarRequisicoes },
-        emissao: { btn: 'btnNavEmissao', tab: 'abaEmissao', title: 'Módulo Qualidade — Emitir Novo Termo Duplo' },
-        consulta: { btn: 'btnNavConsulta', tab: 'abaConsulta', title: 'Módulo Qualidade — Consultar Termos Emitidos' },
-        os_gestao: { btn: 'btnNavOsGestao', tab: 'abaOsGestao', title: 'Manutenção — Central de Gestão de O.S.', fn: renderizarTabelaOS },
-        os_abertura: { btn: 'btnNavOsAbertura', tab: 'abaOsAbertura', title: 'Manutenção — Abrir / Registrar Nova O.S.' },
-        cad_equipamento: { btn: 'btnNavCadEquipamento', tab: 'abaCadEquipamento', title: 'Cadastros — Novo Equipamento' },
-        cad_auxiliares: { btn: 'btnNavCadAuxiliares', tab: 'abaCadAuxiliares', title: 'Cadastros — Nomenclaturas Padrão', fn: renderizarListasAuxiliares }
+        agenda: { btn: 'btnNavAgenda', tab: 'abaAgenda', group: 'operacoes', title: 'Agenda de Serviços & Grelha Mensal', fn: renderizarTabelaAgenda },
+        locacao: { btn: 'btnNavLocacao', tab: 'abaLocacao', group: 'operacoes', title: 'Controle de Locação por Cliente / Unidade', fn: renderizarTabelaLocacao },
+        compras: { btn: 'btnNavCompras', tab: 'abaCompras', group: 'operacoes', title: 'Módulo de Compras & Mapa Comparativo', fn: renderizarTabelaCompras },
+        requisicoes: { btn: 'btnNavRequisicoes', tab: 'abaRequisicoes', group: 'qualidade', title: 'Módulo Qualidade — Requisições Internas', fn: filtrarRequisicoes },
+        emissao: { btn: 'btnNavEmissao', tab: 'abaEmissao', group: 'qualidade', title: 'Módulo Qualidade — Emitir Novo Termo Duplo' },
+        consulta: { btn: 'btnNavConsulta', tab: 'abaConsulta', group: 'qualidade', title: 'Módulo Qualidade — Consultar Termos Emitidos' },
+        os_gestao: { btn: 'btnNavOsGestao', tab: 'abaOsGestao', group: 'manutencao', title: 'Manutenção — Central de Gestão de O.S.', fn: renderizarTabelaOS },
+        os_abertura: { btn: 'btnNavOsAbertura', tab: 'abaOsAbertura', group: 'manutencao', title: 'Manutenção — Abrir / Registrar Nova O.S.' },
+        cad_equipamento: { btn: 'btnNavCadEquipamento', tab: 'abaCadEquipamento', group: 'cadastros', title: 'Cadastros — Novo Equipamento' },
+        cad_auxiliares: { btn: 'btnNavCadAuxiliares', tab: 'abaCadAuxiliares', group: 'cadastros', title: 'Cadastros — Nomenclaturas Padrão', fn: renderizarListasAuxiliares }
       };
 
       const target = mapAba[nomeAba] || mapAba.inicio;
+      if (target.group) {
+        toggleSidebarGroup(target.group, true);
+      }
       const btnEl = document.getElementById(target.btn);
       if (btnEl) {
-        btnEl.className = "nav-tab active w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer bg-sky-500/15 text-sky-400 border border-sky-500/30";
+        btnEl.classList.add('active');
       }
       document.getElementById(target.tab)?.classList.add('active');
       document.getElementById('headerPageTitle').textContent = target.title;
@@ -4190,6 +4543,7 @@
     });
 
     window.onload = function() {
+      aplicarTemaSalvo();
       const mesFormatado = `${curY}-${curM}`;
       if (document.getElementById('filtroMesReq')) document.getElementById('filtroMesReq').value = mesFormatado;
       if (document.getElementById('dashFiltroMes')) document.getElementById('dashFiltroMes').value = mesFormatado;
