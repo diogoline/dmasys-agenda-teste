@@ -1,1189 +1,1171 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DMA SYS - Gestão de Termos, Requisições, O.S., Locação, Compras e Agenda</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DMA SYS v2.0 — Módulo de Agenda de Serviços</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            dma: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+              900: '#0c4a6e',
+              950: '#082f49'
+            }
+          }
+        }
+      }
+    };
+  </script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #f0f2f5; color: #333; min-height: 100vh; padding: 16px; padding-bottom: 70px; overflow-x: hidden; }
-    
-    .header { background-color: #1a4d80; color: white; padding: 12px 24px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; box-shadow: 0 3px 6px rgba(0,0,0,0.12); position: relative; }
-    .header h1 { font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-    
-    .header-right { display: flex; align-items: center; gap: 10px; position: relative; }
-    .status-badge { background-color: #ffc107; color: #333; padding: 6px 14px; border-radius: 16px; font-size: 12px; font-weight: bold; transition: all 0.3s; display: inline-flex; align-items: center; gap: 6px; }
-    .status-badge.connected { background-color: #28a745; color: white; }
-
-    .notification-btn { background: rgba(255,255,255,0.15); border: none; color: white; padding: 0 12px; height: 36px; border-radius: 18px; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: background 0.2s; gap: 6px; }
-    .notification-btn:hover { background: rgba(255,255,255,0.25); }
-    
-    .notification-badge { position: absolute; top: -2px; right: -2px; background: #dc3545; color: white; border-radius: 10px; padding: 2px 6px; font-size: 10px; font-weight: bold; border: 2px solid #1a4d80; display: none; }
-    .notification-badge.active { display: block; animation: pulseBadge 1.5s infinite; }
-
-    @keyframes pulseBadge {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
-      70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(220, 53, 69, 0); }
-      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
     }
-
-    .btn-header-ajuda { background-color: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 6px; width: 34px; height: 32px; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
-    .btn-header-ajuda:hover { background-color: rgba(255, 255, 255, 0.25); border-color: rgba(255, 255, 255, 0.5); }
-
-    .dropdown-ajuda-container { position: relative; display: inline-block; }
-    .menu-ajuda-dropdown { display: none; position: absolute; right: 0; top: 40px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 200px; z-index: 10000; overflow: hidden; }
-    .menu-ajuda-dropdown.ativo { display: block; }
-    .menu-ajuda-item { padding: 11px 14px; font-size: 12px; font-weight: 600; color: #1e293b; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
-    .menu-ajuda-item:hover { background: #f1f5f9; color: #1a4d80; }
-
-    .notification-dropdown { display: none; position: absolute; top: 48px; right: 0; width: 340px; background: white; color: #333; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); z-index: 200; border: 1px solid #e2e8f0; overflow: hidden; }
-    .notification-dropdown.active { display: block; animation: fadeIn 0.2s ease-in-out; }
-    .notif-header { background: #f8fafc; padding: 10px 14px; font-size: 12px; font-weight: bold; color: #1a4d80; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
-    .notif-list { max-height: 280px; overflow-y: auto; }
-    .notif-item { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.2s; }
-    .notif-item:hover { background: #f1f5f9; }
-    .notif-item-title { font-size: 12px; font-weight: bold; color: #1e293b; display: flex; justify-content: space-between; }
-    .notif-item-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
-
-    .nav-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; background: #ffffff; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
-    .nav-tab { padding: 8px 14px; font-size: 13px; font-weight: 700; border: none; background: #f1f5f9; color: #334155; border-radius: 6px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-    .nav-tab:hover { background: #e2e8f0; }
-    .nav-tab.active { background: #1a4d80; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-
-    .dropdown { position: relative; display: inline-block; }
-    .dropdown-content { display: none; position: absolute; top: 100%; left: 0; background-color: #ffffff; min-width: 220px; box-shadow: 0 8px 20px rgba(0,0,0,0.18); border-radius: 6px; border: 1px solid #cbd5e1; z-index: 1000; overflow: hidden; margin-top: 2px; }
-    .dropdown-content button { color: #334155; padding: 11px 16px; text-decoration: none; display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: none; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f1f5f9; }
-    .dropdown-content button:last-child { border-bottom: none; }
-    .dropdown-content button:hover { background-color: #f1f5f9; color: #1a4d80; font-weight: 700; }
-    .dropdown:hover .dropdown-content, .dropdown.open .dropdown-content { display: block; animation: fadeIn 0.15s ease-in-out; }
-
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .card { background: white; border-radius: 8px; padding: 16px; border: 1px solid #dcdcdc; display: flex; flex-direction: column; box-shadow: 0 2px 5px rgba(0,0,0,0.06); margin-bottom: 16px; }
-    .card-title { font-size: 14px; font-weight: bold; color: #1a4d80; text-transform: uppercase; border-bottom: 2px solid #1a4d80; padding-bottom: 6px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-
-    .form-row { display: flex; gap: 12px; margin-bottom: 12px; }
-    .form-group { flex: 1; display: flex; flex-direction: column; }
-    label { font-size: 11px; font-weight: 700; color: #444; margin-bottom: 4px; text-transform: uppercase; }
-    input[type="text"], input[type="password"], input[type="month"], input[type="number"], input[type="datetime-local"], select, textarea { width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; background: #fff; transition: border-color 0.2s; }
-    input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, input[type="datetime-local"]:focus, select:focus, textarea:focus { border-color: #1a4d80; outline: none; }
-    input[readonly] { background-color: #f8f9fa; color: #333; font-weight: 600; }
-    
-    .radio-group { display: flex; gap: 20px; align-items: center; padding: 6px 0; }
-    .radio-group label { font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-
-    .table-container { overflow-x: auto; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 6px; min-height: 200px; max-height: 500px; }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
-    th { background: #e9ecef; color: #1a4d80; padding: 10px 6px; text-align: left; position: sticky; top: 0; border-bottom: 2px solid #ced4da; font-weight: bold; font-size: 11px; text-transform: uppercase; z-index: 10; }
-    td { padding: 8px 6px; border-bottom: 1px solid #eee; vertical-align: middle; font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
-    .td-center { text-align: center; }
-
-    .btn-submit { background: #1a4d80; color: white; border: none; padding: 12px 18px; font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: background 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-submit:hover { background: #13385c; }
-    .btn-submit:disabled { background: #6c757d; cursor: not-allowed; }
-
-    .btn-pdf { background: #1a4d80; color: white; padding: 4px 10px; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 11px; display: inline-flex; align-items: center; gap: 5px; justify-content: center; white-space: nowrap; height: 26px; border: none; cursor: pointer; }
-    .btn-pdf:hover { background: #13385c; }
-
-    .btn-termo-link { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 10px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; height: 26px; white-space: nowrap; }
-    .btn-editar-saldo { background: #2563eb; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; justify-content: center; height: 26px; white-space: nowrap; }
-    .btn-editar-saldo:hover { background: #1d4ed8; }
-
-    .badge-status { padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; text-transform: uppercase; display: inline-block; text-align: center; }
-    .badge-pendente { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-    .badge-atendido { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    .badge-recusado { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-    .badge-encerrado { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-
-    .badge-saldo-ok { background: #f1f5f9; color: #334155; }
-    .badge-saldo-pendente { background: #fef3c7; color: #92400e; }
-    .badge-saldo-alerta { background: #fee2e2; color: #991b1b; }
-
-    .btn-logout { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; transition: background 0.2s; height: 32px; display: inline-flex; align-items: center; gap: 6px; }
-    .btn-logout:hover { background: #dc3545; border-color: #dc3545; }
-
-    .welcome-hero { background: linear-gradient(135deg, #1a4d80 0%, #0f2b48 100%); color: white; border-radius: 12px; padding: 32px 24px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-    .welcome-hero h2 { font-size: 24px; margin-bottom: 8px; }
-    .welcome-hero p { font-size: 14px; opacity: 0.9; max-width: 800px; line-height: 1.5; }
-    
-    .quick-actions-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
-    .quick-card { background: white; border-radius: 8px; padding: 20px; border: 1px solid #e2e8f0; text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-    .quick-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); border-color: #1a4d80; }
-    .quick-icon { font-size: 28px; color: #1a4d80; margin-bottom: 10px; }
-    .quick-title { font-size: 14px; font-weight: bold; color: #1a4d80; margin-bottom: 6px; }
-    .quick-desc { font-size: 11px; color: #64748b; line-height: 1.4; }
-
-    .dash-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
-    .metric-card { background: white; padding: 16px; border-radius: 8px; border: 1px solid #dcdcdc; border-left: 5px solid #1a4d80; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .metric-card.yellow { border-left-color: #ffc107; }
-    .metric-card.green { border-left-color: #28a745; }
-    .metric-card.red { border-left-color: #dc3545; }
-    .metric-card.blue { border-left-color: #2563eb; }
-    .metric-title { font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; }
-    .metric-value { font-size: 24px; font-weight: bold; color: #1e293b; margin-top: 4px; }
-
-    .dash-charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; }
-    .modal-overlay.active { display: flex; }
-    .modal-box { background: white; padding: 24px; border-radius: 10px; width: 680px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-    .modal-title { font-size: 16px; font-weight: bold; color: #1a4d80; margin-bottom: 12px; display: flex; justify-content: space-between; border-bottom: 2px solid #1a4d80; padding-bottom: 6px; }
-
-    .modal-manual-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(3px); z-index: 20000; align-items: center; justify-content: center; }
-    .modal-manual-overlay.ativo { display: flex; }
-    .modal-manual-card { background: #ffffff; width: 90%; max-width: 820px; height: 85vh; border-radius: 10px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; }
-    .modal-manual-header { background: #1a4d80; color: #ffffff; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
-    .modal-manual-header h3 { margin: 0; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-    .btn-fechar-manual { background: transparent; border: none; color: #ffffff; font-size: 20px; cursor: pointer; }
-    .modal-manual-body { padding: 20px 24px; overflow-y: auto; font-size: 13px; line-height: 1.6; color: #334155; }
-
-    .chat-panel-container { display: flex; flex-direction: column; height: 320px; }
-    .chat-tabs { display: flex; background: #f1f5f9; border-bottom: 1px solid #cbd5e1; }
-    .chat-tab { flex: 1; padding: 8px; text-align: center; font-size: 11px; font-weight: bold; cursor: pointer; background: #f8fafc; border: none; border-bottom: 2px solid transparent; }
-    .chat-tab.active { background: white; color: #1a4d80; border-bottom-color: #1a4d80; }
-    .chat-messages { flex: 1; padding: 10px; overflow-y: auto; background: #fafafa; font-size: 11px; display: flex; flex-direction: column; gap: 6px; }
-    .chat-msg { background: white; padding: 6px 10px; border-radius: 6px; border: 1px solid #e2e8f0; max-width: 85%; }
-    .chat-msg.me { background: #dcfce7; align-self: flex-end; border-color: #bbf7d0; }
-    .chat-input-box { display: flex; padding: 8px; background: white; border-top: 1px solid #cbd5e1; gap: 6px; position: relative; align-items: center; }
-    .chat-input-box input { flex: 1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px; }
-    .chat-input-box button { background: #1a4d80; color: white; border: none; padding: 0 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; height: 30px; }
-    .emoji-picker-dropdown { display: none; position: absolute; bottom: 45px; left: 8px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 8px; width: 210px; z-index: 9999; grid-template-columns: repeat(6, 1fr); gap: 4px; text-align: center; }
-    .emoji-picker-dropdown.active { display: grid; }
-    .emoji-item { font-size: 16px; cursor: pointer; padding: 4px; border-radius: 4px; transition: background 0.1s; }
-    .emoji-item:hover { background: #f1f5f9; }
-
-    /* WIDGET WHATSAPP FLUTUANTE */
-    .chat-widget-btn { position: fixed; bottom: 45px; right: 20px; background: #25d366; color: white; border: none; width: 48px; height: 48px; border-radius: 50%; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.25); z-index: 101; transition: transform 0.2s; }
-    .chat-widget-btn:hover { transform: scale(1.08); }
-    .chat-box-wa { display: none; position: fixed; bottom: 105px; right: 20px; width: 300px; background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 102; overflow: hidden; border: 1px solid #e2e8f0; }
-    .chat-box-wa.active { display: block; animation: fadeIn 0.2s ease-in-out; }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* --- RODAPÉ FIXO --- */
-    .system-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #1a4d80; color: #e2e8f0; font-size: 11px; padding: 8px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 99999; border-top: 2px solid #2563eb; }
-    .system-footer a { color: #60a5fa; text-decoration: none; font-weight: bold; }
-    
-    html { scrollbar-color:#b7c4da #eef2f8; }
-    ::selection { background:#bfdbfe; color:#0b2545; }
-    :focus-visible { outline:2px solid #60a5fa; outline-offset:2px; }
-    body { background:radial-gradient(900px 420px at 8% -8%,rgba(37,99,235,.14),transparent 60%),radial-gradient(800px 380px at 100% 0%,rgba(6,182,212,.10),transparent 60%),#eef2f8; background-attachment:fixed; color:#1e293b; padding-bottom:70px; }
-
-    .header { background:linear-gradient(115deg,#0b2545 0%,#123a6b 45%,#1d5fa8 100%); border-radius:14px; box-shadow:0 10px 30px rgba(11,37,69,.35),inset 0 1px 0 rgba(255,255,255,.12); }
-    .header h1 { text-shadow:0 1px 2px rgba(0,0,0,.25); }
-    .status-badge { background:#fbbf24; box-shadow:0 2px 8px rgba(251,191,36,.35); }
-    .status-badge.connected { background:#22c55e; box-shadow:0 0 0 3px rgba(34,197,94,.25),0 2px 8px rgba(34,197,94,.4); }
-    .notification-btn, .btn-header-ajuda, .btn-logout { background:rgba(255,255,255,.12); box-shadow:inset 0 0 0 1px rgba(255,255,255,.14); }
-    .btn-header-ajuda, .btn-logout { border-color:rgba(255,255,255,.28); }
-    .notification-btn:hover, .btn-header-ajuda:hover { background:rgba(255,255,255,.26); }
-    .notification-dropdown, .menu-ajuda-dropdown, .dropdown-content { border-radius:14px; border-color:#e2e8f0; box-shadow:0 18px 44px rgba(11,37,69,.28); }
-    .notif-header { background:linear-gradient(180deg,#f4f8fe,#e9f1fc); }
-    .notif-item:hover, .menu-ajuda-item:hover, .dropdown-content button:hover { background:#eaf2ff; color:#1d4ed8; }
-
-    .nav-tabs { border-radius:14px; border-color:#e2e8f0; box-shadow:0 4px 18px rgba(11,37,69,.08); }
-    .nav-tab { background:#eef2f9; color:#334155; border-radius:999px; transition:all .2s; }
-    .nav-tab:hover { background:#dbe7fa; color:#1a4d80; transform:translateY(-1px); }
-    .nav-tab.active { background:linear-gradient(135deg,#2563eb,#1a4d80); color:#fff; box-shadow:0 6px 16px rgba(37,99,235,.4); }
-
-    .card { border-radius:14px; border-color:#e3e9f3; box-shadow:0 1px 2px rgba(11,37,69,.05),0 10px 28px rgba(11,37,69,.07),inset 0 3px 0 0 #2563eb; }
-    .card-title { color:#0b2545; border-bottom:2px solid transparent; border-image:linear-gradient(90deg,#2563eb,#06b6d4 55%,#22c55e) 1; }
-    .welcome-hero { position:relative; overflow:hidden; background:radial-gradient(520px 240px at 92% 0%,rgba(96,165,250,.45),transparent 70%),radial-gradient(380px 200px at 0% 100%,rgba(6,182,212,.28),transparent 70%),linear-gradient(135deg,#1a4d80 0%,#0b2545 100%); border-radius:18px; box-shadow:0 16px 38px rgba(11,37,69,.34); }
-    .welcome-hero::after { content:""; position:absolute; right:-60px; top:-60px; width:220px; height:220px; border-radius:50%; background:rgba(255,255,255,.07); pointer-events:none; }
-    .quick-card { border-radius:14px; border-color:#e3e9f3; box-shadow:0 2px 10px rgba(11,37,69,.07); }
-    .quick-card:hover { border-color:#2563eb; box-shadow:0 16px 32px rgba(37,99,235,.24); }
-    .quick-icon { background:linear-gradient(135deg,#2563eb,#06b6d4); -webkit-background-clip:text; background-clip:text; color:transparent; }
-    .quick-icon i { -webkit-text-fill-color:transparent; }
-    .quick-title { color:#0b2545; }
-    .metric-card { border-radius:14px; border-color:#e3e9f3; border-left-color:#2563eb; box-shadow:0 2px 12px rgba(11,37,69,.08); }
-    .metric-card.yellow { border-left-color:#f59e0b; } .metric-card.green { border-left-color:#22c55e; } .metric-card.red { border-left-color:#ef4444; } .metric-card.blue { border-left-color:#2563eb; }
-    .metric-value { color:#0b2545; }
-    .bar-bg { background:#e8eef7; } .bar-fill { background:linear-gradient(90deg,#2563eb,#60a5fa); }
-
-    label { color:#475569; }
-    input[type="text"], input[type="password"], input[type="month"], input[type="number"], input[type="datetime-local"], select, textarea { border-color:#d3dbe8; border-radius:10px; background:#fbfcfe; box-shadow:inset 0 1px 2px rgba(11,37,69,.04); }
-    input[type="text"]:hover, input[type="number"]:hover, select:hover, textarea:hover { border-color:#9fb3d1; }
-    input[type="text"]:focus, input[type="password"]:focus, input[type="month"]:focus, input[type="number"]:focus, input[type="datetime-local"]:focus, select:focus, textarea:focus { border-color:#2563eb; background:#fff; box-shadow:0 0 0 4px rgba(37,99,235,.16); }
-    input[readonly] { background-color:#eef2f8; color:#1e293b; }
-    input[type="radio"], input[type="checkbox"] { accent-color:#2563eb; }
-
-    .table-container { border-color:#dbe3ef; border-radius:12px; scrollbar-color:#b7c4da #f1f5fb; }
-    th { background:linear-gradient(180deg,#f1f6fd,#e1ecf9); color:#0b2545; border-bottom-color:#2563eb; }
-    td { border-bottom-color:#edf1f7; }
-    tbody tr:nth-child(even) { background:#fafcff; }
-    tbody tr { transition:background .15s; }
-    tbody tr:hover { background:#eef5ff; }
-
-    .btn-submit { background:linear-gradient(135deg,#2563eb,#1a4d80); border-radius:11px; box-shadow:0 8px 18px rgba(37,99,235,.32); transition:transform .15s,box-shadow .15s,background .15s; }
-    .btn-submit:hover { background:linear-gradient(135deg,#3b82f6,#13427a); box-shadow:0 12px 24px rgba(37,99,235,.42); transform:translateY(-1px); }
-    .btn-submit:active { transform:translateY(0); }
-    .btn-submit:disabled { background:#94a3b8; box-shadow:none; transform:none; }
-    .btn-pdf { background:linear-gradient(135deg,#2563eb,#1a4d80); border-radius:7px; box-shadow:0 3px 8px rgba(37,99,235,.3); transition:transform .15s; }
-    .btn-pdf:hover { background:linear-gradient(135deg,#3b82f6,#13427a); transform:translateY(-1px); }
-    .btn-termo-link { background:#ecfdf5; color:#047857; border-color:#86efac; border-radius:7px; }
-    .btn-editar-saldo { background:linear-gradient(135deg,#2563eb,#1d4ed8); border-radius:7px; box-shadow:0 3px 8px rgba(37,99,235,.3); transition:transform .15s; }
-    .btn-editar-saldo:hover { background:linear-gradient(135deg,#3b82f6,#1e40af); transform:translateY(-1px); }
-    .btn-logout { border-radius:10px; } .btn-logout:hover { background:#dc3545; border-color:#dc3545; }
-
-    .badge-pendente { background:#fffbeb; color:#b45309; border-color:#fcd34d; }
-    .badge-atendido { background:#ecfdf5; color:#047857; border-color:#86efac; }
-    .badge-recusado { background:#fef2f2; color:#b91c1c; border-color:#fca5a5; }
-    .badge-encerrado { background:#fef2f2; color:#b91c1c; border-color:#fca5a5; }
-    .badge-saldo-ok { background:#eef2f8; color:#334155; } .badge-saldo-pendente { background:#fef3c7; color:#92400e; } .badge-saldo-alerta { background:#fee2e2; color:#991b1b; }
-
-    .modal-overlay { background:rgba(11,37,69,.6); backdrop-filter:blur(4px); }
-    .modal-box { border-radius:18px; box-shadow:0 30px 70px rgba(11,37,69,.45); }
-    .modal-overlay.active .modal-box { animation:fadeIn .22s ease-out; }
-    .modal-title { color:#0b2545; border-bottom:2px solid transparent; border-image:linear-gradient(90deg,#2563eb,#06b6d4 60%,#22c55e) 1; }
-    .modal-manual-card { border-radius:18px; } .modal-manual-header { background:linear-gradient(115deg,#0b2545,#1a4d80); }
-
-    .chat-tabs { background:#eef2f9; } .chat-tab { background:#f6f9fd; } .chat-tab.active { color:#1a4d80; border-bottom-color:#2563eb; }
-    .chat-messages { background:#f8fafc; }
-    .chat-msg { border-color:#e2e8f0; border-radius:10px; box-shadow:0 1px 3px rgba(11,37,69,.06); }
-    .chat-msg.me { background:#dbeafe; border-color:#bfdbfe; }
-    .chat-input-box { border-top-color:#e2e8f0; } .chat-input-box input { border-color:#d3dbe8; border-radius:8px; }
-    .chat-input-box button { background:linear-gradient(135deg,#2563eb,#1a4d80); border-radius:8px; }
-    .emoji-picker-dropdown { border-radius:12px; box-shadow:0 12px 28px rgba(11,37,69,.2); }
-    .chat-box-wa { border-radius:18px; box-shadow:0 22px 50px rgba(11,37,69,.3); }
-    .chat-widget-btn { box-shadow:0 10px 24px rgba(37,211,102,.45); }
-
-    .btn-action-container { display:flex !important; flex-direction:row !important; flex-wrap:nowrap !important; align-items:center !important; justify-content:center !important; gap:4px !important; width:100% !important; white-space:nowrap !important; }
-    .btn-atender, .btn-negar, .btn-vincular { color:#fff; border:none; padding:4px 10px; border-radius:7px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap; height:26px; display:inline-flex; align-items:center; gap:4px; justify-content:center; transition:filter .15s,transform .15s; }
-    .btn-atender { background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 3px 8px rgba(217,119,6,.32); }
-    .btn-negar { background:linear-gradient(135deg,#ef4444,#dc2626); box-shadow:0 3px 8px rgba(220,38,38,.32); }
-    .btn-vincular { background:linear-gradient(135deg,#0ea5e9,#0369a1); box-shadow:0 3px 8px rgba(3,105,161,.32); }
-    .btn-atender:hover, .btn-negar:hover, .btn-vincular:hover { filter:brightness(1.1); transform:translateY(-1px); }
-    .btn-clear { position:absolute; right:12px; top:12px; background:#ef4444; color:#fff; border:none; padding:4px 10px; border-radius:7px; font-size:11px; font-weight:bold; cursor:pointer; }
-    .signature-container { display:flex; gap:12px; margin-top:8px; }
-    .sig-box { flex:1; border:1px dashed #b9c7de; border-radius:12px; padding:10px; background:#f6f9fd; text-align:center; position:relative; }
-    .sig-box canvas { touch-action:none; }
-
-    #loginOverlay { background:radial-gradient(700px 400px at 18% 8%,rgba(37,99,235,.42),transparent 70%),radial-gradient(600px 400px at 92% 92%,rgba(6,182,212,.22),transparent 70%),#0a1424 !important; }
-    #loginOverlay > div { border-radius:22px !important; box-shadow:0 34px 80px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.08) !important; }
-    #loginOverlay > div > div:first-child { background:linear-gradient(120deg,#0b2545,#2563eb); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
-    #loginOverlay input { border-radius:10px !important; border-color:#d3dbe8 !important; background:#fbfcfe; }
-    #loginOverlay input:focus { border-color:#2563eb !important; box-shadow:0 0 0 4px rgba(37,99,235,.18); outline:none; background:#fff; }
-    #btnEntrarLogin { background:linear-gradient(135deg,#2563eb,#1a4d80) !important; border-radius:11px !important; box-shadow:0 10px 22px rgba(37,99,235,.4); transition:transform .15s,box-shadow .15s; }
-    #btnEntrarLogin:hover { transform:translateY(-1px); box-shadow:0 14px 28px rgba(37,99,235,.5); }
-    #loginOverlay::after { content:"DMA SYS v2.0 | Sistema de Gestão Operacional"; position:absolute; left:0; right:0; bottom:0; padding:10px 20px; text-align:center; font-size:11px; color:#94a3b8; background:rgba(11,27,51,.85); border-top:2px solid #2563eb; pointer-events:none; }
-
-    .system-footer { position:fixed !important; left:0 !important; right:0 !important; bottom:0 !important; z-index:2147483000 !important; display:flex !important; visibility:visible !important; opacity:1 !important; transform:none !important; justify-content:space-between; align-items:center; background:linear-gradient(90deg,#0b1b33,#12305a 55%,#0b1b33); color:#cbd5e1; font-size:11px; padding:8px 20px; border-top:2px solid #2563eb; box-shadow:0 -6px 20px rgba(11,37,69,.25); }
-    .system-footer a { color:#7dd3fc; text-decoration:none; font-weight:bold; }
-    .system-footer a:hover { color:#fff; }
-
-    @supports (overflow-x: clip) { body { overflow-x: clip !important; } }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.5);
+      border-radius: 9999px;
+    }
+    .conflict-pulse {
+      animation: pulseRed 2s infinite;
+    }
+    @keyframes pulseRed {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45); }
+      50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+    }
   </style>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
 
-  <div id="loginOverlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f172a; z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 20px;">
-    <div style="background: #ffffff; width: 100%; max-width: 380px; padding: 30px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); text-align: center;">
-      <div style="font-size: 24px; font-weight: 800; color: #1a4d80; margin-bottom: 4px;">DMA SYS</div>
-      <div style="font-size: 11px; color: #64748b; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.5px;">Acesso ao Sistema Operacional</div>
-      
-      <div id="loginErro" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 10px; border-radius: 6px; font-size: 13px; margin-bottom: 16px;">
-        Usuário ou senha incorretos.
+  <!-- Barra de Topo Corporativa -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20">
+          <i data-lucide="layers" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-lg tracking-tight text-white">DMA SYS</span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-400 border border-sky-500/30">v2.0</span>
+          </div>
+          <p class="text-xs text-slate-400">Módulo de Agenda de Serviços &bull; Integração Google Drive</p>
+        </div>
       </div>
 
-      <div style="text-align: left; margin-bottom: 16px;">
-        <label style="font-size: 11px; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">USUÁRIO</label>
-        <input type="text" id="loginUsuario" placeholder="Digite seu usuário..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; box-sizing: border-box;" onkeypress="if(event.key === 'Enter') efetuarLogin()">
+      <div class="flex items-center gap-2.5 sm:gap-3">
+        <div id="syncStatusBadge" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/90 border border-slate-700 text-xs text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="syncStatusText">Google Sheets: Pronto</span>
+        </div>
+
+        <button onclick="openCalendarModal()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-medium text-sm shadow-lg shadow-sky-600/25 transition-all cursor-pointer">
+          <i data-lucide="calendar-days" class="w-4 h-4"></i>
+          <span>Calendário Mensal</span>
+        </button>
+
+        <button onclick="openNewServiceForm()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-medium text-sm transition-all cursor-pointer">
+          <i data-lucide="plus" class="w-4 h-4 text-sky-400"></i>
+          <span class="hidden sm:inline">Novo Serviço</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-6">
+
+    <!-- Cartões de Indicadores (KPIs) -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Agendamentos (Mês)</p>
+          <p id="kpiTotalMonth" class="text-2xl font-bold text-white mt-1">0</p>
+          <p class="text-xs text-slate-500 mt-1">No mês selecionado</p>
+        </div>
+        <div class="w-11 h-11 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
+          <i data-lucide="calendar-check" class="w-5 h-5"></i>
+        </div>
       </div>
 
-      <div style="text-align: left; margin-bottom: 24px;">
-        <label style="font-size: 11px; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">SENHA</label>
-        <input type="password" id="loginSenha" placeholder="Digite sua senha..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; box-sizing: border-box;" onkeypress="if(event.key === 'Enter') efetuarLogin()">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Conflitos de Horário</p>
+          <p id="kpiConflicts" class="text-2xl font-bold text-rose-400 mt-1">0</p>
+          <p class="text-xs text-slate-500 mt-1">Sobreposições por técnico</p>
+        </div>
+        <div class="w-11 h-11 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </div>
       </div>
 
-      <button type="button" id="btnEntrarLogin" onclick="efetuarLogin()" style="width: 100%; background: #1a4d80; color: #ffffff; padding: 12px; border: none; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer;">
-        ENTRAR NO SISTEMA
-      </button>
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Equipa Ativa</p>
+          <p id="kpiTechnicians" class="text-2xl font-bold text-emerald-400 mt-1">4</p>
+          <p class="text-xs text-slate-500 mt-1">Técnicos monitorizados</p>
+        </div>
+        <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <i data-lucide="users" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Ação Rápida</p>
+          <button onclick="openCalendarModal()" class="mt-1.5 text-sm font-semibold text-sky-400 hover:text-sky-300 flex items-center gap-1 cursor-pointer">
+            <span>Inspecionar Grelha</span>
+            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+          </button>
+          <p class="text-xs text-slate-500 mt-1">Validação em tempo real</p>
+        </div>
+        <div class="w-11 h-11 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+          <i data-lucide="grid" class="w-5 h-5"></i>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+      <div class="p-4 sm:p-5 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-base font-semibold text-white flex items-center gap-2">
+            <i data-lucide="clipboard-list" class="w-4 h-4 text-sky-400"></i>
+            <span>Lista de Ordens e Serviços Agendados</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Visualize os serviços ou abra o Calendário Mensal para gerir conflitos na grelha.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input
+              id="searchInput"
+              type="text"
+              oninput="renderMainTable()"
+              placeholder="Cliente, serviço ou técnico..."
+              class="pl-9 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500"
+            />
+          </div>
+
+          <select
+            id="techFilterMain"
+            onchange="renderMainTable()"
+            class="px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-sky-500"
+          >
+            <option value="ALL">Todos os Técnicos</option>
+          </select>
+
+          <select
+            id="conflictFilterMain"
+            onchange="renderMainTable()"
+            class="px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-sky-500"
+          >
+            <option value="ALL">Todos os Estados</option>
+            <option value="CONFLICT">Apenas com Conflito</option>
+            <option value="OK">Sem Conflito</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto custom-scroll">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-slate-800 bg-slate-950/60 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+              <th class="py-3 px-4">Data & Horário</th>
+              <th class="py-3 px-4">Cliente / Local</th>
+              <th class="py-3 px-4">Tipo de Serviço</th>
+              <th class="py-3 px-4">Técnico Responsável</th>
+              <th class="py-3 px-4">Estado de Horário</th>
+              <th class="py-3 px-4 text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="mainScheduleTableBody" class="divide-y divide-slate-800/70 text-sm">
+            <!-- Preenchido dinamicamente via JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div
+    id="calendarModal"
+    class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 lg:p-6"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-7xl h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+
+      <!-- Cabeçalho do Modal -->
+      <div class="px-4 sm:px-6 py-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-4 bg-slate-900">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400">
+            <i data-lucide="calendar" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+              <span>Calendário Mensal de Serviços</span>
+              <span id="modalConflictPill" class="hidden text-xs font-semibold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                0 Conflitos no Mês
+              </span>
+            </h3>
+            <p class="text-xs text-slate-400">Selecione um dia na grelha para visualizar horários ou validar conflitos em tempo real.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+          <select
+            id="modalTechFilter"
+            onchange="renderCalendarGrid(); renderDayInspector();"
+            class="px-3 py-1.5 bg-slate-950 border border-slate-700 rounded-xl text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-sky-500"
+          >
+            <option value="ALL">Todos os Técnicos</option>
+          </select>
+
+          <div class="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-1">
+            <button onclick="changeMonth(-1)" class="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 transition cursor-pointer" title="Mês Anterior">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            <span id="calendarMonthLabel" class="px-3 text-xs sm:text-sm font-semibold text-white min-w-[140px] text-center capitalize">
+              Outubro 2026
+            </span>
+            <button onclick="changeMonth(1)" class="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 transition cursor-pointer" title="Próximo Mês">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <button onclick="goToToday()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 border border-slate-700 transition cursor-pointer">
+            Hoje
+          </button>
+
+          <button onclick="closeCalendarModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-rose-500/20 hover:text-rose-300 text-slate-400 border border-slate-700 transition cursor-pointer" title="Fechar (Esc)">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+
+        <!-- Coluna Esquerda: Grelha Mensal de 7 Dias (8 Colunas no Desktop) -->
+        <div class="lg:col-span-8 flex flex-col border-b lg:border-b-0 lg:border-r border-slate-800 overflow-hidden bg-slate-950/40">
+          <!-- Cabeçalho dos Dias da Semana -->
+          <div class="grid grid-cols-7 border-b border-slate-800 bg-slate-900/70 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-400 py-2.5">
+            <div>Dom</div>
+            <div>Seg</div>
+            <div>Ter</div>
+            <div>Qua</div>
+            <div>Qui</div>
+            <div>Sex</div>
+            <div>Sáb</div>
+          </div>
+
+          <!-- Grelha de Dias -->
+          <div id="calendarGridContainer" class="flex-1 grid grid-cols-7 auto-rows-fr overflow-y-auto custom-scroll divide-x divide-y divide-slate-800/80">
+            <!-- Células geradas via JS -->
+          </div>
+
+          <!-- Legenda Rodapé da Grelha -->
+          <div class="px-4 py-2.5 bg-slate-900 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+            <div class="flex items-center gap-4">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span> Normal
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Conflito de Horário
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Concluído
+              </span>
+            </div>
+            <span class="text-[11px] text-slate-500">Dica: Clique num dia para agendar ou resolver sobreposições.</span>
+          </div>
+        </div>
+
+        <div class="lg:col-span-4 flex flex-col bg-slate-900 overflow-hidden">
+          <!-- Cabeçalho do Dia Selecionado -->
+          <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
+            <div>
+              <p class="text-[11px] font-semibold uppercase tracking-wider text-sky-400">Inspetor do Dia</p>
+              <h4 id="inspectorDateTitle" class="text-sm font-bold text-white mt-0.5">--/--/----</h4>
+            </div>
+            <button
+              onclick="toggleQuickForm(true)"
+              class="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-sky-600/20 transition cursor-pointer"
+            >
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+              <span>Agendar neste Dia</span>
+            </button>
+          </div>
+
+          <!-- Alerta de Conflitos do Dia Selecionado -->
+          <div id="dayConflictBanner" class="hidden mx-4 mt-3 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-200 text-xs space-y-1">
+            <div class="flex items-center gap-2 font-semibold text-rose-400">
+              <i data-lucide="alert-octagon" class="w-4 h-4 shrink-0"></i>
+              <span>Conflito de Horário Detetado!</span>
+            </div>
+            <p id="dayConflictDetails" class="text-slate-300 leading-relaxed"></p>
+          </div>
+
+          <!-- Lista de Serviços do Dia Selecionado -->
+          <div id="inspectorEventsList" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-2.5">
+            <!-- Eventos do dia selecionado -->
+          </div>
+
+          <div id="quickScheduleDrawer" class="border-t border-slate-800 bg-slate-950/90 p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <span id="formDrawerTitle" class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-sky-400"></i>
+                <span>Validador & Novo Agendamento</span>
+              </span>
+              <button onclick="resetQuickForm()" class="text-[11px] text-slate-400 hover:text-slate-200 cursor-pointer">Limpar</button>
+            </div>
+
+            <input type="hidden" id="formServiceId" value="" />
+
+            <div class="grid grid-cols-2 gap-2">
+              <div class="col-span-2 sm:col-span-1">
+                <label class="block text-[11px] text-slate-400 mb-1">Cliente / Empresa</label>
+                <input
+                  id="formClient"
+                  type="text"
+                  placeholder="Ex: Grupo Atlântico"
+                  class="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:border-sky-500"
+                />
+              </div>
+              <div class="col-span-2 sm:col-span-1">
+                <label class="block text-[11px] text-slate-400 mb-1">Serviço</label>
+                <input
+                  id="formTitle"
+                  type="text"
+                  placeholder="Ex: Manutenção HVAC"
+                  class="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:border-sky-500"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Data</label>
+                <input
+                  id="formDate"
+                  type="date"
+                  onchange="checkRealtimeFormConflict()"
+                  class="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:border-sky-500"
+                />
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Técnico</label>
+                <select
+                  id="formTech"
+                  onchange="checkRealtimeFormConflict()"
+                  class="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:border-sky-500"
+                ></select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Início</label>
+                <input
+                  id="formStart"
+                  type="time"
+                  value="09:00"
+                  oninput="checkRealtimeFormConflict()"
+                  class="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:border-sky-500"
+                />
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Fim</label>
+                <input
+                  id="formEnd"
+                  type="time"
+                  value="11:00"
+                  oninput="checkRealtimeFormConflict()"
+                  class="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:border-sky-500"
+                />
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Estado</label>
+                <select
+                  id="formStatus"
+                  onchange="checkRealtimeFormConflict()"
+                  class="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:border-sky-500"
+                >
+                  <option value="CONFIRMADO">Confirmado</option>
+                  <option value="PENDENTE">Pendente</option>
+                  <option value="CONCLUIDO">Concluído</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="realtimeValidationBox" class="p-2.5 rounded-xl border text-xs flex items-start gap-2 transition-all bg-emerald-500/10 border-emerald-500/30 text-emerald-300">
+              <i id="realtimeValidationIcon" data-lucide="check-circle-2" class="w-4 h-4 shrink-0 mt-0.5"></i>
+              <div id="realtimeValidationText" class="leading-snug">
+                Horário disponível para o técnico selecionado.
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-1">
+              <button
+                onclick="saveServiceFromForm()"
+                id="btnSaveService"
+                class="w-full py-2 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs shadow-lg shadow-sky-600/25 flex items-center justify-center gap-1.5 transition cursor-pointer"
+              >
+                <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                <span id="btnSaveServiceText">Guardar Agendamento</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 
-  <div id="appContainer" style="display: none;">
+  <!-- Contentor de Notificações (Toast) -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
 
-    <div class="header">
-      <h1 style="color: #ffffff; display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 600;">
-        <i class="fa-solid fa-layer-group" style="font-size: 22px; background: linear-gradient(180deg, #60a5fa 0%, #fef08a 50%, #22c55e 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i> 
-        DMA SYS | Plataforma de Gestão Operacional
-      </h1>
+  <script>
+    const TECHNICIANS = [
+      { id: 'TEC-01', name: 'Carlos Eduardo', role: 'Eletromecânica' },
+      { id: 'TEC-02', name: 'Ana Beatriz', role: 'Redes & Automação' },
+      { id: 'TEC-03', name: 'Marcos Vinícius', role: 'Climatização HVAC' },
+      { id: 'TEC-04', name: 'Sofia Martins', role: 'Inspeção Técnica' }
+    ];
 
-      <div class="header-right">
-        <div style="position: relative; display: inline-block;" id="containerMenuUsuarioChat">
-          <button type="button" class="notification-btn" onclick="toggleUsersDropdown(event)" title="Usuários Conectados e Chat">
-            <i class="fa-solid fa-circle" style="color: #22c55e; font-size: 10px;"></i>
-            <span id="onlineCountText">0 Online</span>
-          </button>
-          
-          <div id="usersDropdown" class="notification-dropdown" style="right: 0; width: 340px;" onclick="event.stopPropagation()">
-            <div class="notif-header">
-              <span><i class="fa-solid fa-users"></i> EQUIPE CONECTADA</span>
-            </div>
-            <div class="notif-list" id="usersOnlineList">
-              <div style="padding: 12px; text-align: center; color: #888; font-size: 12px;">Carregando usuários...</div>
-            </div>
-          </div>
-        </div>
+    // Data de referência baseada no mês atual do utilizador
+    const todayRef = new Date();
+    const currentYear = todayRef.getFullYear();
+    const currentMonth = todayRef.getMonth();
 
-        <button type="button" class="notification-btn" onclick="toggleNotifications(event)" title="Notificações de Requisições">
-          <i class="fa-solid fa-bell"></i>
-          <span id="notifBadge" class="notification-badge">0</span>
-        </button>
+    function pad2(n) {
+      return String(n).padStart(2, '0');
+    }
 
-        <div id="notifDropdown" class="notification-dropdown">
-          <div class="notif-header">
-            <span>REQUISIÇÕES PENDENTES</span>
-            <span id="notifCountText">0 novas</span>
-          </div>
-          <div class="notif-list" id="notifList">
-            <div style="padding: 16px; text-align: center; color: #888; font-size: 12px;">Nenhuma pendência no momento.</div>
-          </div>
-        </div>
+    function buildDateStr(year, monthIndex, day) {
+      return `${year}-${pad2(monthIndex + 1)}-${pad2(day)}`;
+    }
 
-        <span id="statusBadge" class="status-badge"><i class="fa-solid fa-plug"></i> Conectando...</span>
+    let schedules = [
+      {
+        id: 'SRV-1001',
+        client: 'Indústrias MetalSul',
+        title: 'Manutenção Preventiva QGBT',
+        date: buildDateStr(currentYear, currentMonth, 8),
+        startTime: '09:00',
+        endTime: '11:30',
+        techId: 'TEC-01',
+        status: 'CONFIRMADO'
+      },
+      {
+        id: 'SRV-1002',
+        client: 'Logística Tejo S.A.',
+        title: 'Reparação de Quadro Principal',
+        date: buildDateStr(currentYear, currentMonth, 8),
+        startTime: '10:30',
+        endTime: '12:30',
+        techId: 'TEC-01',
+        status: 'PENDENTE'
+      },
+      {
+        id: 'SRV-1003',
+        client: 'Hospital Santa Clara',
+        title: 'Calibração de Sensores HVAC',
+        date: buildDateStr(currentYear, currentMonth, 12),
+        startTime: '14:00',
+        endTime: '16:30',
+        techId: 'TEC-03',
+        status: 'CONFIRMADO'
+      },
+      {
+        id: 'SRV-1004',
+        client: 'DataCenter Prime',
+        title: 'Auditoria de Redundância',
+        date: buildDateStr(currentYear, currentMonth, 15),
+        startTime: '08:30',
+        endTime: '11:00',
+        techId: 'TEC-02',
+        status: 'CONCLUIDO'
+      },
+      {
+        id: 'SRV-1005',
+        client: 'Condomínio Empresarial Solaris',
+        title: 'Vistoria de Chillers Centrais',
+        date: buildDateStr(currentYear, currentMonth, 19),
+        startTime: '13:00',
+        endTime: '15:30',
+        techId: 'TEC-03',
+        status: 'CONFIRMADO'
+      },
+      {
+        id: 'SRV-1006',
+        client: 'Laboratórios BioMed',
+        title: 'Urgência Pressurização Limpa',
+        date: buildDateStr(currentYear, currentMonth, 19),
+        startTime: '14:30',
+        endTime: '17:00',
+        techId: 'TEC-03',
+        status: 'CONFIRMADO'
+      },
+      {
+        id: 'SRV-1007',
+        client: 'Porto Comercial Atlântico',
+        title: 'Laudo Técnico Estrutural',
+        date: buildDateStr(currentYear, currentMonth, todayRef.getDate()),
+        startTime: '09:30',
+        endTime: '12:00',
+        techId: 'TEC-04',
+        status: 'CONFIRMADO'
+      }
+    ];
 
-        <div class="dropdown-ajuda-container">
-          <button type="button" class="btn-header-ajuda" onclick="alternarMenuAjuda(event)" title="Opções do Sistema">
-            <i class="fa-solid fa-gear"></i>
-          </button>
-          <div class="menu-ajuda-dropdown" id="menuAjudaDropdown">
-            <div class="menu-ajuda-item" onclick="abrirModalManual()">
-              <i class="fa-solid fa-book-bookmark" style="color:#1a4d80;"></i> Material de Apoio
-            </div>
-          </div>
-        </div>
+    let viewYear = currentYear;
+    let viewMonth = currentMonth;
+    let selectedDateStr = buildDateStr(currentYear, currentMonth, todayRef.getDate());
 
-        <button type="button" class="btn-logout" onclick="efetuarLogout()" title="Sair do Sistema">
-          <i class="fa-solid fa-right-from-bracket"></i> Sair
-        </button>
-      </div>
-    </div>
+    const GASBridge = {
+      isAvailable() {
+        return typeof window.google !== 'undefined' && window.google.script && window.google.script.run;
+      },
+      syncScheduleToSheet(payload, onSuccess) {
+        const badgeText = document.getElementById('syncStatusText');
+        if (badgeText) badgeText.textContent = 'A sincronizar Drive...';
 
-    <div class="nav-tabs">
-      <button type="button" class="nav-tab active" id="btnNavInicio" onclick="mudarAba('inicio')">
-        <i class="fa-solid fa-house"></i> Início
-      </button>
-      <button type="button" class="nav-tab" id="btnNavDashboard" onclick="mudarAba('dashboard')">
-        <i class="fa-solid fa-chart-pie"></i> Dashboard
-      </button>
+        if (this.isAvailable()) {
+          window.google.script.run
+            .withSuccessHandler((res) => {
+              if (badgeText) badgeText.textContent = 'Google Sheets: Sincronizado';
+              if (onSuccess) onSuccess(res);
+            })
+            .withFailureHandler((err) => {
+              if (badgeText) badgeText.textContent = 'Modo Local (Offline GAS)';
+              showToast('Guardado localmente (Planilha inacessível no momento).', 'warning');
+              if (onSuccess) onSuccess(null);
+            })
+            .salvarAgendamentoDMA(payload);
+        } else {
+          setTimeout(() => {
+            if (badgeText) badgeText.textContent = 'Simulação Local GAS Ativa';
+            if (onSuccess) onSuccess({ ok: true });
+          }, 250);
+        }
+      }
+    };
 
-      <button type="button" class="nav-tab" id="btnNavLocacao" onclick="mudarAba('locacao')">
-        <i class="fa-solid fa-boxes-packing"></i> Controle de Locação
-      </button>
+    function timeToMinutes(timeStr) {
+      if (!timeStr || !timeStr.includes(':')) return 0;
+      const [h, m] = timeStr.split(':').map(Number);
+      return h * 60 + m;
+    }
 
-      <button type="button" class="nav-tab" id="btnNavCompras" onclick="mudarAba('compras')">
-        <i class="fa-solid fa-cart-shopping"></i> Módulo de Compras
-      </button>
+    // Verifica se dois intervalos [startA, endA) e [startB, endB) se sobrepõem
+    function intervalsOverlap(startA, endA, startB, endB) {
+      return timeToMinutes(startA) < timeToMinutes(endB) && timeToMinutes(endA) > timeToMinutes(startB);
+    }
 
-      <button type="button" class="nav-tab" id="btnNavAgenda" onclick="mudarAba('agenda')">
-        <i class="fa-solid fa-calendar-days"></i> Agenda de Serviços
-      </button>
+    // Retorna lista de serviços que entram em conflito com um determinado registo
+    function findConflictsForCandidate(candidate, ignoreId = null) {
+      if (!candidate.date || !candidate.startTime || !candidate.endTime || !candidate.techId) {
+        return [];
+      }
+      return schedules.filter((item) => {
+        if (ignoreId && item.id === ignoreId) return false;
+        if (item.date !== candidate.date) return false;
+        if (item.techId !== candidate.techId) return false;
+        return intervalsOverlap(candidate.startTime, candidate.endTime, item.startTime, item.endTime);
+      });
+    }
 
-      <div class="dropdown" id="dropQualidade">
-        <button type="button" class="nav-tab" id="btnNavQualidade" onclick="toggleMenuDropdown(event, 'dropQualidade')">
-          <i class="fa-solid fa-shield-halved"></i> Módulo Qualidade <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
-        </button>
-        <div class="dropdown-content">
-          <button type="button" onclick="mudarAba('requisicoes')"><i class="fa-solid fa-clipboard-list"></i> Requisições Internas</button>
-          <button type="button" onclick="mudarAba('emissao')"><i class="fa-solid fa-file-signature"></i> Emitir Novo Termo</button>
-          <button type="button" onclick="mudarAba('consulta')"><i class="fa-solid fa-magnifying-glass"></i> Consultar Termos Emitidos</button>
-        </div>
-      </div>
+    // Calcula mapa de conflitos de todos os agendamentos ativos
+    function computeConflictMap() {
+      const conflictMap = new Map();
+      for (const item of schedules) {
+        const overlaps = findConflictsForCandidate(item, item.id);
+        conflictMap.set(item.id, overlaps);
+      }
+      return conflictMap;
+    }
 
-      <div class="dropdown" id="dropManutencao">
-        <button type="button" class="nav-tab" id="btnNavManutencao" onclick="toggleMenuDropdown(event, 'dropManutencao')">
-          <i class="fa-solid fa-screwdriver-wrench"></i> Manutenção (O.S.) <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
-        </button>
-        <div class="dropdown-content">
-          <button type="button" onclick="mudarAba('os_gestao')"><i class="fa-solid fa-list-check"></i> Central de Gestão de O.S.</button>
-          <button type="button" onclick="mudarAba('os_abertura')"><i class="fa-solid fa-square-plus"></i> Abrir / Registrar Nova O.S.</button>
-        </div>
-      </div>
+    function getTechById(techId) {
+      return TECHNICIANS.find((t) => t.id === techId) || { id: techId, name: techId, role: '' };
+    }
 
-      <div class="dropdown" id="dropCadastros">
-        <button type="button" class="nav-tab" id="btnNavCadastros" onclick="toggleMenuDropdown(event, 'dropCadastros')">
-          <i class="fa-solid fa-database"></i> Cadastros <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
-        </button>
-        <div class="dropdown-content">
-          <button type="button" onclick="mudarAba('cad_equipamento')"><i class="fa-solid fa-truck-medical"></i> Cadastrar Novo Equipamento</button>
-          <button type="button" onclick="mudarAba('cad_auxiliares')"><i class="fa-solid fa-tags"></i> Nomenclaturas Padrão</button>
-        </div>
-      </div>
-    </div>
+    function formatDisplayDate(dateStr) {
+      if (!dateStr) return '';
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      return dt.toLocaleDateString('pt-PT', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+    }
 
-    <!-- DATALISTS DINÂMICAS -->
-    <datalist id="listDescricoesPadrao"></datalist>
-    <datalist id="listModelosPadrao"></datalist>
-    <datalist id="listFabricantesPadrao"></datalist>
-    <datalist id="listFamiliasLocacao"></datalist>
-    <datalist id="listUnidadesLocacao"></datalist>
+    function initSelectOptions() {
+      const selects = ['techFilterMain', 'modalTechFilter', 'formTech'];
+      selects.forEach((selId) => {
+        const el = document.getElementById(selId);
+        if (!el) return;
+        const keepFirst = selId !== 'formTech';
+        const firstOption = keepFirst ? '<option value="ALL">Todos os Técnicos</option>' : '';
+        el.innerHTML =
+          firstOption +
+          TECHNICIANS.map((t) => `<option value="${t.id}">${t.name} (${t.role})</option>`).join('');
+      });
+    }
 
-    <div id="abaInicio" class="tab-content active">
-      <div class="welcome-hero">
-        <h2>Bem-vindo ao DMA SYS v2.0</h2>
-        <p>Plataforma corporativa para gestão de saldo de locações, cotações de compras, movimentação de ativos médicos, acompanhamento de ordens de serviço e emissão digital de termos.</p>
-      </div>
+    function updateKPIs() {
+      const prefix = `${viewYear}-${pad2(viewMonth + 1)}-`;
+      const monthItems = schedules.filter((s) => s.date.startsWith(prefix));
+      const conflictMap = computeConflictMap();
 
-      <div class="quick-actions-grid">
-        <div class="quick-card" onclick="mudarAba('agenda')">
-          <div class="quick-icon"><i class="fa-solid fa-calendar-days"></i></div>
-          <div class="quick-title">Agenda de Serviços</div>
-          <div class="quick-desc">Agende calibrações, testes e preventivas com alerta antichoque de horários.</div>
-        </div>
+      let conflictCountMonth = 0;
+      monthItems.forEach((s) => {
+        if ((conflictMap.get(s.id) || []).length > 0) {
+          conflictCountMonth++;
+        }
+      });
 
-        <div class="quick-card" onclick="mudarAba('locacao')">
-          <div class="quick-icon"><i class="fa-solid fa-boxes-packing"></i></div>
-          <div class="quick-title">Controle de Locação</div>
-          <div class="quick-desc">Consulte o saldo contratado vs. físico por cliente, unidade e família de equipamento.</div>
-        </div>
+      document.getElementById('kpiTotalMonth').textContent = String(monthItems.length);
+      document.getElementById('kpiConflicts').textContent = String(conflictCountMonth);
+      document.getElementById('kpiTechnicians').textContent = String(TECHNICIANS.length);
 
-        <div class="quick-card" onclick="mudarAba('compras')">
-          <div class="quick-icon"><i class="fa-solid fa-cart-shopping"></i></div>
-          <div class="quick-title">Módulo de Compras</div>
-          <div class="quick-desc">Crie solicitações com mapa comparativo de 3 fornecedores e aprovação direta.</div>
-        </div>
+      const pill = document.getElementById('modalConflictPill');
+      if (conflictCountMonth > 0) {
+        pill.classList.remove('hidden');
+        pill.textContent = `${conflictCountMonth} Registo(s) em Conflito no Mês`;
+      } else {
+        pill.classList.add('hidden');
+      }
+    }
 
-        <div class="quick-card" onclick="mudarAba('dashboard')">
-          <div class="quick-icon"><i class="fa-solid fa-chart-line"></i></div>
-          <div class="quick-title">Dashboard & Métricas</div>
-          <div class="quick-desc">Acompanhe indicadores gerais de movimentação e chamados em tempo real.</div>
-        </div>
+    function renderMainTable() {
+      const tbody = document.getElementById('mainScheduleTableBody');
+      const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+      const techFilter = document.getElementById('techFilterMain').value;
+      const conflictFilter = document.getElementById('conflictFilterMain').value;
+      const conflictMap = computeConflictMap();
 
-        <div class="quick-card" onclick="mudarAba('os_gestao')">
-          <div class="quick-icon"><i class="fa-solid fa-wrench"></i></div>
-          <div class="quick-title">Ordens de Serviço (O.S.)</div>
-          <div class="quick-desc">Gerencie manutenções corretivas e preventivas com visual por prioridade.</div>
-        </div>
-      </div>
-    </div>
+      const filtered = schedules
+        .slice()
+        .sort((a, b) => (a.date + a.startTime).localeCompare(b.date + b.startTime))
+        .filter((item) => {
+          const tech = getTechById(item.techId);
+          const hasConflict = (conflictMap.get(item.id) || []).length > 0;
+          if (techFilter !== 'ALL' && item.techId !== techFilter) return false;
+          if (conflictFilter === 'CONFLICT' && !hasConflict) return false;
+          if (conflictFilter === 'OK' && hasConflict) return false;
+          if (query) {
+            const hay = `${item.client} ${item.title} ${tech.name} ${item.date}`.toLowerCase();
+            if (!hay.includes(query)) return false;
+          }
+          return true;
+        });
 
-    <!-- MÓDULO: AGENDA DE SERVIÇOS COM MODAL DE CALENDÁRIO MENSAL -->
-    <div id="abaAgenda" class="tab-content">
-      <div class="card">
-        <div class="card-title">
-          <span><i class="fa-solid fa-calendar-plus"></i> Novo Agendamento de Serviço Integrado</span>
-        </div>
-        <form id="formAgenda" onsubmit="return salvarAgendamento(event)">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Setor Solicitante:</label>
-              <select id="agSetorSol" required>
-                <option value="QUALIDADE">Qualidade</option>
-                <option value="REFRIGERAÇÃO">Refrigeração</option>
-                <option value="MANUTENÇÃO">Manutenção</option>
-                <option value="ODONTO">Odonto</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Setor Executante:</label>
-              <select id="agSetorExe" required>
-                <option value="QUALIDADE">Qualidade</option>
-                <option value="REFRIGERAÇÃO">Refrigeração</option>
-                <option value="MANUTENÇÃO">Manutenção</option>
-                <option value="ODONTO">Odonto</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Tipo de Serviço:</label>
-              <select id="agServico" required>
-                <option value="CALIBRAÇÃO">Calibração</option>
-                <option value="TESTE DE SEGURANÇA ELÉTRICA">Teste de Segurança Elétrica</option>
-                <option value="QUALIFICAÇÃO TÉRMICA">Qualificação Térmica</option>
-                <option value="MANUTENÇÃO PREVENTIVA">Manutenção Preventiva</option>
-                <option value="INSPEÇÃO TÉCNICA">Inspeção Técnica</option>
-              </select>
-            </div>
-          </div>
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-10 text-center text-slate-500">
+              Nenhum agendamento encontrado para os filtros aplicados.
+            </td>
+          </tr>
+        `;
+        return;
+      }
 
-          <div class="form-row">
-            <div class="form-group" style="flex: 2;">
-              <label>Pesquisar Equipamento (TAG / Nome / Série):</label>
-              <input type="text" id="agBuscaEq" list="listEquipamentos" placeholder="Digite para buscar equipamento..." oninput="autoPreencherAgendaEq()" required>
-            </div>
-            <div class="form-group" style="flex: 1;"><label>TAG:</label><input type="text" id="agTag" readonly placeholder="-"></div>
-            <div class="form-group" style="flex: 1.5;"><label>Equipamento:</label><input type="text" id="agEquipNome" readonly placeholder="-"></div>
-          </div>
+      tbody.innerHTML = filtered
+        .map((item) => {
+          const tech = getTechById(item.techId);
+          const conflicts = conflictMap.get(item.id) || [];
+          const hasConflict = conflicts.length > 0;
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>Data e Horário do Agendamento:</label>
-              <input type="datetime-local" id="agDataHora" required>
-            </div>
-            <div class="form-group">
-              <label>Técnico Responsável:</label>
-              <select id="agTecnico" required>
-                <option value="">Selecione o técnico...</option>
-              </select>
-            </div>
-          </div>
+          const conflictBadge = hasConflict
+            ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                 <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                 Conflito (${conflicts.length})
+               </span>`
+            : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                 <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                 Sem Conflito
+               </span>`;
 
-          <div style="text-align: right; margin-top: 10px;">
-            <button type="submit" id="btnSalvarAgenda" class="btn-submit">
-              <i class="fa-solid fa-calendar-check"></i> Agendar Serviço e Validar Conflito
-            </button>
-          </div>
-        </form>
-      </div>
+          return `
+            <tr class="hover:bg-slate-800/40 transition">
+              <td class="py-3.5 px-4 whitespace-nowrap">
+                <div class="font-semibold text-white">${formatDisplayDate(item.date)}</div>
+                <div class="text-xs text-sky-400 font-mono">${item.startTime} - ${item.endTime}</div>
+              </td>
+              <td class="py-3.5 px-4">
+                <div class="font-medium text-slate-100">${item.client}</div>
+                <div class="text-xs text-slate-500">ID: ${item.id}</div>
+              </td>
+              <td class="py-3.5 px-4 text-slate-300">${item.title}</td>
+              <td class="py-3.5 px-4">
+                <div class="text-slate-200 font-medium">${tech.name}</div>
+                <div class="text-xs text-slate-500">${tech.role}</div>
+              </td>
+              <td class="py-3.5 px-4">${conflictBadge}</td>
+              <td class="py-3.5 px-4 text-right whitespace-nowrap space-x-1">
+                <button
+                  onclick="inspectDateInModal('${item.date}')"
+                  class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-sky-500/20 hover:text-sky-300 text-xs text-slate-300 border border-slate-700 transition cursor-pointer"
+                  title="Ver no Calendário"
+                >
+                  Ver Grelha
+                </button>
+                <button
+                  onclick="deleteService('${item.id}')"
+                  class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 hover:text-rose-300 text-xs text-slate-400 border border-slate-700 transition cursor-pointer"
+                  title="Remover"
+                >
+                  Excluir
+                </button>
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
 
-      <div class="card">
-        <div class="card-title">
-          <span><i class="fa-solid fa-list-check"></i> Painel de Controle da Agenda de Serviços</span>
-          <button type="button" class="btn-submit" style="padding: 6px 12px; font-size: 11px;" onclick="abrirModalCalendarioMensal()">
-            <i class="fa-solid fa-calendar-days"></i> Ver Calendário do Mês
-          </button>
-        </div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th class="td-center" style="width: 70px;">Protocolo</th>
-                <th style="width: 130px;">Data / Horário</th>
-                <th>Solicitante ➔ Executante</th>
-                <th>Serviço</th>
-                <th class="td-center" style="width: 80px;">TAG</th>
-                <th>Equipamento</th>
-                <th>Técnico</th>
-                <th class="td-center" style="width: 90px;">Status</th>
-              </tr>
-            </thead>
-            <tbody id="corpoTabelaAgenda">
-              <tr><td colspan="8" class="td-center" style="color: #888; padding: 20px;">Carregando agendamentos...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+      lucide.createIcons();
+    }
 
-    <!-- MÓDULO LOCAÇÃO -->
-    <div id="abaLocacao" class="tab-content">
-      <div class="dash-metrics" style="grid-template-columns: repeat(4, 1fr);">
-        <div class="metric-card blue">
-          <div class="metric-title">Total de Registros / Famílias</div>
-          <div class="metric-value" id="locTotalRegistros">0</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-title">Total Qtd Contratada</div>
-          <div class="metric-value" id="locTotalContratada">0</div>
-        </div>
-        <div class="metric-card green">
-          <div class="metric-title">Total Qtd Física (Entregue)</div>
-          <div class="metric-value" id="locTotalFisica">0</div>
-        </div>
-        <div class="metric-card yellow" id="cardMetricSaldo">
-          <div class="metric-title">Saldo Global (Pendente / Sobra)</div>
-          <div class="metric-value" id="locTotalSaldo">0</div>
-        </div>
-      </div>
+    function renderCalendarGrid() {
+      const container = document.getElementById('calendarGridContainer');
+      const monthLabel = document.getElementById('calendarMonthLabel');
+      const techFilter = document.getElementById('modalTechFilter').value;
+      const conflictMap = computeConflictMap();
 
-      <div class="card">
-        <div class="card-title">
-          <span><i class="fa-solid fa-boxes-packing"></i> Saldos de Equipamentos Locados por Cliente / Unidade</span>
-          <button type="button" class="btn-submit" style="padding: 4px 10px; font-size: 11px;" onclick="buscarAtualizacoesSilenciosas()"><i class="fa-solid fa-rotate"></i> Atualizar Dados</button>
-        </div>
+      const monthDate = new Date(viewYear, viewMonth, 1);
+      monthLabel.textContent = monthDate.toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
 
-        <div class="form-row" style="background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 12px; flex-wrap: wrap;">
-          <div class="form-group" style="flex: 1.2;">
-            <label>Cliente:</label>
-            <input type="text" id="locFiltroCliente" list="listClientes" placeholder="Todos os clientes..." oninput="filtrarTabelaLocacaoDebounced()">
-          </div>
-          <div class="form-group" style="flex: 1.2;">
-            <label>Unidade / Hospital:</label>
-            <input type="text" id="locFiltroUnidade" list="listUnidadesLocacao" placeholder="Todas as unidades..." oninput="filtrarTabelaLocacaoDebounced()">
-          </div>
-          <div class="form-group" style="flex: 1.2;">
-            <label>Família do Equipamento:</label>
-            <input type="text" id="locFiltroFamilia" list="listFamiliasLocacao" placeholder="Todas as famílias..." oninput="filtrarTabelaLocacaoDebounced()">
-          </div>
-          <div class="form-group" style="flex: 1;">
-            <label>Situação:</label>
-            <select id="locFiltroSituacao" onchange="filtrarTabelaLocacao()">
-              <option value="TODOS" selected>Todas as Situações</option>
-              <option value="ATIVO">Apenas ATIVO</option>
-              <option value="ENCERRADO">Apenas ENCERRADO</option>
-            </select>
-          </div>
-          <div class="form-group" style="flex: 1.5;">
-            <label>Busca Rápida (Contrato, ID, Cidade):</label>
-            <input type="text" id="locFiltroTexto" placeholder="Digite para buscar..." oninput="filtrarTabelaLocacaoDebounced()">
-          </div>
-        </div>
+      const firstDayWeekday = monthDate.getDay(); // 0 = Dom ... 6 = Sáb
+      const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+      const prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
 
-        <div class="table-container">
-          <table style="table-layout: auto;">
-            <thead>
-              <tr>
-                <th class="td-center" style="width: 50px;">ID</th>
-                <th>Cliente</th>
-                <th>Contrato</th>
-                <th>Unidade</th>
-                <th>Localização</th>
-                <th>Família do Equipamento</th>
-                <th class="td-center">Qtd Contratada</th>
-                <th class="td-center">Qtd Física</th>
-                <th class="td-center">Saldo</th>
-                <th class="td-center">Situação</th>
-                <th class="td-center">Ação</th>
-              </tr>
-            </thead>
-            <tbody id="corpoTabelaLocacao">
-              <tr><td colspan="11" class="td-center" style="color:#888; padding:20px;">Carregando dados de locação...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+      const cells = [];
+      const totalCells = 42; // 6 semanas completas para estabilidade visual
 
-    <!-- MÓDULO COMPRAS -->
-    <div id="abaCompras" class="tab-content">
-      <div class="card">
-        <div class="card-title">
-          <span><i class="fa-solid fa-cart-plus"></i> Nova Solicitação & Mapa de Cotação de Compras</span>
-        </div>
+      for (let i = 0; i < totalCells; i++) {
+        let cellYear = viewYear;
+        let cellMonth = viewMonth;
+        let dayNum = 0;
+        let isCurrentMonth = true;
 
-        <form id="formCompras" onsubmit="return salvarSolicitacaoCompra(event)">
-          <div class="form-row">
-            <div class="form-group" style="flex: 1;">
-              <label>Nº O.S. do Sistema Externo (Manual):</label>
-              <input type="text" id="compOsExterna" placeholder="Ex: OS-2026-8849" required>
-            </div>
+        if (i < firstDayWeekday) {
+          isCurrentMonth = false;
+          dayNum = prevMonthDays - firstDayWeekday + 1 + i;
+          const prevRef = new Date(viewYear, viewMonth - 1, 1);
+          cellYear = prevRef.getFullYear();
+          cellMonth = prevRef.getMonth();
+        } else if (i >= firstDayWeekday + daysInMonth) {
+          isCurrentMonth = false;
+          dayNum = i - (firstDayWeekday + daysInMonth) + 1;
+          const nextRef = new Date(viewYear, viewMonth + 1, 1);
+          cellYear = nextRef.getFullYear();
+          cellMonth = nextRef.getMonth();
+        } else {
+          dayNum = i - firstDayWeekday + 1;
+        }
 
-            <div class="form-group" style="flex: 1.5;">
-              <label>Nome do Solicitante / Comprador:</label>
-              <input type="text" id="compSolicitante" placeholder="Nome do comprador ou solicitante..." required>
-            </div>
+        const dateStr = buildDateStr(cellYear, cellMonth, dayNum);
+        const isSelected = dateStr === selectedDateStr;
+        const isToday = dateStr === buildDateStr(todayRef.getFullYear(), todayRef.getMonth(), todayRef.getDate());
 
-            <div class="form-group" style="flex: 2;">
-              <label>Nome do Produto / Peça Solicitada:</label>
-              <input type="text" id="compProduto" placeholder="Ex: SENSORES DE FLUXO PARA VENTILADOR MONNAL T75" required>
-            </div>
-          </div>
+        // Filtra agendamentos do dia
+        const dayEvents = schedules
+          .filter((s) => s.date === dateStr && (techFilter === 'ALL' || s.techId === techFilter))
+          .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-          <div class="form-group" style="margin-bottom: 14px;">
-            <label>Observações / Justificativa Técnica:</label>
-            <input type="text" id="compObservacao" placeholder="Ex: Peça necessária para atendimento da OS de manutenção corretiva urgente.">
-          </div>
+        const dayHasConflict = dayEvents.some((ev) => (conflictMap.get(ev.id) || []).length > 0);
 
-          <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; margin-bottom: 14px;">
-            <div style="font-size: 12px; font-weight: bold; color: #1a4d80; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
-              <i class="fa-solid fa-scale-balanced"></i> Mapa de Cotação de Preços (3 Fornecedores)
-            </div>
+        const pillsHtml = dayEvents
+          .slice(0, 3)
+          .map((ev) => {
+            const evConflict = (conflictMap.get(ev.id) || []).length > 0;
+            const colorClass = evConflict
+              ? 'bg-rose-500/20 text-rose-200 border-rose-500/40'
+              : ev.status === 'CONCLUIDO'
+              ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+              : 'bg-sky-500/15 text-sky-200 border-sky-500/30';
 
-            <div class="form-row">
-              <div class="form-group" id="boxForn1" style="border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; background: white;">
-                <label>Fornecedor 1:</label>
-                <input type="text" id="compForn1" placeholder="Nome da empresa 1..." style="margin-bottom: 6px;">
-                <label>Valor Orçado (R$):</label>
-                <input type="number" id="compVal1" step="0.01" min="0" placeholder="0.00" oninput="calcularMenorPrecoCotacao()">
+            return `
+              <div class="px-1.5 py-0.5 rounded border text-[10px] truncate font-medium ${colorClass}">
+                <span class="font-mono">${ev.startTime}</span> ${ev.client}
               </div>
+            `;
+          })
+          .join('');
 
-              <div class="form-group" id="boxForn2" style="border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; background: white;">
-                <label>Fornecedor 2:</label>
-                <input type="text" id="compForn2" placeholder="Nome da empresa 2..." style="margin-bottom: 6px;">
-                <label>Valor Orçado (R$):</label>
-                <input type="number" id="compVal2" step="0.01" min="0" placeholder="0.00" oninput="calcularMenorPrecoCotacao()">
+        const moreCount = dayEvents.length > 3 ? `<div class="text-[10px] text-slate-400 font-medium pl-1">+${dayEvents.length - 3} mais</div>` : '';
+
+        cells.push(`
+          <div
+            onclick="selectCalendarDay('${dateStr}')"
+            class="min-h-[92px] p-1.5 sm:p-2 flex flex-col justify-between transition cursor-pointer select-none ${
+              isCurrentMonth ? 'bg-slate-900/40 hover:bg-slate-800/60' : 'bg-slate-950/70 opacity-45 hover:opacity-75'
+            } ${isSelected ? 'ring-2 ring-inset ring-sky-500 bg-sky-950/25' : ''} ${dayHasConflict ? 'conflict-pulse' : ''}"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold w-6 h-6 rounded-full flex items-center justify-center ${
+                isToday ? 'bg-sky-500 text-white font-bold' : isSelected ? 'text-sky-400' : 'text-slate-300'
+              }">
+                ${dayNum}
+              </span>
+              ${
+                dayHasConflict
+                  ? `<span class="px-1.5 py-0.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-400 text-[10px] font-bold flex items-center gap-0.5">
+                       ! Conflito
+                     </span>`
+                  : dayEvents.length > 0
+                  ? `<span class="text-[10px] text-slate-400 font-mono">${dayEvents.length} srv</span>`
+                  : ''
+              }
+            </div>
+            <div class="mt-1 space-y-1 overflow-hidden">
+              ${pillsHtml}
+              ${moreCount}
+            </div>
+          </div>
+        `);
+      }
+
+      container.innerHTML = cells.join('');
+      updateKPIs();
+      lucide.createIcons();
+    }
+
+    function renderDayInspector() {
+      const titleEl = document.getElementById('inspectorDateTitle');
+      const listEl = document.getElementById('inspectorEventsList');
+      const bannerEl = document.getElementById('dayConflictBanner');
+      const bannerDetails = document.getElementById('dayConflictDetails');
+      const techFilter = document.getElementById('modalTechFilter').value;
+      const conflictMap = computeConflictMap();
+
+      titleEl.textContent = formatDisplayDate(selectedDateStr);
+
+      const dayEvents = schedules
+        .filter((s) => s.date === selectedDateStr && (techFilter === 'ALL' || s.techId === techFilter))
+        .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+      const conflictingEvents = dayEvents.filter((ev) => (conflictMap.get(ev.id) || []).length > 0);
+
+      if (conflictingEvents.length > 0) {
+        bannerEl.classList.remove('hidden');
+        const names = [...new Set(conflictingEvents.map((e) => getTechById(e.techId).name))];
+        bannerDetails.textContent = `Existem ${conflictingEvents.length} serviços com horários sobrepostos para: ${names.join(', ')}. Ajuste os horários abaixo.`;
+      } else {
+        bannerEl.classList.add('hidden');
+      }
+
+      if (dayEvents.length === 0) {
+        listEl.innerHTML = `
+          <div class="h-40 border border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center text-center p-4 text-slate-500">
+            <i data-lucide="calendar-off" class="w-6 h-6 mb-2 text-slate-600"></i>
+            <p class="text-xs font-medium text-slate-400">Sem serviços agendados neste dia.</p>
+            <p class="text-[11px] text-slate-500 mt-0.5">Use o formulário abaixo para criar um agendamento.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      listEl.innerHTML = dayEvents
+        .map((ev) => {
+          const tech = getTechById(ev.techId);
+          const conflicts = conflictMap.get(ev.id) || [];
+          const hasConflict = conflicts.length > 0;
+
+          return `
+            <div class="p-3 rounded-xl border transition ${
+              hasConflict
+                ? 'bg-rose-950/20 border-rose-500/40'
+                : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
+            }">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <span class="text-xs font-mono font-semibold ${hasConflict ? 'text-rose-400' : 'text-sky-400'}">
+                    ${ev.startTime} - ${ev.endTime}
+                  </span>
+                  <h5 class="text-xs font-bold text-white mt-0.5">${ev.client}</h5>
+                  <p class="text-[11px] text-slate-400">${ev.title}</p>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button
+                    onclick="loadServiceIntoForm('${ev.id}')"
+                    class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs cursor-pointer"
+                    title="Editar Horário"
+                  >
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button
+                    onclick="deleteService('${ev.id}')"
+                    class="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-500/20 hover:text-rose-300 text-slate-400 text-xs cursor-pointer"
+                    title="Excluir"
+                  >
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
               </div>
-
-              <div class="form-group" id="boxForn3" style="border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; background: white;">
-                <label>Fornecedor 3:</label>
-                <input type="text" id="compForn3" placeholder="Nome da empresa 3..." style="margin-bottom: 6px;">
-                <label>Valor Orçado (R$):</label>
-                <input type="number" id="compVal3" step="0.01" min="0" placeholder="0.00" oninput="calcularMenorPrecoCotacao()">
-              </div>
-            </div>
-
-            <div id="painelMenorPreco" style="background: #e6f4ea; border: 1px solid #a8dab5; color: #137333; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
-              <span><i class="fa-solid fa-trophy"></i> Menor Proposta Identificada: <span id="lblFornVencedor">-</span></span>
-              <span>Valor: <span id="lblMenorValor">R$ 0,00</span></span>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Prazo de Entrega:</label>
-              <input type="text" id="compPrazo" placeholder="Ex: 5 dias úteis">
-            </div>
-            <div class="form-group">
-              <label>Condição de Pagamento:</label>
-              <input type="text" id="compCondPagto" placeholder="Ex: 28 dias / Pix / Faturado">
-            </div>
-            <div class="form-group">
-              <label>Frete:</label>
-              <input type="text" id="compFrete" placeholder="Ex: CIF (Incluso) ou R$ 45,00">
-            </div>
-          </div>
-
-          <div style="text-align: right; margin-top: 12px;">
-            <button type="submit" id="btnSalvarCompra" class="btn-submit">
-              <i class="fa-solid fa-file-signature"></i> Salvar Cotação
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Central de Gestão de Cotações & Compras</div>
-        <div class="table-container">
-          <table style="table-layout: auto;">
-            <thead>
-              <tr>
-                <th class="td-center">ID</th>
-                <th>Data / Hora</th>
-                <th>Nº OS Ext.</th>
-                <th>Solicitante</th>
-                <th>Produto / Peça</th>
-                <th>Fornecedor Escolhido</th>
-                <th class="td-center">Menor Valor</th>
-                <th class="td-center">Status</th>
-                <th class="td-center">Ações</th>
-              </tr>
-            </thead>
-            <tbody id="corpoTabelaCompras">
-              <tr><td colspan="9" class="td-center" style="color:#888; padding:20px;">Carregando cotações de compras...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- MÓDULO DASHBOARD -->
-    <div id="abaDashboard" class="tab-content">
-      <div class="card" style="margin-bottom: 16px;">
-        <div class="card-title"><span>Filtro de Período das Métricas</span></div>
-        <div class="form-row" style="align-items: center; margin-bottom: 0;">
-          <div class="form-group" style="flex: 1;">
-            <label>Selecione o Mês / Ano:</label>
-            <input type="month" id="dashFiltroMes" onchange="atualizarDashboard()">
-          </div>
-          <div class="form-group" style="flex: 1;">
-            <label>Modo de Período:</label>
-            <select id="dashModoPeriodo" onchange="atualizarDashboard()">
-              <option value="MES">Apenas o Mês Selecionado</option>
-              <option value="GERAL">Todo o Histórico (Geral)</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="dash-metrics">
-        <div class="metric-card">
-          <div class="metric-title">Total de Requisições</div>
-          <div class="metric-value" id="dashTotalReq">0</div>
-        </div>
-        <div class="metric-card yellow">
-          <div class="metric-title">Pendentes de Envio</div>
-          <div class="metric-value" id="dashPendentes">0</div>
-        </div>
-        <div class="metric-card green">
-          <div class="metric-title">Atendidas pela Qualidade</div>
-          <div class="metric-value" id="dashAtendidos">0</div>
-        </div>
-        <div class="metric-card red">
-          <div class="metric-title">Recusadas / Negadas</div>
-          <div class="metric-value" id="dashRecusados">0</div>
-        </div>
-      </div>
-
-      <div class="dash-charts-grid">
-        <div class="card">
-          <div class="card-title">Top Clientes em Demandas de Troca</div>
-          <div id="chartClientes" style="padding-top: 10px;">
-            <div style="color:#888; text-align:center; padding: 20px;">Sem dados para o período.</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">Demandas por Família de Equipamentos</div>
-          <div id="chartFamilias" style="padding-top: 10px;">
-            <div style="color:#888; text-align:center; padding: 20px;">Sem dados para o período.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MÓDULO QUALIDADE / REQUISIÇÕES -->
-    <div id="abaRequisicoes" class="tab-content">
-      <div class="card">
-        <div class="card-title">Nova Requisição de Equipamento (Administrativo)</div>
-        <form id="formReq" onsubmit="return salvarRequisicao(event)">
-          <div class="form-row">
-            <div class="form-group" style="flex: 2;">
-              <label>Cliente / Locatário Solicitante:</label>
-              <input type="text" id="reqCliente" list="listClientes" placeholder="Selecione ou digite o cliente..." required>
-            </div>
-            <div class="form-group" style="flex: 1;">
-              <label>Operação:</label>
-              <div class="radio-group">
-                <label><input type="radio" name="reqOperacao" value="LOCAÇÃO" checked> Locação</label>
-                <label><input type="radio" name="reqOperacao" value="EMPRÉSTIMO"> Empréstimo</label>
-                <label><input type="radio" name="reqOperacao" value="VENDA"> Venda</label>
+              <div class="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+                <span class="text-slate-300 font-medium">${tech.name}</span>
+                ${
+                  hasConflict
+                    ? `<span class="text-rose-400 font-semibold">Conflita com ${conflicts.map((c) => c.startTime).join(', ')}</span>`
+                    : `<span class="text-emerald-400">${ev.status}</span>`
+                }
               </div>
             </div>
-          </div>
+          `;
+        })
+        .join('');
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>Equipamento a Substituir (TAG / Nome atual no cliente):</label>
-              <input type="text" id="reqEqAntigo" placeholder="Ex: LMD-5384 - Ventilador Pulmonar com defeito" required>
-            </div>
-            <div class="form-group">
-              <label>Equipamento Solicitado para a Qualidade enviar:</label>
-              <input type="text" id="reqEqSolicitado" list="listDescricoesPadrao" placeholder="Ex: MONITOR MULTIPARAMÉTRICO" required>
-            </div>
-          </div>
+      lucide.createIcons();
+    }
 
-          <div class="form-group" style="margin-bottom: 12px;">
-            <label>Motivo / Observações da Troca:</label>
-            <input type="text" id="reqMotivo" placeholder="Ex: Falha na bateria interna, solicitar troca urgente.">
-          </div>
+    function checkRealtimeFormConflict() {
+      const editId = document.getElementById('formServiceId').value || null;
+      const date = document.getElementById('formDate').value;
+      const techId = document.getElementById('formTech').value;
+      const startTime = document.getElementById('formStart').value;
+      const endTime = document.getElementById('formEnd').value;
 
-          <div style="text-align: right;">
-            <button type="submit" id="btnSalvarReq" class="btn-submit">
-              <i class="fa-solid fa-paper-plane"></i> Enviar Requisição e Gerar PDF
-            </button>
-          </div>
-        </form>
-      </div>
+      const box = document.getElementById('realtimeValidationBox');
+      const text = document.getElementById('realtimeValidationText');
 
-      <div class="card">
-        <div class="card-title">
-          <span>Acompanhamento de Solicitações</span>
-        </div>
+      if (!date || !startTime || !endTime) {
+        box.className = 'p-2.5 rounded-xl border text-xs flex items-start gap-2 bg-slate-900 border-slate-800 text-slate-400';
+        text.textContent = 'Preencha data, início e fim para validar disponibilidade.';
+        return { valid: false, conflicts: [] };
+      }
 
-        <div class="form-row" style="background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 12px;">
-          <div class="form-group" style="flex: 1;">
-            <label>Filtrar por Status:</label>
-            <select id="filtroStatusReq" onchange="filtrarRequisicoes()">
-              <option value="TODOS">Todos os Status</option>
-              <option value="PENDENTE">Apenas Pendentes</option>
-              <option value="ATENDIDO">Apenas Atendidos</option>
-              <option value="RECUSADO">Apenas Recusados</option>
-            </select>
-          </div>
+      if (timeToMinutes(endTime) <= timeToMinutes(startTime)) {
+        box.className = 'p-2.5 rounded-xl border text-xs flex items-start gap-2 bg-amber-500/10 border-amber-500/30 text-amber-300';
+        text.textContent = 'A hora de término deve ser superior à hora de início.';
+        return { valid: false, conflicts: [] };
+      }
 
-          <div class="form-group" style="flex: 1;">
-            <label>Filtrar por Mês/Ano:</label>
-            <input type="month" id="filtroMesReq" onchange="filtrarRequisicoes()">
-          </div>
+      const conflicts = findConflictsForCandidate({ date, techId, startTime, endTime }, editId);
+      const tech = getTechById(techId);
 
-          <div class="form-group" style="flex: 2;">
-            <label>Buscar na Tabela (Cliente, Req # ou Equipamento):</label>
-            <input type="text" id="filtroTextoReq" oninput="filtrarRequisicoesDebounced()" placeholder="Digite para buscar...">
-          </div>
-        </div>
-        
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th class="td-center" style="width: 70px;">Req #</th>
-                <th style="width: 110px;">Data / Hora</th>
-                <th style="width: 220px;">Cliente / Locatário</th>
-                <th style="width: 200px;">Equipamento Solicitado</th>
-                <th>Motivo / Obs.</th>
-                <th class="td-center" style="width: 80px;">Operação</th>
-                <th class="td-center" style="width: 80px;">Status</th>
-                <th class="td-center" style="width: 310px;">Ações / Qualidade</th>
-              </tr>
-            </thead>
-            <tbody id="corpoRequisicoes">
-              <tr><td colspan="8" class="td-center" style="color: #888; padding: 24px;">Carregando requisições...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+      if (conflicts.length > 0) {
+        const conflictDesc = conflicts.map((c) => `${c.client} (${c.startTime}-${c.endTime})`).join('; ');
+        box.className = 'p-2.5 rounded-xl border text-xs flex items-start gap-2 bg-rose-500/15 border-rose-500/40 text-rose-200';
+        text.innerHTML = `<strong>Conflito em tempo real!</strong> ${tech.name} já possui agendamento neste intervalo: ${conflictDesc}.`;
+        return { valid: true, conflicts };
+      }
 
-    <!-- MÓDULO EMISSÃO TERMO -->
-    <div id="abaEmissao" class="tab-content">
-      <div id="bannerReqVinculada" style="display: none; background: #fef3c7; border: 1px solid #fde68a; color: #92400e; padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-weight: bold; font-size: 12px; align-items: center; justify-content: space-between;">
-        <span><i class="fa-solid fa-link"></i> Atendendo Requisição Pendente: <span id="lblProtReqVinculada" style="color: #1a4d80;">-</span></span>
-        <button type="button" onclick="desvincularRequisicao()" style="background: transparent; border: none; color: #dc3545; font-weight: bold; cursor: pointer; font-size: 11px;"><i class="fa-solid fa-xmark"></i> Cancelar Vínculo</button>
-      </div>
+      box.className = 'p-2.5 rounded-xl border text-xs flex items-start gap-2 bg-emerald-500/10 border-emerald-500/30 text-emerald-300';
+      text.innerHTML = `Horário livre para <strong>${tech.name}</strong> das ${startTime} às ${endTime}.`;
+      return { valid: true, conflicts: [] };
+    }
 
-      <form id="termoForm" class="main-grid" onsubmit="gerarTermo(event)">
-        <input type="hidden" id="reqVinculadaProtocolo" value="">
+    function saveServiceFromForm() {
+      const editId = document.getElementById('formServiceId').value;
+      const client = document.getElementById('formClient').value.trim();
+      const title = document.getElementById('formTitle').value.trim();
+      const date = document.getElementById('formDate').value;
+      const techId = document.getElementById('formTech').value;
+      const startTime = document.getElementById('formStart').value;
+      const endTime = document.getElementById('formEnd').value;
+      const status = document.getElementById('formStatus').value;
 
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <div class="card">
-            <div class="card-title">1. Cliente / Locatário</div>
-            <div class="form-group">
-              <label for="inputCliente">Buscar / Selecionar Cliente:</label>
-              <input type="text" id="inputCliente" list="listClientes" placeholder="Digite o nome do cliente..." required>
-              <datalist id="listClientes"></datalist>
-            </div>
-          </div>
+      if (!client || !title || !date || !startTime || !endTime) {
+        showToast('Por favor, preencha o cliente, serviço, data e horários.', 'error');
+        return;
+      }
 
-          <div class="card" style="flex: 1;">
-            <div class="card-title">2. Identificação do Equipamento</div>
-            
-            <div class="form-group" style="margin-bottom: 12px;">
-              <label>Pesquisar Equipamento (Digite a TAG, Série ou Patrimônio):</label>
-              <input type="text" id="buscaEquipamento" list="listEquipamentos" placeholder="Ex: LMD-4654 ou 2329918..." oninput="autoPreencherEquipamento()" required>
-              <datalist id="listEquipamentos"></datalist>
-            </div>
+      const check = checkRealtimeFormConflict();
+      if (!check.valid) {
+        showToast('Verifique o intervalo de horário informado.', 'error');
+        return;
+      }
 
-            <div class="form-row">
-              <div class="form-group"><label>TAG:</label><input type="text" id="eqTag" readonly placeholder="-"></div>
-              <div class="form-group"><label>Nº de Série:</label><input type="text" id="eqSerie" readonly placeholder="-"></div>
-              <div class="form-group"><label>Patrimônio:</label><input type="text" id="eqPatrimonio" readonly placeholder="-"></div>
-            </div>
+      const payload = {
+        id: editId || `SRV-${Math.floor(1000 + Math.random() * 9000)}`,
+        client,
+        title,
+        date,
+        startTime,
+        endTime,
+        techId,
+        status
+      };
 
-            <div class="form-row">
-              <div class="form-group"><label>Equipamento:</label><input type="text" id="eqNome" readonly placeholder="-"></div>
-              <div class="form-group"><label>Modelo:</label><input type="text" id="eqModelo" readonly placeholder="-"></div>
-              <div class="form-group"><label>Fabricante:</label><input type="text" id="eqFabricante" readonly placeholder="-"></div>
-            </div>
+      if (editId) {
+        schedules = schedules.map((item) => (item.id === editId ? payload : item));
+      } else {
+        schedules.push(payload);
+      }
 
-            <div class="form-group" style="margin-top: 6px;">
-              <label>Operação:</label>
-              <div class="radio-group">
-                <label><input type="radio" name="tipoOperacao" value="LOCAÇÃO" checked> Locação</label>
-                <label><input type="radio" name="tipoOperacao" value="EMPRÉSTIMO"> Empréstimo</label>
-                <label><input type="radio" name="tipoOperacao" value="VENDA"> Venda</label>
-              </div>
-            </div>
-          </div>
-        </div>
+      selectedDateStr = date;
+      const [y, m] = date.split('-').map(Number);
+      viewYear = y;
+      viewMonth = m - 1;
 
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <div class="card" style="flex: 1;">
-            <div class="card-title">3. Lista de Acessórios</div>
-            <div class="table-container">
-              <table style="table-layout: auto;">
-                <thead>
-                  <tr>
-                    <th class="td-center" style="width: 40px;">#</th>
-                    <th class="td-center" style="width: 70px;">QTD</th>
-                    <th>Descrição do Acessório</th>
-                    <th class="td-center" style="width: 110px;">Conformidade</th>
-                  </tr>
-                </thead>
-                <tbody id="corpoAcessorios">
-                  <tr><td colspan="4" class="td-center" style="color: #888; padding: 24px;">Selecione um equipamento para visualizar os acessórios.</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+      GASBridge.syncScheduleToSheet(payload, () => {
+        renderMainTable();
+        renderCalendarGrid();
+        renderDayInspector();
+        resetQuickForm();
 
-          <div class="card">
-            <div class="card-title">4. Liberação e Assinaturas</div>
-            
-            <div class="form-group">
-              <label>Técnico Responsável:</label>
-              <select id="selectTecnico" required>
-                <option value="">Selecione o técnico...</option>
-              </select>
-            </div>
+        if (check.conflicts.length > 0) {
+          showToast('Agendamento registado com alerta de conflito de horário!', 'warning');
+        } else {
+          showToast('Agendamento guardado e validado sem conflitos.', 'success');
+        }
+      });
+    }
 
-            <div class="signature-container" style="margin-top: 12px;">
-              <div class="sig-box">
-                <label>Assinatura do Recebedor / Cliente:</label>
-                <button type="button" class="btn-clear" onclick="limparAssinatura()" style="float: right; margin-bottom: 4px; padding: 2px 8px; font-size: 11px;">Limpar</button>
-                <canvas id="canvasAssinatura" width="500" height="110" style="border: 1px solid #cbd5e1; border-radius: 6px; background: #fafafa; cursor: crosshair; width: 100%;"></canvas>
-              </div>
-            </div>
+    function loadServiceIntoForm(serviceId) {
+      const item = schedules.find((s) => s.id === serviceId);
+      if (!item) return;
 
-            <button type="button" id="btnEnviar" class="btn-submit" style="margin-top: 12px; width: 100%;" onclick="gerarTermo(event)">
-              <i class="fa-solid fa-file-pdf"></i> Gerar Termo Duplo PDF (Entrega + Higienização)
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
+      document.getElementById('formServiceId').value = item.id;
+      document.getElementById('formClient').value = item.client;
+      document.getElementById('formTitle').value = item.title;
+      document.getElementById('formDate').value = item.date;
+      document.getElementById('formTech').value = item.techId;
+      document.getElementById('formStart').value = item.startTime;
+      document.getElementById('formEnd').value = item.endTime;
+      document.getElementById('formStatus').value = item.status;
 
-    <!-- MÓDULO CONSULTA TERMOS -->
-    <div id="abaConsulta" class="tab-content">
-      <div class="card">
-        <div class="card-title">Histórico e Consulta de Termos Gerados</div>
-        <div class="form-group" style="margin-bottom: 16px;">
-          <label>Filtrar por Protocolo, Cliente, TAG ou Técnico:</label>
-          <input type="text" id="filtroTermos" oninput="filtrarTabelaTermosDebounced()" placeholder="Digite aqui para buscar...">
-        </div>
-        <div class="table-container">
-          <table style="table-layout: auto;">
-            <thead>
-              <tr>
-                <th class="td-center">Protocolo</th>
-                <th>Data / Hora</th>
-                <th>Cliente / Locatário</th>
-                <th class="td-center">TAG</th>
-                <th>Equipamento</th>
-                <th class="td-center">Operação</th>
-                <th>Técnico</th>
-                <th class="td-center">Ação</th>
-              </tr>
-            </thead>
-            <tbody id="corpoTermos">
-              <tr><td colspan="8" class="td-center" style="color: #888; padding: 24px;">Carregando histórico...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+      document.getElementById('formDrawerTitle').innerHTML = `
+        <i data-lucide="edit" class="w-3.5 h-3.5 text-amber-400"></i>
+        <span class="text-amber-300">A Editar ${item.id}</span>
+      `;
+      document.getElementById('btnSaveServiceText').textContent = 'Atualizar Agendamento';
+      checkRealtimeFormConflict();
+      lucide.createIcons();
+    }
 
-    <!-- MÓDULO MANUTENÇÃO O.S. -->
-    <div id="abaOsGestao" class="tab-content">
-      <div class="card">
-        <div class="card-title">
-          <span>Central de Ordens de Serviço (Engenharia Clínica)</span>
-          <button type="button" class="btn-submit" style="padding: 6px 12px; font-size: 11px;" onclick="mudarAba('os_abertura')"><i class="fa-solid fa-plus"></i> Nova O.S.</button>
-        </div>
+    function resetQuickForm() {
+      document.getElementById('formServiceId').value = '';
+      document.getElementById('formClient').value = '';
+      document.getElementById('formTitle').value = '';
+      document.getElementById('formDate').value = selectedDateStr;
+      document.getElementById('formStart').value = '09:00';
+      document.getElementById('formEnd').value = '11:00';
+      document.getElementById('formStatus').value = 'CONFIRMADO';
+      document.getElementById('formDrawerTitle').innerHTML = `
+        <i data-lucide="clock" class="w-3.5 h-3.5 text-sky-400"></i>
+        <span>Validador & Novo Agendamento</span>
+      `;
+      document.getElementById('btnSaveServiceText').textContent = 'Guardar Agendamento';
+      checkRealtimeFormConflict();
+      lucide.createIcons();
+    }
 
-        <div class="form-row" style="background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 12px;">
-          <div class="form-group" style="flex: 1;">
-            <label>Status da O.S.:</label>
-            <select id="filtroStatusOS" onchange="renderizarTabelaOS()">
-              <option value="TODOS">Todos os Status</option>
-              <option value="ABERTA">Apenas Abertas</option>
-              <option value="CONCLUÍDA">Apenas Concluídas</option>
-            </select>
-          </div>
-          <div class="form-group" style="flex: 2;">
-            <label>Buscar O.S. (Nº OS, TAG, Cliente ou Equipamento):</label>
-            <input type="text" id="filtroTextoOS" oninput="renderizarTabelaOSDebounced()" placeholder="Digite para filtrar...">
-          </div>
-        </div>
+    function deleteService(serviceId) {
+      schedules = schedules.filter((s) => s.id !== serviceId);
+      renderMainTable();
+      renderCalendarGrid();
+      renderDayInspector();
+      checkRealtimeFormConflict();
+      showToast(`Agendamento ${serviceId} removido.`, 'info');
+    }
 
-        <div class="table-container">
-          <table style="table-layout: auto;">
-            <thead>
-              <tr>
-                <th class="td-center" style="width: 90px;">Nº O.S.</th>
-                <th style="width: 110px;">Abertura</th>
-                <th>Cliente / Unidade</th>
-                <th class="td-center" style="width: 80px;">TAG</th>
-                <th>Equipamento</th>
-                <th class="td-center" style="width: 90px;">Tipo</th>
-                <th class="td-center" style="width: 80px;">Prioridade</th>
-                <th class="td-center" style="width: 80px;">Status</th>
-                <th class="td-center" style="width: 140px;">Ações</th>
-              </tr>
-            </thead>
-            <tbody id="corpoOS">
-              <tr><td colspan="9" class="td-center" style="color: #888; padding: 24px;">Carregando Ordens de Serviço...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+    function selectCalendarDay(dateStr) {
+      selectedDateStr = dateStr;
+      const [y, m] = dateStr.split('-').map(Number);
+      viewYear = y;
+      viewMonth = m - 1;
+      document.getElementById('formDate').value = dateStr;
+      renderCalendarGrid();
+      renderDayInspector();
+      checkRealtimeFormConflict();
+    }
 
-    <div id="abaOsAbertura" class="tab-content">
-      <div class="card">
-        <div class="card-title">Abrir Nova Ordem de Serviço (Manutenção)</div>
-        <form id="formNovaOS" onsubmit="return salvarNovaOS(event)">
-          <div class="form-row">
-            <div class="form-group" style="flex: 2;">
-              <label>Cliente / Unidade Hospitalar:</label>
-              <input type="text" id="osCliente" list="listClientes" placeholder="Selecione o cliente..." required>
-            </div>
-            <div class="form-group" style="flex: 1;">
-              <label>Tipo de Manutenção:</label>
-              <select id="osTipo">
-                <option value="CORRETIVA">CORRETIVA</option>
-                <option value="PREVENTIVA">PREVENTIVA</option>
-                <option value="CALIBRAÇÃO">CALIBRAÇÃO</option>
-                <option value="INSPEÇÃO">INSPEÇÃO / HIGIENIZAÇÃO</option>
-                <option value="OFICINA">OFICINA</option>
-              </select>
-            </div>
-            <div class="form-group" style="flex: 1;">
-              <label>Prioridade do Atendimento:</label>
-              <select id="osPrioridade">
-                <option value="MÉDIA" selected>MÉDIA</option>
-                <option value="ALTA">ALTA</option>
-                <option value="CRÍTICA">CRÍTICA</option>
-                <option value="BAIXA">BAIXA</option>
-              </select>
-            </div>
-          </div>
+    function changeMonth(delta) {
+      const next = new Date(viewYear, viewMonth + delta, 1);
+      viewYear = next.getFullYear();
+      viewMonth = next.getMonth();
+      renderCalendarGrid();
+    }
 
-          <div class="form-row">
-            <div class="form-group" style="flex: 2;">
-              <label>Pesquisar Equipamento (TAG / Série / Patrimônio):</label>
-              <input type="text" id="osBuscaEquip" list="listEquipamentos" placeholder="Digite para buscar..." oninput="autoPreencherOSEquipamento()" required>
-            </div>
-            <div class="form-group" style="flex: 1;"><label>TAG:</label><input type="text" id="osTag" readonly placeholder="-"></div>
-            <div class="form-group" style="flex: 1;"><label>Nº de Série:</label><input type="text" id="osSerie" readonly placeholder="-"></div>
-            <div class="form-group" style="flex: 1;"><label>Patrimônio:</label><input type="text" id="osPatrimonio" readonly placeholder="-"></div>
-          </div>
+    function goToToday() {
+      viewYear = todayRef.getFullYear();
+      viewMonth = todayRef.getMonth();
+      selectedDateStr = buildDateStr(viewYear, viewMonth, todayRef.getDate());
+      document.getElementById('formDate').value = selectedDateStr;
+      renderCalendarGrid();
+      renderDayInspector();
+      checkRealtimeFormConflict();
+    }
 
-          <div class="form-group" style="margin-bottom: 12px;">
-            <label>Equipamento / Modelo Selecionado:</label>
-            <input type="text" id="osNomeEquip" readonly placeholder="-">
-          </div>
+    function openCalendarModal() {
+      document.getElementById('calendarModal').classList.remove('hidden');
+      document.getElementById('formDate').value = selectedDateStr;
+      renderCalendarGrid();
+      renderDayInspector();
+      checkRealtimeFormConflict();
+    }
 
-          <div class="form-row">
-            <div class="form-group"><label>Solicitante / Reclamante:</label><input type="text" id="osSolicitante" placeholder="Ex: Enfermagem / Eng. Clínica" required></div>
-            <div class="form-group"><label>Técnico Responsável:</label><input type="text" id="osTecnico" placeholder="Nome do técnico executante" required></div>
-          </div>
+    function closeCalendarModal() {
+      document.getElementById('calendarModal').classList.add('hidden');
+    }
 
-          <div class="form-group" style="margin-bottom: 12px;"><label>Defeito Relatado:</label><textarea id="osDefeito" style="height: 60px;" required></textarea></div>
-          <div class="form-group" style="margin-bottom: 12px;"><label>Diagnóstico Técnico:</label><textarea id="osDiagnostico" style="height: 60px;" required></textarea></div>
-          <div class="form-group" style="margin-bottom: 16px;"><label>Serviço Realizado:</label><textarea id="osServico" style="height: 60px;" required></textarea></div>
+    function inspectDateInModal(dateStr) {
+      openCalendarModal();
+      selectCalendarDay(dateStr);
+    }
 
-          <div style="text-align: right;">
-            <button type="submit" id="btnSalvarOS" class="btn-submit"><i class="fa-solid fa-floppy-disk"></i> Registrar O.S.</button>
-          </div>
-        </form>
-      </div>
-    </div>
+    function openNewServiceForm() {
+      openCalendarModal();
+      resetQuickForm();
+      document.getElementById('formClient').focus();
+    }
 
-    <!-- MÓDULOS CADASTROS -->
-    <div id="abaCadEquipamento" class="tab-content">
-      <div class="card">
-        <div class="card-title">Cadastrar Novo Equipamento (Aba EQUIP)</div>
-        <form id="formNovoEquip" onsubmit="salvarNovoEquipamento(event)">
-          <div class="form-row">
-            <div class="form-group"><label>TAG do Equipamento:</label><input type="text" id="cadTag" placeholder="Ex: LMD-9999" required></div>
-            <div class="form-group"><label>Nº de Série:</label><input type="text" id="cadSerie" placeholder="Ex: 849302" required></div>
-            <div class="form-group"><label>Patrimônio:</label><input type="text" id="cadPatrimonio" placeholder="Ex: 00984" required></div>
-          </div>
+    function toggleQuickForm(focusClient) {
+      resetQuickForm();
+      if (focusClient) {
+        document.getElementById('formClient').focus();
+      }
+    }
 
-          <div class="form-row">
-            <div class="form-group" style="flex: 2;"><label>Descrição do Equipamento:</label><input type="text" id="cadNome" list="listDescricoesPadrao" required></div>
-            <div class="form-group" style="flex: 1;"><label>Modelo:</label><input type="text" id="cadModelo" list="listModelosPadrao" required></div>
-            <div class="form-group" style="flex: 1;"><label>Fabricante:</label><input type="text" id="cadFabricante" list="listFabricantesPadrao" required></div>
-          </div>
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const colors = {
+        success: 'bg-emerald-950/95 border-emerald-500/40 text-emerald-200',
+        warning: 'bg-amber-950/95 border-amber-500/40 text-amber-200',
+        error: 'bg-rose-950/95 border-rose-500/40 text-rose-200',
+        info: 'bg-slate-900/95 border-slate-700 text-slate-200'
+      };
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-xl text-xs font-medium flex items-center justify-between gap-3 transition-all ${colors[type] || colors.info}`;
+      toast.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 3600);
+    }
 
-          <div class="form-group" style="margin-bottom: 16px;">
-            <label>Acessórios Padrão (Separados por ;):</label>
-            <input type="text" id="cadAcessorios" placeholder="Ex: CABO DE FORÇA; CIRCUITO PACIENTE; SENSOR FLUXO">
-          </div>
+    // Fechar modal com tecla ESC
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeCalendarModal();
+    });
 
-          <div style="text-align: right;">
-            <button type="submit" id="btnSalvarCadEquip" class="btn-submit"><i class="fa-solid fa-server"></i> Salvar Equipamento</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <div id="abaCadAuxiliares" class="tab-content">
-      <div class="card">
-        <div class="card-title">Gerenciar Nomenclaturas & Combinações Válidas</div>
-        <form onsubmit="salvarAuxiliarVinculado(event)" style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
-          <div class="form-row">
-            <div class="form-group" style="flex: 2;"><label>Descrição / Família:</label><input type="text" id="vinculoDescricao" list="listDescricoesPadrao" required></div>
-            <div class="form-group" style="flex: 1;"><label>Modelo:</label><input type="text" id="vinculoModelo" required></div>
-            <div class="form-group" style="flex: 1;"><label>Fabricante:</label><input type="text" id="vinculoFabricante" required></div>
-          </div>
-          <div style="text-align: right;">
-            <button type="submit" class="btn-submit"><i class="fa-solid fa-plus"></i> Cadastrar Vínculo</button>
-          </div>
-        </form>
-
-        <div class="table-container">
-          <table style="table-layout: auto;">
-            <thead><tr><th>Descrição / Família</th><th>Modelo Autorizado</th><th>Fabricante</th></tr></thead>
-            <tbody id="tabelaAuxiliaresList"><tr><td colspan="3" class="td-center" style="color:#888;">Carregando combinações...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- RODAPÉ DO SISTEMA -->
-    <footer class="system-footer">
-      <div><b>DMA SYS</b> v2.0 | Sistema de Gestão Operacional</div>
-      <div>Suporte / TI: <a href="mailto:si@linemedhospital
+    // Inicialização ao carregar a página
+    window.addEventListener('DOMContentLoaded', () => {
+      initSelectOptions();
+      document.getElementById('formDate').value = selectedDateStr;
+      renderMainTable();
+      updateKPIs();
+      checkRealtimeFormConflict();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
