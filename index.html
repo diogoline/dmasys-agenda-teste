@@ -1120,7 +1120,7 @@
         </div>
 
         <!-- =========================================================
-             ABA 2: AGENDA DE SERVIÇOS (COM MODAL DE CALENDÁRIO MENSAL)
+             ABA 2: AGENDA DE SERVIÇOS (COM CLIENTE E OBSERVAÇÃO)
              ========================================================= -->
         <div id="abaAgenda" class="tab-content">
           <!-- KPIs Rápidos da Agenda -->
@@ -1189,30 +1189,39 @@
 
               <div class="form-row">
                 <div class="form-group" style="flex: 2;">
+                  <label>Cliente / Hospital (Onde será o compromisso):</label>
+                  <input type="text" id="agCliente" list="listClientes" placeholder="Selecione ou digite o cliente..." required />
+                </div>
+                <div class="form-group" style="flex: 2;">
                   <label>Pesquisar Equipamento (TAG / Nome / Série):</label>
                   <input type="text" id="agBuscaEq" list="listEquipamentos" placeholder="Digite para buscar equipamento..." oninput="autoPreencherAgendaEq(); validarConflitoFormularioPrincipal();" required />
-                </div>
-                <div class="form-group" style="flex: 1;">
-                  <label>TAG:</label>
-                  <input type="text" id="agTag" readonly placeholder="-" />
-                </div>
-                <div class="form-group" style="flex: 1.5;">
-                  <label>Equipamento:</label>
-                  <input type="text" id="agEquipNome" readonly placeholder="-" />
                 </div>
               </div>
 
               <div class="form-row">
-                <div class="form-group">
-                  <label>Data e Horário do Agendamento:</label>
+                <div class="form-group" style="flex: 1;">
+                  <label>TAG:</label>
+                  <input type="text" id="agTag" readonly placeholder="-" />
+                </div>
+                <div class="form-group" style="flex: 2;">
+                  <label>Equipamento:</label>
+                  <input type="text" id="agEquipNome" readonly placeholder="-" />
+                </div>
+                <div class="form-group" style="flex: 1.5;">
+                  <label>Data e Horário:</label>
                   <input type="datetime-local" id="agDataHora" oninput="validarConflitoFormularioPrincipal()" required />
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="flex: 1.5;">
                   <label>Técnico Responsável:</label>
                   <select id="agTecnico" onchange="validarConflitoFormularioPrincipal()" required>
-                    <option value="">Selecione o técnico...</option>
+                    <option value="">Selecione...</option>
                   </select>
                 </div>
+              </div>
+
+              <div class="form-group mb-4">
+                <label>Observações / Detalhes Adicionais:</label>
+                <input type="text" id="agObservacao" placeholder="Ex: Acessar pela portaria lateral com crachá..." />
               </div>
 
               <!-- Validador de Conflito em Tempo Real no Formulário Principal -->
@@ -1238,22 +1247,22 @@
             <div class="card-title">
               <span><i class="fa-solid fa-list-check text-sky-400 mr-1.5"></i> Painel de Controle da Agenda de Serviços</span>
               <div class="flex items-center gap-2">
-                <input type="text" id="filtroTextoAgenda" oninput="renderizarTabelaAgenda()" placeholder="Filtrar protocolo, TAG, técnico..." class="!w-56 !py-1.5 !text-xs" />
+                <input type="text" id="filtroTextoAgenda" oninput="renderizarTabelaAgenda()" placeholder="Filtrar protocolo, cliente, TAG..." class="!w-56 !py-1.5 !text-xs" />
               </div>
             </div>
             <div class="table-container">
               <table>
                 <thead>
                   <tr>
-                    <th class="td-center" style="width: 85px;">Protocolo</th>
-                    <th style="width: 150px;">Data / Horário</th>
-                    <th>Solicitante &rarr; Executante</th>
+                    <th class="td-center" style="width: 75px;">Protocolo</th>
+                    <th style="width: 140px;">Data / Horário</th>
+                    <th>Cliente / Local</th>
                     <th>Serviço</th>
-                    <th class="td-center" style="width: 90px;">TAG</th>
+                    <th class="td-center" style="width: 80px;">TAG</th>
                     <th>Equipamento</th>
                     <th>Técnico</th>
-                    <th class="td-center" style="width: 130px;">Status / Horário</th>
-                    <th class="td-center" style="width: 100px;">Grelha</th>
+                    <th class="td-center" style="width: 120px;">Status / Obs</th>
+                    <th class="td-center" style="width: 90px;">Grelha</th>
                   </tr>
                 </thead>
                 <tbody id="corpoTabelaAgenda">
@@ -2057,14 +2066,8 @@
 
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="!text-[10px] !mb-1">Tipo de Serviço</label>
-                <select id="modalAgServico" class="!py-1.5 !text-xs">
-                  <option value="CALIBRAÇÃO">Calibração</option>
-                  <option value="TESTE DE SEGURANÇA ELÉTRICA">Teste Seg. Elétrica</option>
-                  <option value="QUALIFICAÇÃO TÉRMICA">Qualificação Térmica</option>
-                  <option value="MANUTENÇÃO PREVENTIVA">Manut. Preventiva</option>
-                  <option value="INSPEÇÃO TÉCNICA">Inspeção Técnica</option>
-                </select>
+                <label class="!text-[10px] !mb-1">Cliente / Hospital</label>
+                <input type="text" id="modalAgCliente" list="listClientes" placeholder="Selecione..." class="!py-1.5 !text-xs" />
               </div>
               <div>
                 <label class="!text-[10px] !mb-1">Equipamento (TAG)</label>
@@ -2083,6 +2086,11 @@
                   <option value="">Selecione...</option>
                 </select>
               </div>
+            </div>
+
+            <div>
+              <label class="!text-[10px] !mb-1">Observações</label>
+              <input type="text" id="modalAgObservacao" placeholder="Obs ou detalhes..." class="!py-1.5 !text-xs" />
             </div>
 
             <div id="modalRealtimeValidationBox" class="p-2.5 rounded-xl border text-xs flex items-center gap-2 bg-emerald-500/10 border-emerald-500/30 text-emerald-300">
@@ -2208,7 +2216,7 @@
       <div class="space-y-4 text-xs text-slate-300 leading-relaxed">
         <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
           <h4 class="text-sky-400 font-bold text-sm mb-1"><i class="fa-solid fa-calendar-days mr-1"></i> 1. Agenda de Serviços &amp; Calendário Mensal</h4>
-          <p>Agende serviços integrados entre setores e utilize o botão <b>"Calendário Mensal"</b> para visualizar a grelha do mês inteiro e validar conflitos de horário por técnico e equipamento em tempo real.</p>
+          <p>Agende serviços integrados entre setores especificando o cliente e utilize o botão <b>"Calendário Mensal"</b> para visualizar a grelha do mês inteiro e validar conflitos de horário em tempo real.</p>
         </div>
         <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
           <h4 class="text-sky-400 font-bold text-sm mb-1"><i class="fa-solid fa-boxes-packing mr-1"></i> 2. Controle de Locação</h4>
@@ -2244,7 +2252,7 @@
     </div>
   </div>
 
-  <!-- CONTENTOR DE NOTIFICAÇÕES TOAST (Substitui alert/confirm) -->
+  <!-- CONTENTOR DE NOTIFICAÇÕES TOAST -->
   <div id="toastContainer" class="fixed bottom-14 left-1/2 -translate-x-1/2 z-[100000] flex flex-col gap-2 max-w-md w-full px-4 pointer-events-none"></div>
 
   <script>
@@ -2256,7 +2264,6 @@
     const curM = String(todayRef.getMonth() + 1).padStart(2, '0');
     const curD = String(todayRef.getDate()).padStart(2, '0');
 
-    // Dados iniciais locais para funcionamento imediato enquanto sincroniza com a planilha
     let bancoDados = {
       clientes: [
         "HOSPITAL SANTA CLARA",
@@ -2273,39 +2280,27 @@
       usuarios: [
         { usuario: "carlos.eduardo", nome: "Carlos Eduardo", online: true, ultimoAcesso: "Online agora" },
         { usuario: "ana.beatriz", nome: "Ana Beatriz", online: true, ultimoAcesso: "Online agora" },
-        { usuario: "marcos.vinicius", nome: "Marcos Vinícius", online: false, ultimoAcesso: "Há 15 min" },
-        { usuario: "sofia.martins", nome: "Sofia Martins", online: true, ultimoAcesso: "Online agora" }
+        { usuario: "fabio.bezerra", nome: "Fabrício Bezerra", online: true, ultimoAcesso: "Online agora" }
       ],
       termosEmitidos: [
-        { protocolo: "PT0018", dataHora: `${curD}/${curM}/${curY} 09:15`, cliente: "HOSPITAL SANTA CLARA", tag: "LMD-4654", equipamento: "VENTILADOR PULMONAR", tipo: "LOCAÇÃO", tecnico: "Carlos Eduardo", pdfUrl: "" },
-        { protocolo: "PT0019", dataHora: `${curD}/${curM}/${curY} 11:40`, cliente: "MATERNIDADE SÃO LUCAS", tag: "LMD-5384", equipamento: "MONITOR MULTIPARAMÉTRICO", tipo: "LOCAÇÃO", tecnico: "Ana Beatriz", pdfUrl: "" }
+        { protocolo: "PT0018", dataHora: `${curD}/${curM}/${curY} 09:15`, cliente: "HOSPITAL SANTA CLARA", tag: "LMD-4654", equipamento: "VENTILADOR PULMONAR", tipo: "LOCAÇÃO", tecnico: "Carlos Eduardo", pdfUrl: "" }
       ],
       requisicoes: [
-        { protocolo: "REQ-0104", dataHora: `${curD}/${curM}/${curY} 08:30`, cliente: "HOSPITAL SANTA CLARA", operacao: "LOCAÇÃO", equipamentoAntigo: "LMD-5384 - Monitor com falha PNI", equipamentoSolicitado: "MONITOR MULTIPARAMÉTRICO", motivo: "Substituição preventiva solicitada pela UTI 2", solicitante: "Administração", status: "PENDENTE", protocoloTermo: "", pdfUrlReq: "" },
-        { protocolo: "REQ-0103", dataHora: `${curD}/${curM}/${curY} 07:45`, cliente: "MATERNIDADE SÃO LUCAS", operacao: "LOCAÇÃO", equipamentoAntigo: "LMD-6102", equipamentoSolicitado: "BOMBA DE INFUSÃO", motivo: "Aumento de demanda neonatal", solicitante: "Coordenação", status: "ATENDIDO", protocoloTermo: "PT0019", pdfUrlReq: "" }
+        { protocolo: "REQ-0104", dataHora: `${curD}/${curM}/${curY} 08:30`, cliente: "HOSPITAL SANTA CLARA", operacao: "LOCAÇÃO", equipamentoAntigo: "LMD-5384 - Monitor com falha PNI", equipamentoSolicitado: "MONITOR MULTIPARAMÉTRICO", motivo: "Substituição preventiva", solicitante: "Administração", status: "PENDENTE", protocoloTermo: "", pdfUrlReq: "" }
       ],
       ordensServico: [
-        { protocoloOS: "OS-8801", dataAbertura: `${curD}/${curM}/${curY} 08:00`, cliente: "HOSPITAL SANTA CLARA", tag: "LMD-4654", equipamento: "VENTILADOR PULMONAR (MONNAL T75)", tipoManutencao: "PREVENTIVA", prioridade: "ALTA", status: "ABERTA", pdfUrlOS: "" },
-        { protocoloOS: "OS-8802", dataAbertura: `${curD}/${curM}/${curY} 10:20`, cliente: "INSTITUTO CARDIOLÓGICO PAULISTA", tag: "LMD-7019", equipamento: "DESFIBRILADOR (HEARTSTART XL+)", tipoManutencao: "CALIBRAÇÃO", prioridade: "CRÍTICA", status: "CONCLUÍDA", pdfUrlOS: "" }
+        { protocoloOS: "OS-8801", dataAbertura: `${curD}/${curM}/${curY} 08:00`, cliente: "HOSPITAL SANTA CLARA", tag: "LMD-4654", equipamento: "VENTILADOR PULMONAR (MONNAL T75)", tipoManutencao: "PREVENTIVA", prioridade: "ALTA", status: "ABERTA", pdfUrlOS: "" }
       ],
       relacoesAuxiliares: [
         { descricao: "VENTILADOR PULMONAR", modelo: "MONNAL T75", fabricante: "AIR LIQUIDE" },
-        { descricao: "MONITOR MULTIPARAMÉTRICO", modelo: "B40", fabricante: "GE HEALTHCARE" },
-        { descricao: "BOMBA DE INFUSÃO", modelo: "INFUSOMAT COMPACT", fabricante: "B.BRAUN" },
-        { descricao: "DESFIBRILADOR / CARDIOVERSOR", modelo: "HEARTSTART XL+", fabricante: "PHILIPS" }
+        { descricao: "MONITOR MULTIPARAMÉTRICO", modelo: "B40", fabricante: "GE HEALTHCARE" }
       ],
       locacoes: [
-        { id: "LOC-01", cliente: "HOSPITAL SANTA CLARA", contrato: "CTR-2026/01", unidade: "UTI Geral Adulto", localizacao: "São Paulo - SP", equipamento: "VENTILADOR PULMONAR", qtdContratada: 20, qtdFisica: 18, saldo: 2, situacao: "ATIVO", valorUnitario: 1450, valorTotal: 26100 },
-        { id: "LOC-02", cliente: "MATERNIDADE SÃO LUCAS", contrato: "CTR-2026/04", unidade: "UTI Neonatal", localizacao: "Campinas - SP", equipamento: "MONITOR MULTIPARAMÉTRICO", qtdContratada: 15, qtdFisica: 15, saldo: 0, situacao: "ATIVO", valorUnitario: 680, valorTotal: 10200 },
-        { id: "LOC-03", cliente: "INSTITUTO CARDIOLÓGICO PAULISTA", contrato: "CTR-2025/19", unidade: "Centro Cirúrgico", localizacao: "São Paulo - SP", equipamento: "BOMBA DE INFUSÃO", qtdContratada: 30, qtdFisica: 27, saldo: 3, situacao: "ATIVO", valorUnitario: 290, valorTotal: 7830 }
+        { id: "LOC-01", cliente: "HOSPITAL SANTA CLARA", contrato: "CTR-2026/01", unidade: "UTI Geral Adulto", localizacao: "São Paulo - SP", equipamento: "VENTILADOR PULMONAR", qtdContratada: 20, qtdFisica: 18, saldo: 2, situacao: "ATIVO", valorUnitario: 1450, valorTotal: 26100 }
       ],
-      compras: [
-        { protocolo: "CMP-301", dataHora: `${curD}/${curM}/${curY} 09:50`, osExterna: "OS-2026-8849", solicitante: "Marcos Vinícius", produto: "SENSOR DE FLUXO MONNAL T75", fornVencedor: "MedParts Brasil", menorValor: 890.00, status: "APROVADO", pdfUrlCompra: "" }
-      ],
+      compras: [],
       agenda: [
-        { protocolo: "AG-101", dataHora: `${curY}-${curM}-${curD}T09:00`, dataHoraExibicao: `${curD}/${curM}/${curY} 09:00`, setorSolicitante: "QUALIDADE", setorExecutante: "MANUTENÇÃO", servico: "CALIBRAÇÃO", tag: "LMD-4654", equipamento: "VENTILADOR PULMONAR (MONNAL T75)", tecnico: "Carlos Eduardo", status: "AGENDADO" },
-        { protocolo: "AG-102", dataHora: `${curY}-${curM}-${curD}T09:30`, dataHoraExibicao: `${curD}/${curM}/${curY} 09:30`, setorSolicitante: "MANUTENÇÃO", setorExecutante: "QUALIDADE", servico: "TESTE DE SEGURANÇA ELÉTRICA", tag: "LMD-5384", equipamento: "MONITOR MULTIPARAMÉTRICO (B40)", tecnico: "Carlos Eduardo", status: "AGENDADO" },
-        { protocolo: "AG-103", dataHora: `${curY}-${curM}-15T14:00`, dataHoraExibicao: `15/${curM}/${curY} 14:00`, setorSolicitante: "REFRIGERAÇÃO", setorExecutante: "REFRIGERAÇÃO", servico: "QUALIFICAÇÃO TÉRMICA", tag: "LMD-6102", equipamento: "BOMBA DE INFUSÃO", tecnico: "Ana Beatriz", status: "AGENDADO" }
+        { protocolo: "AG-101", dataHora: `${curY}-${curM}-${curD}T09:00`, dataHoraExibicao: `${curD}/${curM}/${curY} 09:00`, setorSolicitante: "REFRIGERAÇÃO", setorExecutante: "QUALIDADE", servico: "QUALIFICAÇÃO TÉRMICA", cliente: "HOSPITAL SANTA CLARA", tag: "LMD-4654", equipamento: "VENTILADOR PULMONAR", tecnico: "Carlos Eduardo", observacao: "Manter distanciamento", status: "AGENDADO" }
       ]
     };
 
@@ -2319,7 +2314,6 @@
     let timerPiscarTitulo = null;
     let ultimoTempoDigitandoEnviado = 0;
 
-    // Estado do Calendário Mensal
     let viewYear = todayRef.getFullYear();
     let viewMonth = todayRef.getMonth();
     let selectedDateStr = `${curY}-${curM}-${curD}`;
@@ -2374,7 +2368,6 @@
       const shouldOpen = forceOpen !== null ? forceOpen : !isCurrentlyOpen;
 
       if (shouldOpen) {
-        // Fecha outros grupos para manter o menu lateral limpo e organizado
         ['operacoes', 'qualidade', 'manutencao', 'cadastros'].forEach(g => {
           if (g !== groupId) {
             document.getElementById(`grpBtn_${g}`)?.classList.remove('open');
@@ -2490,7 +2483,6 @@
           return;
         }
       }
-      // Para facilitar o uso imediato no Preview, também permitimos login direto
       document.getElementById('loginOverlay').style.display = "flex";
       document.getElementById('appContainer').style.display = "none";
     }
@@ -2527,7 +2519,6 @@
         }
       })
       .catch(() => {
-        // Fallback inteligente caso esteja em ambiente de teste local
         concluirAcessoLogin({ usuario: usr, nome: usr });
         showToast("Conectado em modo local/híbrido.", "info");
       });
@@ -2866,7 +2857,6 @@
     }
 
     function extrairDataHoraAgenda(item) {
-      // Suporta formato ISO "YYYY-MM-DDTHH:mm" ou "DD/MM/YYYY HH:mm"
       if (item.dataHora && item.dataHora.includes('T')) {
         const [d, t] = item.dataHora.split('T');
         return { dateStr: d, timeStr: t.slice(0, 5) };
@@ -2891,17 +2881,16 @@
       return (h * 60) + (m || 0);
     }
 
-    // Verifica se dois agendamentos colidem (considerando janela padrão de 60 minutos por serviço)
     function agendamentosEmConflito(a, b) {
       if (!a || !b) return false;
       const infoA = extrairDataHoraAgenda(a);
       const infoB = extrairDataHoraAgenda(b);
       if (infoA.dateStr !== infoB.dateStr) return false;
 
-      const mesmoTecnico = (a.tecnico || '').toLowerCase().trim() === (b.tecnico || '').toLowerCase().trim() && Boolean(a.tecnico);
-      const mesmaTag = (a.tag || '').toLowerCase().trim() === (b.tag || '').toLowerCase().trim() && Boolean(a.tag) && a.tag !== '-';
-
-      if (!mesmoTecnico && !mesmaTag) return false;
+      // O conflito só ocorre se for EXATAMENTE o mesmo técnico na mesma janela horária
+      const tecnicoA = (a.tecnico || '').toLowerCase().trim();
+      const tecnicoB = (b.tecnico || '').toLowerCase().trim();
+      if (!tecnicoA || !tecnicoB || tecnicoA !== tecnicoB) return false;
 
       const minA = minutosDesdeMeiaNoite(infoA.timeStr);
       const minB = minutosDesdeMeiaNoite(infoB.timeStr);
@@ -2942,7 +2931,7 @@
       if (!dataHora || !tecnico) {
         box.className = "mb-4 p-3 rounded-xl border border-slate-800 bg-slate-950/80 text-xs text-slate-400 flex items-center justify-between gap-3";
         icon.className = "fa-solid fa-clock text-sky-400";
-        txt.innerText = "Selecione a data/hora, equipamento e técnico para verificar conflitos de agenda em tempo real.";
+        txt.innerText = "Selecione a data/hora e o técnico para verificar conflitos de agenda em tempo real.";
         return [];
       }
 
@@ -2969,13 +2958,15 @@
       const setorSol = document.getElementById('agSetorSol').value;
       const setorExe = document.getElementById('agSetorExe').value;
       const servico = document.getElementById('agServico').value;
+      const cliente = document.getElementById('agCliente').value.trim();
       const tag = document.getElementById('agTag').value.trim() || document.getElementById('agBuscaEq').value.trim();
       const equip = document.getElementById('agEquipNome').value.trim() || tag;
       const dataHora = document.getElementById('agDataHora').value;
       const tecnico = document.getElementById('agTecnico').value;
+      const observacao = document.getElementById('agObservacao').value.trim();
 
-      if (!tag || !dataHora || !tecnico) {
-        showToast("Preencha todos os campos obrigatórios do agendamento.", "error");
+      if (!cliente || !tag || !dataHora || !tecnico) {
+        showToast("Preencha o cliente, equipamento, data/hora e técnico responsável.", "error");
         return false;
       }
 
@@ -2991,11 +2982,13 @@
         acao: "CRIAR_AGENDAMENTO",
         setorSolicitante: setorSol,
         setorExecutante: setorExe,
-        servico: servico,
-        tag: tag,
+        servico,
+        cliente,
+        tag,
         equipamento: equip,
-        dataHora: dataHora,
-        tecnico: tecnico
+        dataHora,
+        tecnico,
+        observacao
       };
 
       fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
@@ -3040,9 +3033,11 @@
         setorSolicitante: payload.setorSolicitante,
         setorExecutante: payload.setorExecutante,
         servico: payload.servico,
+        cliente: payload.cliente,
         tag: payload.tag,
         equipamento: payload.equipamento,
         tecnico: payload.tecnico,
+        observacao: payload.observacao || "",
         status: "AGENDADO"
       });
       renderizarTabelaAgenda();
@@ -3056,7 +3051,6 @@
       const lista = bancoDados.agenda || [];
       const filtro = (document.getElementById('filtroTextoAgenda')?.value || "").toLowerCase().trim();
 
-      // Calcula KPIs da Agenda
       let totalConflitos = 0;
       const tecnicosSet = new Set();
       lista.forEach(item => {
@@ -3076,7 +3070,7 @@
 
       const filtrada = lista.filter(a => {
         if (!filtro) return true;
-        const hay = `${a.protocolo} ${a.servico} ${a.tag} ${a.equipamento} ${a.tecnico} ${a.setorSolicitante} ${a.setorExecutante}`.toLowerCase();
+        const hay = `${a.protocolo} ${a.servico} ${a.cliente} ${a.tag} ${a.equipamento} ${a.tecnico} ${a.observacao}`.toLowerCase();
         return hay.includes(filtro);
       });
 
@@ -3094,7 +3088,7 @@
           <tr class="${temConflito ? 'bg-rose-950/20' : ''}">
             <td class="td-center"><b>${a.protocolo || '-'}</b></td>
             <td class="font-mono text-xs text-sky-400">${a.dataHoraExibicao || infoData.dateStr + ' ' + infoData.timeStr}</td>
-            <td><span class="font-bold text-sky-300">${a.setorSolicitante}</span> &rarr; <span class="font-bold text-indigo-300">${a.setorExecutante}</span></td>
+            <td><b>${a.cliente || 'Não informado'}</b><br><span class="text-[10px] text-slate-400">${a.setorSolicitante} &rarr; ${a.setorExecutante}</span></td>
             <td><b>${a.servico || '-'}</b></td>
             <td class="td-center"><span class="px-2 py-0.5 rounded bg-slate-800 text-sky-300 font-mono text-xs">${a.tag || '-'}</span></td>
             <td>${a.equipamento || '-'}</td>
@@ -3102,9 +3096,10 @@
             <td class="td-center">
               ${
                 temConflito
-                  ? `<span class="badge-status badge-recusado"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Conflito (${conflitos.length})</span>`
-                  : `<span class="badge-status badge-atendido">${a.status || 'AGENDADO'}</span>`
+                  ? `<span class="badge-status badge-recusado mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Conflito</span>`
+                  : `<span class="badge-status badge-atendido mb-1">${a.status || 'AGENDADO'}</span>`
               }
+              ${a.observacao ? `<div class="text-[10px] text-amber-300 italic truncate max-w-[140px]" title="${a.observacao}">obs: ${a.observacao}</div>` : ''}
             </td>
             <td class="td-center">
               <button type="button" onclick="inspecionarDiaNoCalendario('${infoData.dateStr}')" class="btn-pdf !h-7 !px-2.5">
@@ -3226,7 +3221,7 @@
             ? 'bg-rose-500/25 text-rose-200 border-rose-500/50'
             : 'bg-sky-500/15 text-sky-200 border-sky-500/30';
           return `
-            <div class="px-1.5 py-0.5 rounded border text-[10px] truncate font-medium ${cls}">
+            <div class="px-1.5 py-0.5 rounded border text-[10px] truncate font-medium ${cls}" title="${ev.cliente || ''} - ${ev.servico || ''}">
               <span class="font-mono font-bold">${info.timeStr}</span> ${ev.tag !== '-' ? ev.tag : ev.servico}
             </div>
           `;
@@ -3322,7 +3317,9 @@
               <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] font-mono text-slate-300">${ev.tag || '-'}</span>
             </div>
             <div class="text-xs font-bold text-white">${ev.servico}</div>
+            <div class="text-[11px] text-sky-300 font-semibold"><i class="fa-solid fa-hospital mr-1"></i>${ev.cliente || 'Local não informado'}</div>
             <div class="text-[11px] text-slate-400">${ev.equipamento || '-'}</div>
+            ${ev.observacao ? '<div class="text-[10px] text-amber-300 italic">obs: ' + ev.observacao + '</div>' : ''}
             <div class="pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
               <span class="text-slate-300"><i class="fa-solid fa-user-gear mr-1 text-sky-400"></i>${ev.tecnico}</span>
               <span class="text-slate-400">${ev.setorSolicitante} &rarr; ${ev.setorExecutante}</span>
@@ -3353,7 +3350,7 @@
 
       if (conflitos.length > 0) {
         box.className = "p-2.5 rounded-xl border text-xs flex items-center gap-2 bg-rose-500/15 border-rose-500/40 text-rose-200";
-        txt.innerHTML = `<b>Conflito!</b> ${tecnico} ou TAG já possui serviço às ${extrairDataHoraAgenda(conflitos[0]).timeStr}.`;
+        txt.innerHTML = `<b>Conflito!</b> ${tecnico} já possui serviço agendado às ${extrairDataHoraAgenda(conflitos[0]).timeStr}.`;
       } else {
         box.className = "p-2.5 rounded-xl border text-xs flex items-center gap-2 bg-emerald-500/10 border-emerald-500/30 text-emerald-300";
         txt.innerHTML = `Horário das <b>${hora}</b> livre para <b>${tecnico}</b>.`;
@@ -3364,12 +3361,14 @@
       const setorSol = document.getElementById('modalAgSetorSol').value;
       const setorExe = document.getElementById('modalAgSetorExe').value;
       const servico = document.getElementById('modalAgServico').value;
+      const cliente = document.getElementById('modalAgCliente').value.trim();
       const rawEq = document.getElementById('modalAgBuscaEq').value.trim();
       const hora = document.getElementById('modalAgHora').value || "09:00";
       const tecnico = document.getElementById('modalAgTecnico').value;
+      const observacao = document.getElementById('modalAgObservacao').value.trim();
 
-      if (!rawEq || !tecnico) {
-        showToast("Informe o equipamento (TAG) e o técnico responsável.", "error");
+      if (!cliente || !rawEq || !tecnico) {
+        showToast("Informe o cliente, equipamento (TAG) e o técnico responsável.", "error");
         return;
       }
 
@@ -3393,15 +3392,19 @@
         setorSolicitante: setorSol,
         setorExecutante: setorExe,
         servico,
+        cliente,
         tag,
         equipamento: equipNome,
         dataHora,
-        tecnico
+        tecnico,
+        observacao
       };
 
       const protLocal = `AG-${Math.floor(100 + Math.random() * 900)}`;
       adicionarAgendamentoLocal(protLocal, payload, dataHoraExibicao);
       document.getElementById('modalAgBuscaEq').value = "";
+      document.getElementById('modalAgCliente').value = "";
+      document.getElementById('modalAgObservacao').value = "";
       checkModalRealtimeConflict();
       showToast(`Agendamento ${protLocal} registado para ${dataHoraExibicao}!`, "success");
 
@@ -4034,9 +4037,10 @@
     }
 
     function popularAutocomplete() {
-      const listaClientesUnicos = new Set();
+      let listaClientesUnicos = new Set();
       if (bancoDados.clientes) bancoDados.clientes.forEach(c => c && listaClientesUnicos.add(c));
       if (bancoDados.locacoes) bancoDados.locacoes.forEach(l => l && l.cliente && listaClientesUnicos.add(l.cliente));
+      if (bancoDados.agenda) bancoDados.agenda.forEach(a => a && a.cliente && listaClientesUnicos.add(a.cliente));
 
       const listC = document.getElementById('listClientes');
       if (listC) listC.innerHTML = Array.from(listaClientesUnicos).sort().map(c => `<option value="${c}">`).join('');
@@ -4109,7 +4113,6 @@
       }
     }
 
-    // Canvas de Assinatura
     const canvas = document.getElementById('canvasAssinatura');
     const ctx = canvas?.getContext('2d');
     let desenhando = false;
