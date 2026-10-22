@@ -2621,8 +2621,10 @@ abaAgenda.appendRow([
         }
       })
       .catch(() => {
-        concluirAcessoLogin({ usuario: usr, nome: usr });
-        showToast("Conectado em modo local/híbrido.", "info");
+        divErro.innerText = "Não foi possível conectar ao servidor. Verifique a internet e a implantação do Apps Script.";
+        divErro.classList.remove("hidden");
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> ENTRAR NO SISTEMA';
       });
     }
 
@@ -4658,4 +4660,312 @@ abaAgenda.appendRow([
       );
       if (eq) {
         document.getElementById('osTag').value = eq.tag || "-";
-        document.getElementById('osSerie').value = eq.serie || "-
+        document.getElementById('osSerie').value = eq.serie || "-";
+        document.getElementById('osPatrimonio').value = eq.patrimonio || "-";
+        document.getElementById('osNomeEquip').value = `${eq.nome || ''} ${eq.modelo ? '(' + eq.modelo + ')' : ''}`.trim() || "-";
+      }
+    }
+
+    function nomeUsuarioAtual() {
+      return usuarioLogado ? (usuarioLogado.nome || usuarioLogado.usuario || "Sistema") : "Sistema";
+    }
+
+    function postAPI(payload) {
+      return fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(r => r.json());
+    }
+
+    // ---------- Termos ----------
+    function renderizarTabelaTermos(lista) {
+      const tbody = document.getElementById('corpoTermos');
+      if (!tbody) return;
+      const f = (document.getElementById('filtroTermos')?.value || "").toLowerCase().trim();
+      const dados = (lista || []).filter(t => t && (!f || `${t.protocolo} ${t.cliente} ${t.tag} ${t.tecnico}`.toLowerCase().includes(f)));
+      if (dados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="td-center text-slate-500 py-6">Nenhum termo encontrado.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = dados.map(t => `
+        <tr>
+          <td class="td-center"><b>${t.protocolo || '-'}</b></td>
+          <td>${t.dataHora || '-'}</td>
+          <td>${t.cliente || '-'}</td>
+          <td class="td-center">${t.tag || '-'}</td>
+          <td>${t.equipamento || '-'}</td>
+          <td class="td-center">${t.tipo || t.tipoOperacao || '-'}</td>
+          <td>${t.tecnico || '-'}</td>
+          <td class="td-center">${t.pdfUrl && t.pdfUrl !== '-' ? `<a href="${t.pdfUrl}" target="_blank" class="btn-pdf"><i class="fa-solid fa-file-pdf"></i> PDF</a>` : '-'}</td>
+        </tr>`).join('');
+    }
+
+    // ---------- Assinatura (canvas) ----------
+    let assinaturaDesenhada = false;
+    function iniciarCanvasAssinatura() {
+      const cv = document.getElementById('canvasAssinatura');
+      if (!cv) return;
+      const ctx = cv.getContext('2d');
+      ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#0f172a';
+      let desenhando = false;
+      const pos = (e) => {
+        const r = cv.getBoundingClientRect();
+        const p = e.touches ? e.touches[0] : e;
+        return { x: (p.clientX - r.left) * (cv.width / r.width), y: (p.clientY - r.top) * (cv.height / r.height) };
+      };
+      const ini = (e) => { desenhando = true; const p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); };
+      const mov = (e) => { if (!desenhando) return; const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); assinaturaDesenhada = true; e.preventDefault(); };
+      const fim = () => { desenhando = false; };
+      cv.addEventListener('mousedown', ini); cv.addEventListener('mousemove', mov);
+      window.addEventListener('mouseup', fim);
+      cv.addEventListener('touchstart', ini, { passive: false });
+      cv.addEventListener('touchmove', mov, { passive: false });
+      cv.addEventListener('touchend', fim);
+    }
+    function limparAssinatura() {
+      const cv = document.getElementById('canvasAssinatura');
+      if (cv) cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
+      assinaturaDesenhada = false;
+    }
+
+    function gerarTermo(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      const cliente = document.getElementById('inputCliente').value.trim();
+      const nomeTec = document.getElementById('selectTecnico').value;
+      if (!cliente || !equipamentoSelecionado || !nomeTec) {
+        showToast("Informe o cliente, o equipamento e o técnico responsável.", "error");
+        return false;
+      }
+      const tecObj = (bancoDados.usuarios || []).find(u => (u.nome || u.usuario) === nomeTec) || { nome: nomeTec };
+      const acessorios = [];
+      document.querySelectorAll('#corpoAcessorios tr').forEach(tr => {
+        const inp = tr.querySelector('.qtd-acessorio');
+        const desc = tr.querySelector('td:nth-child(3)');
+        if (inp && desc) acessorios.push({ qtd: inp.value, descricao: desc.innerText.trim(), conformidade: 'CONFORME' });
+      });
+      const cv = document.getElementById('canvasAssinatura');
+      const btn = document.getElementById('btnEnviar');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> GERANDO PDF...';
+
+      postAPI({
+        acao: "CRIAR_TERMO",
+        cliente,
+        tipoOperacao: document.querySelector('input[name="tipoOperacao"]:checked')?.value || "LOCAÇÃO",
+        equipamento: equipamentoSelecionado,
+        tecnico: tecObj,
+        acessorios,
+        assinaturaCliente: assinaturaDesenhada ? cv.toDataURL('image/png') : "",
+        protocoloReq: document.getElementById('reqVinculadaProtocolo').value || ""
+      }).then(res => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Gerar Termo Duplo PDF (Entrega + Higienização)';
+        if (res.status === "sucesso") {
+          showToast(`Termo ${res.protocolo} gerado com sucesso!`, "success");
+          if (res.pdfUrl) abrirModalVisualizadorReq(res.pdfUrl, "Termo " + res.protocolo);
+          desvincularRequisicao();
+          limparAssinatura();
+          buscarAtualizacoesSilenciosas();
+        } else {
+          showToast("Erro ao gerar termo: " + (res.mensagem || "desconhecido"), "error");
+        }
+      }).catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Gerar Termo Duplo PDF (Entrega + Higienização)';
+        showToast("Falha de conexão ao gerar o termo.", "error");
+      });
+      return false;
+    }
+
+    // ---------- Ordens de Serviço ----------
+    function renderizarTabelaOS() {
+      const tbody = document.getElementById('corpoOS');
+      if (!tbody) return;
+      const st = document.getElementById('filtroStatusOS')?.value || "TODOS";
+      const txt = (document.getElementById('filtroTextoOS')?.value || "").toLowerCase().trim();
+      const lista = (bancoDados.ordensServico || []).filter(o => {
+        if (!o) return false;
+        const s = (o.status || "ABERTA").toUpperCase();
+        if (st !== "TODOS" && s !== st) return false;
+        return !txt || `${o.protocoloOS} ${o.tag} ${o.cliente} ${o.equipamento}`.toLowerCase().includes(txt);
+      });
+      if (lista.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="td-center text-slate-500 py-6">Nenhuma O.S. encontrada.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = lista.map(o => {
+        const s = (o.status || "ABERTA").toUpperCase();
+        const aberta = s === "ABERTA";
+        return `
+        <tr>
+          <td class="td-center"><b>${o.protocoloOS}</b></td>
+          <td>${o.dataAbertura || '-'}</td>
+          <td>${o.cliente || '-'}</td>
+          <td class="td-center">${o.tag || '-'}</td>
+          <td>${o.equipamento || '-'}</td>
+          <td class="td-center">${o.tipoManutencao || '-'}</td>
+          <td class="td-center">${o.prioridade || '-'}</td>
+          <td class="td-center"><span class="badge-status ${aberta ? 'badge-pendente' : 'badge-atendido'}">${s}</span></td>
+          <td class="td-center"><div class="btn-action-container">
+            ${o.pdfUrlOS ? `<a href="${o.pdfUrlOS}" target="_blank" class="btn-pdf"><i class="fa-solid fa-file-pdf"></i></a>` : ''}
+            <button type="button" class="${aberta ? 'btn-atender' : 'btn-vincular'}" onclick="alterarStatusOS('${o.protocoloOS}', ${aberta})">${aberta ? 'Concluir' : 'Reabrir'}</button>
+          </div></td>
+        </tr>`;
+      }).join('');
+    }
+
+    function alterarStatusOS(protocoloOS, concluir) {
+      const o = (bancoDados.ordensServico || []).find(x => x && x.protocoloOS === protocoloOS);
+      if (o) o.status = concluir ? "CONCLUÍDA" : "ABERTA";
+      renderizarTabelaOS();
+      postAPI({ acao: concluir ? "FECHAR_OS" : "REABRIR_OS", protocoloOS })
+        .then(() => buscarAtualizacoesSilenciosas()).catch(() => {});
+      showToast(`O.S. ${protocoloOS} ${concluir ? 'concluída' : 'reaberta'}.`, "success");
+    }
+
+    function salvarNovaOS(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      const g = id => document.getElementById(id).value.trim();
+      const btn = document.getElementById('btnSalvarOS');
+      btn.disabled = true;
+      postAPI({
+        acao: "CRIAR_OS",
+        cliente: g('osCliente'), tag: g('osTag'), serie: g('osSerie'), patrimonio: g('osPatrimonio'),
+        equipamento: g('osNomeEquip'), tipoManutencao: g('osTipo'), prioridade: g('osPrioridade'),
+        solicitante: g('osSolicitante'), tecnico: g('osTecnico'),
+        defeitoRelatado: g('osDefeito'), diagnosticoTecnico: g('osDiagnostico'), servicoRealizado: g('osServico')
+      }).then(res => {
+        btn.disabled = false;
+        if (res.status === "sucesso") {
+          document.getElementById('formNovaOS').reset();
+          showToast(`O.S. ${res.protocoloOS} registrada!`, "success");
+          buscarAtualizacoesSilenciosas();
+          mudarAba('os_gestao');
+        } else showToast("Erro ao registrar O.S.", "error");
+      }).catch(() => { btn.disabled = false; showToast("Falha de conexão.", "error"); });
+      return false;
+    }
+
+    // ---------- Cadastros ----------
+    function salvarNovoEquipamento(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      const g = id => document.getElementById(id).value.trim();
+      const btn = document.getElementById('btnSalvarCadEquip');
+      btn.disabled = true;
+      postAPI({
+        acao: "CRIAR_EQUIPAMENTO",
+        tag: g('cadTag'), serie: g('cadSerie'), patrimonio: g('cadPatrimonio'),
+        nome: g('cadNome'), modelo: g('cadModelo'), fabricante: g('cadFabricante'), acessorios: g('cadAcessorios')
+      }).then(res => {
+        btn.disabled = false;
+        if (res.status === "sucesso") {
+          document.getElementById('formNovoEquip').reset();
+          showToast("Equipamento cadastrado!", "success");
+          buscarAtualizacoesSilenciosas();
+        } else showToast("Erro ao cadastrar equipamento.", "error");
+      }).catch(() => { btn.disabled = false; showToast("Falha de conexão.", "error"); });
+      return false;
+    }
+
+    function salvarAuxiliarVinculado(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      const g = id => document.getElementById(id).value.trim();
+      const btn = document.getElementById('btnSalvarVinculoAux');
+      btn.disabled = true;
+      const payload = { acao: "CRIAR_AUXILIAR_VINCULADO", descricao: g('vinculoDescricao'), modelo: g('vinculoModelo'), fabricante: g('vinculoFabricante') };
+      postAPI(payload).then(res => {
+        btn.disabled = false;
+        if (res.status === "sucesso") {
+          (bancoDados.relacoesAuxiliares = bancoDados.relacoesAuxiliares || []).push(payload);
+          renderizarListasAuxiliares();
+          e.target.reset();
+          showToast("Vínculo cadastrado!", "success");
+          buscarAtualizacoesSilenciosas();
+        } else showToast("Erro ao cadastrar vínculo.", "error");
+      }).catch(() => { btn.disabled = false; showToast("Falha de conexão.", "error"); });
+      return false;
+    }
+
+    function renderizarListasAuxiliares() {
+      const rel = bancoDados.relacoesAuxiliares || [];
+      const uniq = k => Array.from(new Set(rel.map(r => r && r[k]).filter(Boolean))).sort();
+      const dl = (id, arr) => { const el = document.getElementById(id); if (el) el.innerHTML = arr.map(v => `<option value="${v}">`).join(''); };
+      dl('listDescricoesPadrao', uniq('descricao'));
+      dl('listModelosPadrao', uniq('modelo'));
+      dl('listFabricantesPadrao', uniq('fabricante'));
+      const tb = document.getElementById('tabelaAuxiliaresList');
+      if (tb) {
+        tb.innerHTML = rel.length
+          ? rel.map(r => `<tr><td><b>${r.descricao || '-'}</b></td><td>${r.modelo || '-'}</td><td>${r.fabricante || '-'}</td></tr>`).join('')
+          : '<tr><td colspan="3" class="td-center text-slate-500 py-6">Nenhuma combinação cadastrada.</td></tr>';
+      }
+    }
+
+    // ---------- Notificações e Dashboard ----------
+    function atualizarNotificacoes() {
+      const pend = (bancoDados.requisicoes || []).filter(r => r && (r.status || "PENDENTE").toUpperCase() === "PENDENTE");
+      const n = pend.length;
+      const badge = document.getElementById('notifBadge');
+      if (badge) { badge.innerText = n; badge.classList.toggle('hidden', n === 0); }
+      const sb = document.getElementById('sidebarReqBadge');
+      if (sb) { sb.innerText = n; sb.classList.toggle('hidden', n === 0); }
+      const ct = document.getElementById('notifCountText');
+      if (ct) ct.innerText = `${n} nova(s)`;
+      const lista = document.getElementById('notifList');
+      if (lista) {
+        lista.innerHTML = n === 0
+          ? '<div class="p-4 text-center text-slate-500 text-xs">Nenhuma pendência no momento.</div>'
+          : pend.map(r => `
+            <div class="notif-item" onclick="mudarAba('requisicoes')">
+              <div class="notif-item-title"><span>${r.protocolo}</span><span>${r.operacao || ''}</span></div>
+              <div class="notif-item-sub">${r.cliente || '-'} — ${r.equipamentoSolicitado || '-'}</div>
+            </div>`).join('');
+      }
+    }
+
+    function atualizarDashboard() {
+      const mesEl = document.getElementById('dashFiltroMes');
+      if (mesEl && !mesEl.value) mesEl.value = `${curY}-${curM}`;
+      const modo = document.getElementById('dashModoPeriodo')?.value || "MES";
+      const mes = mesEl ? mesEl.value : "";
+      const lista = (bancoDados.requisicoes || []).filter(r => {
+        if (!r) return false;
+        if (modo === "GERAL" || !mes) return true;
+        const p = String(r.dataHora || '').split(' ')[0].split('/');
+        return p.length === 3 && `${p[2]}-${p[1].padStart(2, '0')}` === mes;
+      });
+      const cont = s => lista.filter(r => (r.status || "PENDENTE").toUpperCase() === s).length;
+      const set = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v; };
+      set('dashTotalReq', lista.length);
+      set('dashPendentes', cont("PENDENTE"));
+      set('dashAtendidos', cont("ATENDIDO"));
+      set('dashRecusados', cont("RECUSADO"));
+
+      const grafico = (id, chave) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const cnt = {};
+        lista.forEach(r => { const k = (r[chave] || '-').toString(); cnt[k] = (cnt[k] || 0) + 1; });
+        const top = Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 6);
+        if (!top.length) { el.innerHTML = '<div class="text-slate-500 text-center py-6 text-xs">Sem dados para o período.</div>'; return; }
+        const max = top[0][1];
+        el.innerHTML = top.map(([k, v]) => `
+          <div class="mb-2">
+            <div class="flex justify-between text-xs mb-1"><span>${k}</span><b>${v}</b></div>
+            <div class="h-2 rounded-full bg-slate-800"><div class="h-2 rounded-full bg-sky-500" style="width:${(v / max) * 100}%"></div></div>
+          </div>`).join('');
+      };
+      grafico('chartClientes', 'cliente');
+      grafico('chartFamilias', 'equipamentoSolicitado');
+    }
+
+    // ---------- Inicialização ----------
+    document.addEventListener('keydown', ev => { if (ev.key === 'Escape') closeCalendarModal(); });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      aplicarTemaSalvo();
+      iniciarCanvasAssinatura();
+      verificarSessao();
+      buscarAtualizacoesSilenciosas();
+      setInterval(() => { if (usuarioLogado) { enviarHeartbeat(); buscarAtualizacoesSilenciosas(); } }, 60000);
+    });
+  </script>
+</body>
+</html>
