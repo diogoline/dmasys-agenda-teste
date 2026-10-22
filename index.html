@@ -509,13 +509,44 @@
     .emoji-item { font-size: 16px; cursor: pointer; padding: 4px; border-radius: 6px; }
     .emoji-item:hover { background: #1e293b; }
 
-    .conflict-pulse {
-      animation: pulseRed 2s infinite;
+    /* Cores por Tipo de Serviço na Agenda e Calendário */
+    .srv-pill-calibracao {
+      background: rgba(14, 165, 233, 0.18);
+      color: #7dd3fc;
+      border-color: rgba(14, 165, 233, 0.45);
     }
-    @keyframes pulseRed {
-      0%, 100% { box-shadow: inset 0 0 0 1px rgba(244, 63, 94, 0.6), 0 0 0 0 rgba(244, 63, 94, 0.35); }
-      50% { box-shadow: inset 0 0 0 2px rgba(244, 63, 94, 0.9), 0 0 0 5px rgba(244, 63, 94, 0); }
+    .srv-pill-termica {
+      background: rgba(245, 158, 11, 0.18);
+      color: #fcd34d;
+      border-color: rgba(245, 158, 11, 0.45);
     }
+    .srv-pill-seguranca {
+      background: rgba(168, 85, 247, 0.18);
+      color: #d8b4fe;
+      border-color: rgba(168, 85, 247, 0.45);
+    }
+    .srv-pill-preventiva {
+      background: rgba(16, 185, 129, 0.18);
+      color: #6ee7b7;
+      border-color: rgba(16, 185, 129, 0.45);
+    }
+    .srv-pill-inspecao {
+      background: rgba(99, 102, 241, 0.18);
+      color: #a5b4fc;
+      border-color: rgba(99, 102, 241, 0.45);
+    }
+    .srv-pill-conflito {
+      background: rgba(244, 63, 94, 0.25);
+      color: #fecdd3;
+      border-color: rgba(244, 63, 94, 0.6);
+    }
+
+    html.light .srv-pill-calibracao { background: #e0f2fe; color: #0369a1; border-color: #7dd3fc; }
+    html.light .srv-pill-termica { background: #fef3c7; color: #b45309; border-color: #fcd34d; }
+    html.light .srv-pill-seguranca { background: #f3e8ff; color: #7e22ce; border-color: #d8b4fe; }
+    html.light .srv-pill-preventiva { background: #d1fae5; color: #047857; border-color: #6ee7b7; }
+    html.light .srv-pill-inspecao { background: #e0e7ff; color: #4338ca; border-color: #a5b4fc; }
+    html.light .srv-pill-conflito { background: #ffe4e6; color: #be123c; border-color: #fda4af; }
 
     .nav-tab {
       display: flex;
@@ -755,6 +786,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 selection:bg-sky-500 selection:text-white">
 
+  <!-- TELA DE LOGIN -->
   <div id="loginOverlay" class="fixed inset-0 z-[99999] bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-md p-8 rounded-2xl shadow-2xl text-center relative overflow-hidden">
       <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-sky-500/25">
@@ -1031,6 +1063,7 @@
       <datalist id="listUnidadesLocacao"></datalist>
       <datalist id="listClientes"></datalist>
       <datalist id="listEquipamentos"></datalist>
+      <datalist id="listSolicitantesAgenda"></datalist>
 
       <main class="p-4 sm:p-6 flex-1">
 
@@ -1117,23 +1150,26 @@
           </div>
 
           <div class="card">
-            <div class="card-title">
+            <div class="card-title flex-wrap">
               <span><i class="fa-solid fa-calendar-plus text-sky-400 mr-1.5"></i> Novo Agendamento de Serviço Integrado</span>
-              <button type="button" onclick="openCalendarModal()" class="btn-pdf">
-                <i class="fa-solid fa-table-cells"></i> Ver Grelha Mensal &amp; Conflitos
-              </button>
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" onclick="imprimirProgramacaoAgenda('DIA')" class="btn-pdf">
+                  <i class="fa-solid fa-print"></i> Imprimir Dia
+                </button>
+                <button type="button" onclick="imprimirProgramacaoAgenda('MES')" class="btn-pdf">
+                  <i class="fa-solid fa-file-pdf"></i> Imprimir Mês
+                </button>
+                <button type="button" onclick="openCalendarModal()" class="btn-pdf">
+                  <i class="fa-solid fa-table-cells"></i> Ver Grelha Mensal &amp; Conflitos
+                </button>
+              </div>
             </div>
 
             <form id="formAgenda" onsubmit="return salvarAgendamento(event)">
               <div class="form-row">
                 <div class="form-group">
-                  <label>Setor Solicitante:</label>
-                  <select id="agSetorSol" required>
-                    <option value="QUALIDADE">Qualidade</option>
-                    <option value="REFRIGERAÇÃO">Refrigeração</option>
-                    <option value="MANUTENÇÃO">Manutenção</option>
-                    <option value="ODONTO">Odonto</option>
-                  </select>
+                  <label>Solicitante (Usuário):</label>
+                  <input type="text" id="agSetorSol" list="listSolicitantesAgenda" placeholder="Nome do solicitante..." required />
                 </div>
                 <div class="form-group">
                   <label>Setor Executante:</label>
@@ -1158,8 +1194,8 @@
 
               <div class="form-row">
                 <div class="form-group" style="flex: 2;">
-                  <label>Cliente / Hospital (Onde será o compromisso):</label>
-                  <input type="text" id="agCliente" list="listClientes" placeholder="Selecione ou digite o cliente..." required />
+                  <label>Cliente / Hospital (Local do Compromisso - Coluna J):</label>
+                  <input type="text" id="agCliente" list="listClientes" placeholder="Selecione ou digite o cliente/hospital..." required />
                 </div>
                 <div class="form-group" style="flex: 2;">
                   <label>Pesquisar Equipamento (TAG / Nome / Série):</label>
@@ -1169,19 +1205,19 @@
 
               <div class="form-row">
                 <div class="form-group" style="flex: 1;">
-                  <label>TAG:</label>
+                  <label>TAG (Coluna F):</label>
                   <input type="text" id="agTag" readonly placeholder="-" />
                 </div>
                 <div class="form-group" style="flex: 2;">
-                  <label>Equipamento:</label>
+                  <label>Equipamento (Coluna G):</label>
                   <input type="text" id="agEquipNome" readonly placeholder="-" />
                 </div>
                 <div class="form-group" style="flex: 1.5;">
-                  <label>Data e Horário:</label>
+                  <label>Data e Horário (Coluna B):</label>
                   <input type="datetime-local" id="agDataHora" oninput="validarConflitoFormularioPrincipal()" required />
                 </div>
                 <div class="form-group" style="flex: 1.5;">
-                  <label>Técnico Responsável:</label>
+                  <label>Técnico Responsável (Coluna H):</label>
                   <select id="agTecnico" onchange="validarConflitoFormularioPrincipal()" required>
                     <option value="">Selecione...</option>
                   </select>
@@ -1189,8 +1225,8 @@
               </div>
 
               <div class="form-group mb-4">
-                <label>Observações / Detalhes Adicionais:</label>
-                <input type="text" id="agObservacao" placeholder="Ex: Acessar pela portaria lateral com crachá..." />
+                <label>Observações / Detalhes Adicionais (Coluna K da Planilha):</label>
+                <input type="text" id="agObservacao" placeholder="Ex: Acessar pela portaria lateral com crachá, procurar Eng. Clínica..." />
               </div>
 
               <div id="agRealtimeConflictBox" class="mb-4 p-3 rounded-xl border border-slate-800 bg-slate-950/80 text-xs text-slate-400 flex items-center justify-between gap-3">
@@ -1212,29 +1248,43 @@
           </div>
 
           <div class="card">
-            <div class="card-title">
+            <div class="card-title flex-wrap">
               <span><i class="fa-solid fa-list-check text-sky-400 mr-1.5"></i> Painel de Controle da Agenda de Serviços</span>
-              <div class="flex items-center gap-2">
-                <input type="text" id="filtroTextoAgenda" oninput="renderizarTabelaAgenda()" placeholder="Filtrar protocolo, cliente, TAG..." class="!w-56 !py-1.5 !text-xs" />
+              <div class="flex flex-wrap items-center gap-2">
+                <input type="text" id="filtroTextoAgenda" oninput="renderizarTabelaAgenda()" placeholder="Filtrar protocolo, cliente, TAG, técnico..." class="!w-60 !py-1.5 !text-xs" />
               </div>
             </div>
+
+            <!-- Legenda de Cores por Tipo de Serviço -->
+            <div class="flex flex-wrap items-center gap-3 mb-3 px-3 py-2 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px]">
+              <span class="font-bold text-slate-400 uppercase tracking-wider mr-1"><i class="fa-solid fa-palette mr-1 text-sky-400"></i>Legenda de Serviços:</span>
+              <span class="px-2 py-0.5 rounded border srv-pill-calibracao font-semibold">● Calibração</span>
+              <span class="px-2 py-0.5 rounded border srv-pill-termica font-semibold">● Qualificação Térmica</span>
+              <span class="px-2 py-0.5 rounded border srv-pill-seguranca font-semibold">● Teste Seg. Elétrica</span>
+              <span class="px-2 py-0.5 rounded border srv-pill-preventiva font-semibold">● Manutenção Preventiva</span>
+              <span class="px-2 py-0.5 rounded border srv-pill-inspecao font-semibold">● Inspeção Técnica</span>
+              <span class="px-2 py-0.5 rounded border srv-pill-conflito font-semibold">⚠️ Conflito de Horário</span>
+            </div>
+
             <div class="table-container">
               <table>
                 <thead>
                   <tr>
                     <th class="td-center" style="width: 75px;">Protocolo</th>
-                    <th style="width: 140px;">Data / Horário</th>
+                    <th style="width: 135px;">Data / Horário</th>
                     <th>Cliente / Local</th>
-                    <th>Serviço</th>
-                    <th class="td-center" style="width: 80px;">TAG</th>
+                    <th>Solicitante &rarr; Setor</th>
+                    <th>Tipo de Serviço</th>
+                    <th class="td-center" style="width: 85px;">TAG</th>
                     <th>Equipamento</th>
                     <th>Técnico</th>
-                    <th class="td-center" style="width: 120px;">Status / Obs</th>
-                    <th class="td-center" style="width: 90px;">Grelha</th>
+                    <th>Observação</th>
+                    <th class="td-center" style="width: 100px;">Status</th>
+                    <th class="td-center" style="width: 85px;">Grelha</th>
                   </tr>
                 </thead>
                 <tbody id="corpoTabelaAgenda">
-                  <tr><td colspan="9" class="td-center text-slate-500 py-6">Carregando agendamentos...</td></tr>
+                  <tr><td colspan="11" class="td-center text-slate-500 py-6">Carregando agendamentos...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1889,7 +1939,7 @@
   <div id="calendarModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 lg:p-6">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-7xl h-[92vh] flex flex-col shadow-2xl overflow-hidden">
 
-      <div class="px-4 sm:px-6 py-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-4 bg-slate-900">
+      <div class="px-4 sm:px-6 py-3.5 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-900">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400">
             <i class="fa-solid fa-calendar-days text-lg"></i>
@@ -1901,11 +1951,22 @@
                 0 Conflitos no Mês
               </span>
             </h3>
-            <p class="text-xs text-slate-400">Visualize os agendamentos em grelha e valide choques de horário por técnico ou equipamento em tempo real.</p>
+            <p class="text-xs text-slate-400">Visualize clientes, equipamentos, cores por serviço e imprima a programação diária ou mensal.</p>
           </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Botões de Impressão Dia / Mês -->
+          <button type="button" onclick="imprimirProgramacaoAgenda('DIA')" class="px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer" title="Imprimir Programação do Dia Selecionado">
+            <i class="fa-solid fa-print"></i>
+            <span>Imprimir Dia</span>
+          </button>
+
+          <button type="button" onclick="imprimirProgramacaoAgenda('MES')" class="px-3 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer" title="Imprimir Programação do Mês Inteiro">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span>Imprimir Mês</span>
+          </button>
+
           <select id="modalTechFilter" onchange="renderCalendarGrid(); renderDayInspector();" class="!w-auto px-3 py-1.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-slate-200">
             <option value="ALL">Todos os Técnicos</option>
           </select>
@@ -1946,23 +2007,33 @@
 
           <div id="calendarGridContainer" class="flex-1 grid grid-cols-7 auto-rows-fr overflow-y-auto custom-scroll divide-x divide-y divide-slate-800/80"></div>
 
-          <div class="px-4 py-2.5 bg-slate-900 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
-            <div class="flex items-center gap-4">
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span> Agendado Normal</span>
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Conflito de Horário</span>
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Concluído</span>
+          <!-- Legenda Completa por Tipo de Serviço no Rodapé do Calendário -->
+          <div class="px-4 py-2.5 bg-slate-900 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-300">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-bold text-slate-400 mr-1">Legenda:</span>
+              <span class="px-2 py-0.5 rounded border srv-pill-calibracao">Calibração</span>
+              <span class="px-2 py-0.5 rounded border srv-pill-termica">Qualif. Térmica</span>
+              <span class="px-2 py-0.5 rounded border srv-pill-seguranca">Seg. Elétrica</span>
+              <span class="px-2 py-0.5 rounded border srv-pill-preventiva">Preventiva</span>
+              <span class="px-2 py-0.5 rounded border srv-pill-inspecao">Inspeção</span>
+              <span class="px-2 py-0.5 rounded border srv-pill-conflito">Conflito Horário</span>
             </div>
-            <span class="text-[11px] text-slate-500">Clique em qualquer dia para inspecionar ou agendar diretamente.</span>
+            <span class="text-[11px] text-slate-400">Clique num dia para ver detalhes ou agendar.</span>
           </div>
         </div>
 
         <div class="lg:col-span-4 flex flex-col bg-slate-900 overflow-hidden">
-          <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+          <div class="p-3.5 border-b border-slate-800 flex items-center justify-between">
             <div>
               <p class="text-[10px] font-bold uppercase tracking-wider text-sky-400">Inspetor de Escala Diária</p>
               <h4 id="inspectorDateTitle" class="text-sm font-bold text-white mt-0.5">--/--/----</h4>
             </div>
-            <span id="inspectorCountBadge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-300">0 serviços</span>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="imprimirProgramacaoAgenda('DIA')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-sky-400 border border-slate-700 cursor-pointer" title="Imprimir este dia">
+                <i class="fa-solid fa-print mr-1"></i>Imprimir
+              </button>
+              <span id="inspectorCountBadge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-300">0 serviços</span>
+            </div>
           </div>
 
           <div id="dayConflictBanner" class="hidden mx-4 mt-3 p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-200 text-xs space-y-1">
@@ -1975,8 +2046,8 @@
 
           <div id="inspectorEventsList" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-2.5"></div>
 
-          <!-- Formulário Rápido no Modal com Cliente e Observação -->
-          <div class="border-t border-slate-800 bg-slate-950/90 p-4 space-y-2.5">
+          <!-- Formulário Rápido no Modal com Solicitante (Usuário), Cliente e Observação -->
+          <div class="border-t border-slate-800 bg-slate-950/90 p-3.5 space-y-2">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                 <i class="fa-solid fa-bolt text-sky-400"></i> Agendar neste Dia
@@ -1985,13 +2056,8 @@
 
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="!text-[10px] !mb-1">Setor Solicitante</label>
-                <select id="modalAgSetorSol" class="!py-1.5 !text-xs">
-                  <option value="QUALIDADE">Qualidade</option>
-                  <option value="REFRIGERAÇÃO">Refrigeração</option>
-                  <option value="MANUTENÇÃO">Manutenção</option>
-                  <option value="ODONTO">Odonto</option>
-                </select>
+                <label class="!text-[10px] !mb-1">Solicitante (Usuário)</label>
+                <input type="text" id="modalAgSetorSol" list="listSolicitantesAgenda" placeholder="Seu nome..." class="!py-1.5 !text-xs" />
               </div>
               <div>
                 <label class="!text-[10px] !mb-1">Setor Executante</label>
@@ -2006,7 +2072,7 @@
 
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="!text-[10px] !mb-1">Cliente / Hospital</label>
+                <label class="!text-[10px] !mb-1">Cliente / Hospital (Local)</label>
                 <input type="text" id="modalAgCliente" list="listClientes" placeholder="Selecione o cliente..." class="!py-1.5 !text-xs" />
               </div>
               <div>
@@ -2022,7 +2088,8 @@
                   <option value="CALIBRAÇÃO">Calibração</option>
                   <option value="QUALIFICAÇÃO TÉRMICA">Qualif. Térmica</option>
                   <option value="MANUTENÇÃO PREVENTIVA">Preventiva</option>
-                  <option value="TESTE DE SEGURANÇA ELÉTRICA">Segurança Elétrica</option>
+                  <option value="TESTE DE SEGURANÇA ELÉTRICA">Seg. Elétrica</option>
+                  <option value="INSPEÇÃO TÉCNICA">Inspeção Técnica</option>
                 </select>
               </div>
               <div>
@@ -2039,10 +2106,10 @@
 
             <div>
               <label class="!text-[10px] !mb-1">Observações / Detalhes</label>
-              <input type="text" id="modalAgObservacao" placeholder="Ex: Acessar portaria lateral..." class="!py-1.5 !text-xs" />
+              <input type="text" id="modalAgObservacao" placeholder="Ex: Procurar enfermaria 2º andar..." class="!py-1.5 !text-xs" />
             </div>
 
-            <div id="modalRealtimeValidationBox" class="p-2.5 rounded-xl border text-xs flex items-center gap-2 bg-emerald-500/10 border-emerald-500/30 text-emerald-300">
+            <div id="modalRealtimeValidationBox" class="p-2 rounded-xl border text-xs flex items-center gap-2 bg-emerald-500/10 border-emerald-500/30 text-emerald-300">
               <i class="fa-solid fa-circle-check"></i>
               <span id="modalRealtimeValidationText">Horário disponível para agendamento.</span>
             </div>
@@ -2053,6 +2120,92 @@
           </div>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CÓDIGO GOOGLE APPS SCRIPT PARA AS COLUNAS A ATÉ K (J=CLIENTE, K=OBSERVAÇÃO) -->
+  <div id="modalCodigoGASAgenda" class="modal-overlay">
+    <div class="modal-box" style="width: 820px; max-width: 96vw;">
+      <div class="modal-title">
+        <span><i class="fa-solid fa-code text-sky-400 mr-2"></i> Atualização do Apps Script para Colunas J (CLIENTE) e K (OBSERVAÇÃO)</span>
+        <span onclick="fecharModalCodigoGASAgenda()" class="cursor-pointer text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></span>
+      </div>
+      <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+        <div class="p-3.5 rounded-xl bg-sky-500/10 border border-sky-500/30 text-slate-200 space-y-1">
+          <div class="font-bold text-sky-400 uppercase tracking-wider mb-1">Como atualizar na planilha do Google Drive:</div>
+          <div><b>1.</b> Na sua planilha, vá em <b>Extensões &rarr; Apps Script</b>.</div>
+          <div><b>2.</b> Substitua a leitura da <code>AGENDA</code> no <code>doGet</code> e o <code>appendRow</code> no <code>doPost</code> (seção <code>CRIAR_AGENDAMENTO</code>) pelos blocos abaixo:</div>
+        </div>
+
+        <pre id="preCodigoGASAgenda" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-[11px] font-mono text-sky-300 overflow-x-auto select-all leading-normal">
+// No doGet() -> Leitura da Agenda (Colunas A até K):
+const dadosAgenda = abaAgenda.getDataRange().getValues();
+const listaAgenda = [];
+for (let i = 1; i &lt; dadosAgenda.length; i++) {
+  const r = dadosAgenda[i];
+  if (!r[0]) continue;
+  listaAgenda.push({
+    protocolo: r[0],
+    dataHoraExibicao: r[1] ? Utilities.formatDate(new Date(r[1]), "GMT-3", "dd/MM/yyyy HH:mm") : "",
+    setorSolicitante: r[2] || "",
+    setorExecutante: r[3] || "",
+    servico: r[4] || "",
+    tag: r[5] || "",
+    equipamento: r[6] || "",
+    tecnico: r[7] || "",
+    status: r[8] || "AGENDADO",
+    cliente: r[9] || "",          // Coluna J: CLIENTE
+    observacao: r[10] || ""       // Coluna K: OBSERVAÇÃO
+  });
+}
+
+// No doPost() -> CRIAR_AGENDAMENTO:
+abaAgenda.appendRow([
+  novoProtocolo,                  // Coluna A
+  dataFormatada,                  // Coluna B
+  dados.setorSolicitante || "",   // Coluna C
+  dados.setorExecutante || "",    // Coluna D
+  dados.servico || "",            // Coluna E
+  dados.tag || "",                // Coluna F
+  dados.equipamento || "",        // Coluna G
+  dados.tecnico || "",            // Coluna H
+  "AGENDADO",                     // Coluna I
+  dados.cliente || "",            // Coluna J: CLIENTE
+  dados.observacao || ""          // Coluna K: OBSERVAÇÃO
+]);</pre>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="copiarCodigoGASAgenda()" class="btn-submit !py-2 !px-4">
+            <i class="fa-solid fa-copy"></i> Copiar Código para o Apps Script
+          </button>
+          <button type="button" onclick="fecharModalCodigoGASAgenda()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 cursor-pointer">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR CLIENTE E OBSERVAÇÃO DA AGENDA -->
+  <div id="modalEditarClienteAgenda" class="modal-overlay">
+    <div class="modal-box" style="width: 480px;">
+      <div class="modal-title">
+        <span><i class="fa-solid fa-pen-to-square text-sky-400 mr-2"></i> Definir Cliente e Observação (<span id="editAgProtocoloLabel" class="text-sky-400">-</span>)</span>
+        <span onclick="fecharModalEditarClienteAgenda()" class="cursor-pointer text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></span>
+      </div>
+      <input type="hidden" id="editAgProtocolo" value="" />
+      <div class="form-group mb-3">
+        <label>Cliente / Hospital (Coluna J):</label>
+        <input type="text" id="editAgCliente" list="listClientes" placeholder="Digite ou selecione o cliente..." />
+      </div>
+      <div class="form-group mb-4">
+        <label>Observação / Detalhes (Coluna K):</label>
+        <input type="text" id="editAgObservacao" placeholder="Digite a observação..." />
+      </div>
+      <div class="flex justify-end gap-2">
+        <button type="button" onclick="fecharModalEditarClienteAgenda()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 cursor-pointer">Cancelar</button>
+        <button type="button" onclick="salvarEdicaoClienteObsAgenda()" class="btn-submit"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
       </div>
     </div>
   </div>
@@ -2203,13 +2356,10 @@
   <div id="toastContainer" class="fixed bottom-14 left-1/2 -translate-x-1/2 z-[100000] flex flex-col gap-2 max-w-md w-full px-4 pointer-events-none"></div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzlemt_vTpfx7Qq-JQUcCNroQ0IaP3QeK4Y8Lw6tzmhWxhWvjNm8up0pHtyhi4QEyf4FA/exec";
+    let API_URL = localStorage.getItem("dmasys_custom_api_url") || "https://script.google.com/macros/s/AKfycbzlemt_vTpfx7Qq-JQUcCNroQ0IaP3QeK4Y8Lw6tzmhWxhWvjNm8up0pHtyhi4QEyf4FA/exec";
+    const SPREADSHEET_ID_AGENDA = "12kuq9JKe6s9Dpui4GPoq-fqAI0jtozO5dWcFb7xOddo";
+    const GID_ABA_AGENDA = "153961340";
     const NUMERO_WHATSAPP_SUPORTE = "5511970116092";
-
-    const todayRef = new Date();
-    const curY = todayRef.getFullYear();
-    const curM = String(todayRef.getMonth() + 1).padStart(2, '0');
-    const curD = String(todayRef.getDate()).padStart(2, '0');
 
     let bancoDados = {
       clientes: [
@@ -2230,13 +2380,13 @@
         { usuario: "fabio.bezerra", nome: "Fabrício Bezerra", online: true, ultimoAcesso: "Online agora" }
       ],
       termosEmitidos: [
-        { protocolo: "PT0018", dataHora: `${curD}/${curM}/${curY} 09:15`, cliente: "HOSPITAL SANTA CLARA", tag: "LMD-4654", equipamento: "VENTILADOR PULMONAR", tipo: "LOCAÇÃO", tecnico: "Carlos Eduardo", pdfUrl: "" }
+        { protocolo: "PT0018", dataHora: "26/10/2026 09:15", cliente: "HOSPITAL SANTA CLARA", tag: "LMD-4654", equipamento: "VENTILADOR PULMONAR", tipo: "LOCAÇÃO", tecnico: "Carlos Eduardo", pdfUrl: "" }
       ],
       requisicoes: [
-        { protocolo: "REQ-0104", dataHora: `${curD}/${curM}/${curY} 08:30`, cliente: "HOSPITAL SANTA CLARA", operacao: "LOCAÇÃO", equipamentoAntigo: "LMD-5384 - Monitor com falha PNI", equipamentoSolicitado: "MONITOR MULTIPARAMÉTRICO", motivo: "Substituição preventiva", solicitante: "Administração", status: "PENDENTE", protocoloTermo: "", pdfUrlReq: "" }
+        { protocolo: "REQ-0104", dataHora: "26/10/2026 08:30", cliente: "HOSPITAL SANTA CLARA", operacao: "LOCAÇÃO", equipamentoAntigo: "LMD-5384 - Monitor com falha PNI", equipamentoSolicitado: "MONITOR MULTIPARAMÉTRICO", motivo: "Substituição preventiva", solicitante: "Administração", status: "PENDENTE", protocoloTermo: "", pdfUrlReq: "" }
       ],
       ordensServico: [
-        { protocoloOS: "OS-8801", dataAbertura: `${curD}/${curM}/${curY} 08:00`, cliente: "HOSPITAL SANTA CLARA", tag: "LMD-4654", equipamento: "VENTILADOR PULMONAR (MONNAL T75)", tipoManutencao: "PREVENTIVA", prioridade: "ALTA", status: "ABERTA", pdfUrlOS: "" }
+        { protocoloOS: "OS-8801", dataAbertura: "26/10/2026 08:00", cliente: "HOSPITAL SANTA CLARA", tag: "LMD-4654", equipamento: "VENTILADOR PULMONAR (MONNAL T75)", tipoManutencao: "PREVENTIVA", prioridade: "ALTA", status: "ABERTA", pdfUrlOS: "" }
       ],
       relacoesAuxiliares: [
         { descricao: "VENTILADOR PULMONAR", modelo: "MONNAL T75", fabricante: "AIR LIQUIDE" },
@@ -2247,7 +2397,7 @@
       ],
       compras: [],
       agenda: [
-        { protocolo: "AG-101", dataHora: `${curY}-${curM}-${curD}T09:00`, dataHoraExibicao: `${curD}/${curM}/${curY} 09:00`, setorSolicitante: "REFRIGERAÇÃO", setorExecutante: "QUALIDADE", servico: "QUALIFICAÇÃO TÉRMICA", cliente: "HOSPITAL SANTA CLARA", tag: "LMD-4654", equipamento: "VENTILADOR PULMONAR", tecnico: "Carlos Eduardo", observacao: "Manter distanciamento", status: "AGENDADO" }
+        { protocolo: "AG-101", dataHora: "2026-10-26T09:00", dataHoraExibicao: "26/10/2026 09:00", setorSolicitante: "Carlos Eduardo", setorExecutante: "QUALIDADE", servico: "QUALIFICAÇÃO TÉRMICA", cliente: "HOSPITAL SANTA CLARA", tag: "LMD-4654", equipamento: "VENTILADOR PULMONAR", tecnico: "Carlos Eduardo", observacao: "Manter distanciamento", status: "AGENDADO" }
       ]
     };
 
@@ -2261,8 +2411,12 @@
     let timerPiscarTitulo = null;
     let ultimoTempoDigitandoEnviado = 0;
 
+    const todayRef = new Date();
     let viewYear = todayRef.getFullYear();
     let viewMonth = todayRef.getMonth();
+    const curY = todayRef.getFullYear();
+    const curM = String(todayRef.getMonth() + 1).padStart(2, '0');
+    const curD = String(todayRef.getDate()).padStart(2, '0');
     let selectedDateStr = `${curY}-${curM}-${curD}`;
 
     function showToast(message, type = 'info') {
@@ -2413,9 +2567,10 @@
       if (!atv) dropdown.classList.add('active');
     }
 
+    // Função de Acesso Rápido corrigida (Demostração)
     function acessoRapidoDemo() {
-      concluirAcessoLogin({ usuario: "admin.dma", nome: "Gestor Operacional" });
-      showToast("Sessão iniciada com sucesso no DMA SYS v2.0!", "success");
+      concluirAcessoLogin({ usuario: "admin.dma", nome: "Carlos Eduardo (Gestor)" });
+      showToast("Sessão iniciada em modo demonstração!", "success");
     }
 
     function verificarSessao() {
@@ -2482,6 +2637,7 @@
         btnL.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> ENTRAR NO SISTEMA';
       }
       preencherSelectTecnicos();
+      preencherSolicitantePadraoAgenda();
       enviarHeartbeat();
       buscarAtualizacoesSilenciosas();
     }
@@ -2728,10 +2884,13 @@
     function preencherSelectTecnicos() {
       const selects = ['selectTecnico', 'agTecnico', 'modalAgTecnico'];
       let htmlOptions = '<option value="">Selecione o técnico...</option>';
+      const nomesUsuarios = [];
+
       if (bancoDados && bancoDados.usuarios) {
         bancoDados.usuarios.forEach((u) => {
           if (u && (u.nome || u.usuario)) {
             const nomeExibir = u.nome || u.usuario;
+            nomesUsuarios.push(nomeExibir);
             htmlOptions += `<option value="${nomeExibir}">${nomeExibir}</option>`;
           }
         });
@@ -2756,18 +2915,233 @@
           }).join('');
         if (prev) modalFilter.value = prev;
       }
+
+      const dlSol = document.getElementById('listSolicitantesAgenda');
+      if (dlSol) {
+        const opcoesSol = new Set([...nomesUsuarios, 'QUALIDADE', 'REFRIGERAÇÃO', 'MANUTENÇÃO', 'ODONTO']);
+        if (usuarioLogado && (usuarioLogado.nome || usuarioLogado.usuario)) {
+          opcoesSol.add(usuarioLogado.nome || usuarioLogado.usuario);
+        }
+        dlSol.innerHTML = Array.from(opcoesSol).map(s => `<option value="${s}">`).join('');
+      }
+
+      preencherSolicitantePadraoAgenda();
+    }
+
+    function preencherSolicitantePadraoAgenda() {
+      const nomeLogado = usuarioLogado ? (usuarioLogado.nome || usuarioLogado.usuario || "") : "";
+      if (!nomeLogado) return;
+      const agSol = document.getElementById('agSetorSol');
+      if (agSol && !agSol.value) {
+        agSol.value = nomeLogado;
+      }
+      const modalSol = document.getElementById('modalAgSetorSol');
+      if (modalSol && !modalSol.value) {
+        modalSol.value = nomeLogado;
+      }
+    }
+
+    function obterCacheComplementarAgenda() {
+      try {
+        return JSON.parse(localStorage.getItem('dmasys_agenda_extra_v2') || '{}');
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function salvarCacheComplementarAgenda(chave, dadosExtra) {
+      if (!chave) return;
+      try {
+        const cache = obterCacheComplementarAgenda();
+        cache[String(chave).trim().toUpperCase()] = dadosExtra;
+        localStorage.setItem('dmasys_agenda_extra_v2', JSON.stringify(cache));
+      } catch (e) {}
+    }
+
+    function registarMultiplasChavesCacheAgenda(prot, dateStr, timeStr, tag, tecnico, dadosExtra) {
+      const tagLimpa = (tag || '').toString().trim().toUpperCase();
+      const tecLimpo = (tecnico || '').toString().trim().toUpperCase();
+      if (prot) salvarCacheComplementarAgenda(prot, dadosExtra);
+      if (dateStr && timeStr && tagLimpa) {
+        salvarCacheComplementarAgenda(`${dateStr}_${timeStr.slice(0,5)}_${tagLimpa}`, dadosExtra);
+      }
+      if (dateStr && tagLimpa && tecLimpo) {
+        salvarCacheComplementarAgenda(`${dateStr}_${tagLimpa}_${tecLimpo}`, dadosExtra);
+      }
+    }
+
+    function editarClienteObsLocalAgenda(protocolo) {
+      const lista = bancoDados.agenda || [];
+      const item = lista.find(a => a && a.protocolo === protocolo);
+      if (!item) return;
+
+      const modal = document.getElementById('modalEditarClienteAgenda');
+      if (!modal) return;
+      document.getElementById('editAgProtocolo').value = item.protocolo;
+      document.getElementById('editAgProtocoloLabel').innerText = item.protocolo;
+      document.getElementById('editAgCliente').value = item.cliente || "";
+      document.getElementById('editAgObservacao').value = item.observacao || "";
+      modal.classList.add('active');
+    }
+
+    function fecharModalEditarClienteAgenda() {
+      document.getElementById('modalEditarClienteAgenda')?.classList.remove('active');
+    }
+
+    function salvarEdicaoClienteObsAgenda() {
+      const prot = document.getElementById('editAgProtocolo').value;
+      const cli = document.getElementById('editAgCliente').value.trim();
+      const obs = document.getElementById('editAgObservacao').value.trim();
+
+      const item = (bancoDados.agenda || []).find(a => a && a.protocolo === prot);
+      if (item) {
+        item.cliente = cli;
+        item.observacao = obs;
+        const info = extrairDataHoraAgenda(item);
+        registarMultiplasChavesCacheAgenda(prot, info.dateStr, info.timeStr, item.tag, item.tecnico, {
+          cliente: cli,
+          observacao: obs,
+          setorSolicitante: item.setorSolicitante
+        });
+      }
+
+      fecharModalEditarClienteAgenda();
+      renderizarTabelaAgenda();
+      renderCalendarGrid();
+      renderDayInspector();
+      popularAutocomplete();
+      showToast(`Dados do agendamento ${prot} atualizados!`, "success");
+    }
+
+    function normalizarListaAgenda(listaBruta) {
+      if (!Array.isArray(listaBruta)) return [];
+      const cacheExtra = obterCacheComplementarAgenda();
+
+      return listaBruta.map(item => {
+        if (!item) return item;
+        const copia = Array.isArray(item) ? {
+          protocolo: item[0],
+          dataHoraExibicao: item[1],
+          setorSolicitante: item[2],
+          setorExecutante: item[3],
+          servico: item[4],
+          tag: item[5],
+          equipamento: item[6],
+          tecnico: item[7],
+          status: item[8],
+          cliente: item[9],
+          observacao: item[10]
+        } : { ...item };
+
+        const clientePlanilha = (copia.cliente || copia.CLIENTE || copia.Cliente || copia[9] || '').toString().trim();
+        const obsPlanilha = (copia.observacao || copia.OBSERVACAO || copia['OBSERVAÇÃO'] || copia.Observacao || copia[10] || '').toString().trim();
+
+        if (clientePlanilha) copia.cliente = clientePlanilha;
+        if (obsPlanilha) copia.observacao = obsPlanilha;
+
+        const chaveProt = (copia.protocolo || '').toString().trim().toUpperCase();
+        const infoData = extrairDataHoraAgenda(copia);
+        const tagUp = (copia.tag || '').toString().trim().toUpperCase();
+        const tecUp = (copia.tecnico || '').toString().trim().toUpperCase();
+
+        const extra = cacheExtra[chaveProt] || cacheExtra[`${infoData.dateStr}_${infoData.timeStr}_${tagUp}`] || cacheExtra[`${infoData.dateStr}_${tagUp}_${tecUp}`];
+
+        if (extra) {
+          if (!copia.cliente && extra.cliente) copia.cliente = extra.cliente;
+          if (!copia.observacao && extra.observacao) copia.observacao = extra.observacao;
+          if (extra.setorSolicitante && !copia.setorSolicitante) copia.setorSolicitante = extra.setorSolicitante;
+        }
+
+        return copia;
+      });
+    }
+
+    function sincronizarColunasJKDiretoDaPlanilha() {
+      if (!SPREADSHEET_ID_AGENDA) return;
+      const script = document.createElement('script');
+      script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID_AGENDA}/gviz/tq?gid=${GID_ABA_AGENDA}&headers=1&tqx=responseHandler:receberDadosGvizAgenda&t=${new Date().getTime()}`;
+      script.onload = () => script.remove();
+      script.onerror = () => script.remove();
+      document.body.appendChild(script);
+    }
+
+    window.receberDadosGvizAgenda = function(resp) {
+      if (!resp || resp.status !== 'ok' || !resp.table || !resp.table.rows) return;
+      const rows = resp.table.rows;
+      let houveAtualizacao = false;
+
+      rows.forEach(r => {
+        const c = r.c || [];
+        const getVal = (idx) => {
+          if (!c[idx]) return "";
+          if (c[idx].f !== undefined && c[idx].f !== null) return String(c[idx].f).trim();
+          if (c[idx].v !== undefined && c[idx].v !== null) return String(c[idx].v).trim();
+          return "";
+        };
+
+        const prot = getVal(0);
+        if (!prot || prot.toUpperCase() === "PROTOCOLO") return;
+
+        const clienteColJ = getVal(9); // Coluna J: CLIENTE
+        const obsColK = getVal(10);    // Coluna K: OBSERVAÇÃO
+        const solColC = getVal(2);     // Coluna C: SOLICITANTE
+
+        if (clienteColJ || obsColK) {
+          salvarCacheComplementarAgenda(prot, {
+            cliente: clienteColJ,
+            observacao: obsColK,
+            setorSolicitante: solColC
+          });
+        }
+
+        const item = (bancoDados.agenda || []).find(
+          a => a && String(a.protocolo || '').trim().toUpperCase() === prot.toUpperCase()
+        );
+        if (item) {
+          if (clienteColJ && item.cliente !== clienteColJ) {
+            item.cliente = clienteColJ;
+            houveAtualizacao = true;
+          }
+          if (obsColK && item.observacao !== obsColK) {
+            item.observacao = obsColK;
+            houveAtualizacao = true;
+          }
+        }
+      });
+
+      if (houveAtualizacao) {
+        renderizarTabelaAgenda();
+        renderCalendarGrid();
+        renderDayInspector();
+        popularAutocomplete();
+      }
+    };
+
+    function obterClasseCorServico(servico, temConflito = false) {
+      if (temConflito) return 'srv-pill-conflito';
+      const s = (servico || '').toUpperCase();
+      if (s.includes('CALIBRA')) return 'srv-pill-calibracao';
+      if (s.includes('TÉRMICA') || s.includes('TERMICA')) return 'srv-pill-termica';
+      if (s.includes('ELÉTRICA') || s.includes('ELETRICA') || s.includes('SEGURANÇA')) return 'srv-pill-seguranca';
+      if (s.includes('PREVENTIVA')) return 'srv-pill-preventiva';
+      if (s.includes('INSPEÇÃO') || s.includes('INSPECAO')) return 'srv-pill-inspecao';
+      return 'srv-pill-calibracao';
     }
 
     function carregarDadosPlanilha(data) {
       estaBuscandoDados = false;
       if (data && !data.erro) {
         bancoDados = data;
+        if (bancoDados.agenda) {
+          bancoDados.agenda = normalizarListaAgenda(bancoDados.agenda);
+        }
         const badge = document.getElementById('statusBadge');
         if (badge) {
           badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span class="hidden sm:inline">Conectado</span>';
           badge.className = "px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 cursor-pointer";
         }
         atualizarTodasAsVisoes();
+        sincronizarColunasJKDiretoDaPlanilha();
       }
     }
 
@@ -2789,6 +3163,7 @@
     function buscarAtualizacoesSilenciosas() {
       if (estaBuscandoDados) return;
       estaBuscandoDados = true;
+      sincronizarColunasJKDiretoDaPlanilha();
       const script = document.createElement('script');
       script.src = API_URL + "?callback=carregarDadosPlanilha&t=" + new Date().getTime();
       script.onload = () => script.remove();
@@ -2804,11 +3179,35 @@
     }
 
     function extrairDataHoraAgenda(item) {
-      if (item.dataHora && item.dataHora.includes('T')) {
-        const [d, t] = item.dataHora.split('T');
-        return { dateStr: d, timeStr: t.slice(0, 5) };
+      const rawExib = (item.dataHoraExibicao || "").toString().trim();
+      if (rawExib.includes('/')) {
+        const [dPart, tPart] = rawExib.split(' ');
+        const [dd, mm, yyyy] = dPart.split('/');
+        if (yyyy && mm && dd) {
+          return {
+            dateStr: `${yyyy}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`,
+            timeStr: (tPart || "09:00").slice(0, 5)
+          };
+        }
       }
-      const raw = item.dataHoraExibicao || item.dataHora || "";
+
+      if (item.dataHora && item.dataHora.includes('T')) {
+        if (!item.dataHora.endsWith('Z')) {
+          const [d, t] = item.dataHora.split('T');
+          return { dateStr: d, timeStr: t.slice(0, 5) };
+        }
+        const dt = new Date(item.dataHora);
+        if (!isNaN(dt.getTime())) {
+          const yy = dt.getFullYear();
+          const mm = String(dt.getMonth() + 1).padStart(2, '0');
+          const dd = String(dt.getDate()).padStart(2, '0');
+          const hh = String(dt.getHours()).padStart(2, '0');
+          const mi = String(dt.getMinutes()).padStart(2, '0');
+          return { dateStr: `${yy}-${mm}-${dd}`, timeStr: `${hh}:${mi}` };
+        }
+      }
+
+      const raw = (item.dataHora || "").toString().trim();
       if (raw.includes('/')) {
         const [dPart, tPart] = raw.split(' ');
         const [dd, mm, yyyy] = dPart.split('/');
@@ -2872,7 +3271,7 @@
       const box = document.getElementById('agRealtimeConflictBox');
       const icon = document.getElementById('agRealtimeIcon');
       const txt = document.getElementById('agRealtimeText');
-      if (!box || !txt) return;
+      if (!box || !txt) return [];
 
       if (!dataHora || !tecnico) {
         box.className = "mb-4 p-3 rounded-xl border border-slate-800 bg-slate-950/80 text-xs text-slate-400 flex items-center justify-between gap-3";
@@ -2901,8 +3300,8 @@
         e.stopPropagation();
       }
 
-      const setorSol = document.getElementById('agSetorSol').value;
-      const setorExe = document.getElementById('agSetorExe').value;
+      const setorSol = document.getElementById('agSetorSol').value.trim();
+      const setorExe = document.getElementById('agSetorExe').value.trim();
       const servico = document.getElementById('agServico').value;
       const cliente = document.getElementById('agCliente').value.trim();
       const tag = document.getElementById('agTag').value.trim() || document.getElementById('agBuscaEq').value.trim();
@@ -2918,7 +3317,7 @@
 
       const btn = document.getElementById('btnSalvarAgenda');
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> VALIDANDO E AGENDANDO...';
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> AGENDANDO...';
 
       const [dPart, tPart] = dataHora.split('T');
       const [yyyy, mm, dd] = dPart.split('-');
@@ -2927,15 +3326,26 @@
       const payload = {
         acao: "CRIAR_AGENDAMENTO",
         setorSolicitante: setorSol,
+        solicitante: setorSol,
         setorExecutante: setorExe,
         servico,
         cliente,
+        CLIENTE: cliente,
+        colJ: cliente,
         tag,
         equipamento: equip,
         dataHora,
         tecnico,
-        observacao
+        observacao,
+        OBSERVACAO: observacao,
+        colK: observacao
       };
+
+      registarMultiplasChavesCacheAgenda(null, dPart, tPart.slice(0, 5), tag, tecnico, {
+        cliente,
+        observacao,
+        setorSolicitante: setorSol
+      });
 
       fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
       .then(res => res.json())
@@ -2944,12 +3354,19 @@
         btn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Agendar Serviço e Validar Conflito';
 
         if (res.status === "sucesso") {
-          adicionarAgendamentoLocal(res.protocolo || `AG-${Math.floor(100 + Math.random() * 900)}`, payload, dataHoraExibicao);
+          const protGerado = res.protocolo || `AG-${Math.floor(100 + Math.random() * 900)}`;
+          registarMultiplasChavesCacheAgenda(protGerado, dPart, tPart.slice(0, 5), tag, tecnico, {
+            cliente,
+            observacao,
+            setorSolicitante: setorSol
+          });
+          adicionarAgendamentoLocal(protGerado, payload, dataHoraExibicao);
           document.getElementById('formAgenda').reset();
+          preencherSolicitantePadraoAgenda();
           document.getElementById('agTag').value = "";
           document.getElementById('agEquipNome').value = "";
           validarConflitoFormularioPrincipal();
-          showToast(`Serviço agendado com sucesso! Protocolo: ${res.protocolo || 'Gerado'}`, "success");
+          showToast(`Serviço agendado com sucesso! Protocolo: ${protGerado}`, "success");
           buscarAtualizacoesSilenciosas();
         } else {
           showToast("⚠️ " + (res.mensagem || "Conflito ou erro ao agendar."), "warning");
@@ -2959,8 +3376,14 @@
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Agendar Serviço e Validar Conflito';
         const protLocal = `AG-${Math.floor(100 + Math.random() * 900)}`;
+        registarMultiplasChavesCacheAgenda(protLocal, dPart, tPart.slice(0, 5), tag, tecnico, {
+          cliente,
+          observacao,
+          setorSolicitante: setorSol
+        });
         adicionarAgendamentoLocal(protLocal, payload, dataHoraExibicao);
         document.getElementById('formAgenda').reset();
+        preencherSolicitantePadraoAgenda();
         document.getElementById('agTag').value = "";
         document.getElementById('agEquipNome').value = "";
         validarConflitoFormularioPrincipal();
@@ -2994,7 +3417,8 @@
     function renderizarTabelaAgenda() {
       const tbody = document.getElementById('corpoTabelaAgenda');
       if (!tbody) return;
-      const lista = bancoDados.agenda || [];
+      const lista = normalizarListaAgenda(bancoDados.agenda || []);
+      bancoDados.agenda = lista;
       const filtro = (document.getElementById('filtroTextoAgenda')?.value || "").toLowerCase().trim();
 
       let totalConflitos = 0;
@@ -3016,12 +3440,12 @@
 
       const filtrada = lista.filter(a => {
         if (!filtro) return true;
-        const hay = `${a.protocolo} ${a.servico} ${a.cliente} ${a.tag} ${a.equipamento} ${a.tecnico} ${a.observacao}`.toLowerCase();
+        const hay = `${a.protocolo} ${a.servico} ${a.cliente} ${a.setorSolicitante} ${a.tag} ${a.equipamento} ${a.tecnico} ${a.observacao}`.toLowerCase();
         return hay.includes(filtro);
       });
 
       if (filtrada.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="td-center text-slate-500 py-6">Nenhum serviço agendado encontrado.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="td-center text-slate-500 py-6">Nenhum serviço agendado encontrado.</td></tr>';
         return;
       }
 
@@ -3029,23 +3453,35 @@
         const conflitos = obterConflitosParaCandidato(a, a.protocolo);
         const temConflito = conflitos.length > 0;
         const infoData = extrairDataHoraAgenda(a);
+        const corServicoClass = obterClasseCorServico(a.servico, temConflito);
 
         return `
           <tr class="${temConflito ? 'bg-rose-950/20' : ''}">
             <td class="td-center"><b>${a.protocolo || '-'}</b></td>
             <td class="font-mono text-xs text-sky-400">${a.dataHoraExibicao || infoData.dateStr + ' ' + infoData.timeStr}</td>
-            <td><b>${a.cliente || 'Não informado'}</b><br><span class="text-[10px] text-slate-400">${a.setorSolicitante} &rarr; ${a.setorExecutante}</span></td>
-            <td><b>${a.servico || '-'}</b></td>
-            <td class="td-center"><span class="px-2 py-0.5 rounded bg-slate-800 text-sky-300 font-mono text-xs">${a.tag || '-'}</span></td>
+            <td>
+              <div onclick="editarClienteObsLocalAgenda('${a.protocolo}')" class="font-bold text-sky-300 cursor-pointer hover:text-sky-200 flex items-center gap-1" title="Clique para definir ou editar Cliente e Observação">
+                <i class="fa-solid fa-hospital opacity-75"></i>
+                <span>${a.cliente || '<span class="text-slate-500 font-normal underline decoration-dotted">Não informado (Definir)</span>'}</span>
+                <i class="fa-solid fa-pen text-[10px] text-slate-500 ml-1"></i>
+              </div>
+            </td>
+            <td>
+              <span class="font-semibold">${a.setorSolicitante || '-'}</span>
+              <span class="text-slate-500 mx-1">&rarr;</span>
+              <span class="text-sky-400 font-semibold">${a.setorExecutante || '-'}</span>
+            </td>
+            <td><span class="px-2.5 py-1 rounded-lg border text-[11px] font-bold inline-block ${corServicoClass}">${a.servico || '-'}</span></td>
+            <td class="td-center"><span class="px-2 py-0.5 rounded bg-slate-800 text-sky-300 font-mono text-xs font-bold">${a.tag || '-'}</span></td>
             <td>${a.equipamento || '-'}</td>
-            <td>${a.tecnico || '-'}</td>
+            <td><b>${a.tecnico || '-'}</b></td>
+            <td onclick="editarClienteObsLocalAgenda('${a.protocolo}')" class="text-xs text-amber-300 max-w-[180px] truncate cursor-pointer hover:underline" title="Clique para editar observação: ${a.observacao || ''}">${a.observacao || '<span class="text-slate-600">-</span>'}</td>
             <td class="td-center">
               ${
                 temConflito
-                  ? `<span class="badge-status badge-recusado mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Conflito</span>`
-                  : `<span class="badge-status badge-atendido mb-1">${a.status || 'AGENDADO'}</span>`
+                  ? `<span class="badge-status badge-recusado"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Conflito</span>`
+                  : `<span class="badge-status badge-atendido">${a.status || 'AGENDADO'}</span>`
               }
-              ${a.observacao ? `<div class="text-[10px] text-amber-300 italic truncate max-w-[140px]" title="${a.observacao}">obs: ${a.observacao}</div>` : ''}
             </td>
             <td class="td-center">
               <button type="button" onclick="inspecionarDiaNoCalendario('${infoData.dateStr}')" class="btn-pdf !h-7 !px-2.5">
@@ -3060,6 +3496,7 @@
     function openCalendarModal() {
       document.getElementById('calendarModal')?.classList.remove('hidden');
       preencherSelectTecnicos();
+      preencherSolicitantePadraoAgenda();
       renderCalendarGrid();
       renderDayInspector();
       checkModalRealtimeConflict();
@@ -3163,12 +3600,11 @@
         const pillsHtml = dayEvents.slice(0, 3).map(ev => {
           const info = extrairDataHoraAgenda(ev);
           const evConflict = obterConflitosParaCandidato(ev, ev.protocolo).length > 0;
-          const cls = evConflict
-            ? 'bg-rose-500/25 text-rose-200 border-rose-500/50'
-            : 'bg-sky-500/15 text-sky-200 border-sky-500/30';
+          const cls = obterClasseCorServico(ev.servico, evConflict);
+          const labelTag = (ev.tag && ev.tag !== '-') ? ev.tag : ev.servico;
           return `
-            <div class="px-1.5 py-0.5 rounded border text-[10px] truncate font-medium ${cls}" title="${ev.cliente || ''} - ${ev.servico || ''}">
-              <span class="font-mono font-bold">${info.timeStr}</span> ${ev.tag !== '-' ? ev.tag : ev.servico}
+            <div class="px-1.5 py-0.5 rounded border text-[10px] truncate font-medium ${cls}" title="${info.timeStr} | ${ev.servico} | Cliente: ${ev.cliente || 'Não informado'} | TAG: ${ev.tag || '-'} | Téc: ${ev.tecnico || '-'}">
+              <span class="font-mono font-bold">${info.timeStr}</span> <b>${labelTag}</b>
             </div>
           `;
         }).join('');
@@ -3256,19 +3692,25 @@
         const info = extrairDataHoraAgenda(ev);
         const conflicts = obterConflitosParaCandidato(ev, ev.protocolo);
         const hasConflict = conflicts.length > 0;
+        const badgeSrvClass = obterClasseCorServico(ev.servico, hasConflict);
         return `
           <div class="p-3 rounded-xl border ${hasConflict ? 'bg-rose-950/25 border-rose-500/40' : 'bg-slate-950/70 border-slate-800'} space-y-1.5">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between gap-2">
               <span class="text-xs font-mono font-bold ${hasConflict ? 'text-rose-400' : 'text-sky-400'}">${info.timeStr} &bull; ${ev.protocolo || 'AG'}</span>
-              <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] font-mono text-slate-300">${ev.tag || '-'}</span>
+              <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] font-mono font-bold text-sky-300 border border-slate-700">${ev.tag || '-'}</span>
             </div>
-            <div class="text-xs font-bold text-white">${ev.servico}</div>
-            <div class="text-[11px] text-sky-300 font-semibold"><i class="fa-solid fa-hospital mr-1"></i>${ev.cliente || 'Local não informado'}</div>
-            <div class="text-[11px] text-slate-400">${ev.equipamento || '-'}</div>
-            ${ev.observacao ? '<div class="text-[10px] text-amber-300 italic">obs: ' + ev.observacao + '</div>' : ''}
+            <div>
+              <span class="px-2 py-0.5 rounded border text-[10px] font-bold inline-block ${badgeSrvClass}">${ev.servico || '-'}</span>
+            </div>
+            <div class="text-xs font-bold text-amber-300 flex items-center gap-1.5 bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800">
+              <i class="fa-solid fa-location-dot text-sky-400"></i>
+              <span>Cliente / Local: <b class="text-white">${ev.cliente || 'Não informado'}</b></span>
+            </div>
+            <div class="text-[11px] text-slate-300 font-medium"><i class="fa-solid fa-microchip mr-1 text-slate-500"></i>${ev.equipamento || '-'}</div>
+            ${ev.observacao ? `<div class="text-[11px] text-amber-200 bg-amber-500/10 border border-amber-500/25 px-2.5 py-1 rounded-lg"><i class="fa-solid fa-comment-dots mr-1"></i><b>Obs:</b> ${ev.observacao}</div>` : ''}
             <div class="pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
-              <span class="text-slate-300"><i class="fa-solid fa-user-gear mr-1 text-sky-400"></i>${ev.tecnico}</span>
-              <span class="text-slate-400">${ev.setorSolicitante} &rarr; ${ev.setorExecutante}</span>
+              <span class="text-slate-200 font-semibold"><i class="fa-solid fa-user-gear mr-1 text-sky-400"></i>Téc: ${ev.tecnico || '-'}</span>
+              <span class="text-slate-400"><i class="fa-solid fa-user-pen mr-1"></i>Sol: ${ev.setorSolicitante || '-'}</span>
             </div>
           </div>
         `;
@@ -3304,7 +3746,7 @@
     }
 
     function salvarAgendamentoPeloModal() {
-      const setorSol = document.getElementById('modalAgSetorSol').value;
+      const setorSol = (document.getElementById('modalAgSetorSol')?.value || "").trim() || (usuarioLogado ? (usuarioLogado.nome || usuarioLogado.usuario) : "QUALIDADE");
       const setorExe = document.getElementById('modalAgSetorExe').value;
       const servico = document.getElementById('modalAgServico').value;
       const cliente = document.getElementById('modalAgCliente').value.trim();
@@ -3314,7 +3756,7 @@
       const observacao = document.getElementById('modalAgObservacao').value.trim();
 
       if (!cliente || !rawEq || !tecnico) {
-        showToast("Informe o cliente, equipamento (TAG) e o técnico responsável.", "error");
+        showToast("Informe o cliente/local, equipamento (TAG) e o técnico responsável.", "error");
         return;
       }
 
@@ -3336,33 +3778,188 @@
       const payload = {
         acao: "CRIAR_AGENDAMENTO",
         setorSolicitante: setorSol,
+        solicitante: setorSol,
         setorExecutante: setorExe,
         servico,
         cliente,
+        CLIENTE: cliente,
+        colJ: cliente,
         tag,
         equipamento: equipNome,
         dataHora,
         tecnico,
-        observacao
+        observacao,
+        OBSERVACAO: observacao,
+        colK: observacao
       };
 
       const protLocal = `AG-${Math.floor(100 + Math.random() * 900)}`;
+      registarMultiplasChavesCacheAgenda(protLocal, selectedDateStr, hora.slice(0, 5), tag, tecnico, {
+        cliente,
+        observacao,
+        setorSolicitante: setorSol
+      });
+
       adicionarAgendamentoLocal(protLocal, payload, dataHoraExibicao);
-      
+
       document.getElementById('modalAgBuscaEq').value = "";
       document.getElementById('modalAgCliente').value = "";
       document.getElementById('modalAgObservacao').value = "";
       checkModalRealtimeConflict();
-      showToast(`Agendamento ${protLocal} registado para ${dataHoraExibicao}!`, "success");
+      showToast(`Agendamento ${protLocal} confirmado para ${dataHoraExibicao} em ${cliente}!`, "success");
 
       fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
       .then(res => res.json())
       .then(res => {
         if (res.status === "sucesso") {
+          if (res.protocolo) {
+            registarMultiplasChavesCacheAgenda(res.protocolo, selectedDateStr, hora.slice(0, 5), tag, tecnico, {
+              cliente,
+              observacao,
+              setorSolicitante: setorSol
+            });
+          }
           buscarAtualizacoesSilenciosas();
         }
       })
       .catch(() => {});
+    }
+
+    function abrirModalCodigoGASAgenda() {
+      document.getElementById('modalCodigoGASAgenda')?.classList.add('active');
+    }
+
+    function fecharModalCodigoGASAgenda() {
+      document.getElementById('modalCodigoGASAgenda')?.classList.remove('active');
+    }
+
+    function copiarCodigoGASAgenda() {
+      const pre = document.getElementById('preCodigoGASAgenda');
+      if (!pre) return;
+      const temp = document.createElement('textarea');
+      temp.value = pre.innerText;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      temp.remove();
+      showToast("Código copiado! Cole no Apps Script da sua planilha.", "success");
+    }
+
+    function imprimirProgramacaoAgenda(modo = 'DIA') {
+      const lista = normalizarListaAgenda(bancoDados.agenda || []);
+      const techFilter = document.getElementById('modalTechFilter')?.value || 'ALL';
+
+      let tituloRelatorio = "";
+      let eventosFiltrados = [];
+
+      if (modo === 'DIA') {
+        const [y, m, d] = selectedDateStr.split('-');
+        tituloRelatorio = `PROGRAMAÇÃO DIÁRIA DE SERVIÇOS — ${d}/${m}/${y}`;
+        eventosFiltrados = lista.filter(ev => {
+          const info = extrairDataHoraAgenda(ev);
+          if (info.dateStr !== selectedDateStr) return false;
+          if (techFilter !== 'ALL' && ev.tecnico !== techFilter) return false;
+          return true;
+        });
+      } else {
+        const prefixoMes = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
+        const nomeMes = new Date(viewYear, viewMonth, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase();
+        tituloRelatorio = `PROGRAMAÇÃO MENSAL DE SERVIÇOS — ${nomeMes}`;
+        eventosFiltrados = lista.filter(ev => {
+          const info = extrairDataHoraAgenda(ev);
+          if (!info.dateStr.startsWith(prefixoMes)) return false;
+          if (techFilter !== 'ALL' && ev.tecnico !== techFilter) return false;
+          return true;
+        });
+      }
+
+      eventosFiltrados.sort((a, b) => {
+        const ia = extrairDataHoraAgenda(a);
+        const ib = extrairDataHoraAgenda(b);
+        return `${ia.dateStr} ${ia.timeStr}`.localeCompare(`${ib.dateStr} ${ib.timeStr}`);
+      });
+
+      const linhasHtml = eventosFiltrados.length === 0
+        ? `<tr><td colspan="9" style="text-align:center; padding: 24px; color:#64748b;">Nenhum agendamento encontrado para este período.</td></tr>`
+        : eventosFiltrados.map(ev => {
+            const info = extrairDataHoraAgenda(ev);
+            const [yy, mm, dd] = info.dateStr.split('-');
+            return `
+              <tr>
+                <td style="font-weight:bold; text-align:center;">${ev.protocolo || '-'}</td>
+                <td style="text-align:center; font-family:monospace;">${dd}/${mm}/${yy} ${info.timeStr}</td>
+                <td style="font-weight:bold; color:#0f172a;">${ev.cliente || 'Não informado'}</td>
+                <td><b>${ev.servico || '-'}</b></td>
+                <td style="text-align:center; font-weight:bold;">${ev.tag || '-'}</td>
+                <td>${ev.equipamento || '-'}</td>
+                <td>${ev.tecnico || '-'}</td>
+                <td>${ev.setorSolicitante || '-'} &rarr; ${ev.setorExecutante || '-'}</td>
+                <td>${ev.observacao || '-'}</td>
+              </tr>
+            `;
+          }).join('');
+
+      const win = window.open('', '_blank', 'width=1100,height=800');
+      if (!win) {
+        showToast("Permita pop-ups no navegador para abrir a janela de impressão.", "warning");
+        return;
+      }
+
+      win.document.write(`
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+          <meta charset="UTF-8" />
+          <title>${tituloRelatorio}</title>
+          <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; color: #0f172a; margin: 24px; }
+            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0284c7; padding-bottom: 12px; margin-bottom: 18px; }
+            .header h1 { margin: 0; font-size: 18px; color: #0b2545; }
+            .header p { margin: 4px 0 0; font-size: 12px; color: #475569; }
+            table { width: 100%; border-collapse: collapse; font-size: 11px; }
+            th { background: #0b2545; color: #fff; padding: 8px; text-align: left; text-transform: uppercase; font-size: 10px; }
+            td { padding: 8px; border-bottom: 1px solid #cbd5e1; vertical-align: top; }
+            tr:nth-child(even) { background: #f8fafc; }
+            .no-print { margin-bottom: 16px; display: flex; gap: 10px; }
+            .btn { background: #0284c7; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+            @media print { .no-print { display: none; } body { margin: 0; } }
+          </style>
+        </head>
+        <body>
+          <div class="no-print">
+            <button class="btn" onclick="window.print()">🖨️ Imprimir / Salvar em PDF</button>
+            <button class="btn" style="background:#64748b;" onclick="window.close()">Fechar</button>
+          </div>
+          <div class="header">
+            <div>
+              <h1>DMA SYS v2.0 — ${tituloRelatorio}</h1>
+              <p>Filtro de Técnico: <b>${techFilter === 'ALL' ? 'Todos os Técnicos' : techFilter}</b> | Total de Serviços: <b>${eventosFiltrados.length}</b></p>
+            </div>
+            <div style="text-align:right; font-size:11px; color:#475569;">
+              Emitido em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}<br/>
+              Emitido por: <b>${usuarioLogado ? (usuarioLogado.nome || usuarioLogado.usuario) : 'Sistema'}</b>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width:70px; text-align:center;">Protocolo</th>
+                <th style="width:115px; text-align:center;">Data / Hora</th>
+                <th>Cliente / Local</th>
+                <th>Tipo de Serviço</th>
+                <th style="width:75px; text-align:center;">TAG</th>
+                <th>Equipamento</th>
+                <th>Técnico</th>
+                <th>Solicitante &rarr; Setor</th>
+                <th>Observações</th>
+              </tr>
+            </thead>
+            <tbody>${linhasHtml}</tbody>
+          </table>
+        </body>
+        </html>
+      `);
+      win.document.close();
     }
 
     function salvarRequisicao(e) {
@@ -3379,14 +3976,14 @@
       const solicitante = usuarioLogado ? (usuarioLogado.nome || usuarioLogado.usuario || "Solicitante") : "Solicitante";
 
       if (!cliente || !eqAntigo || !eqSolicitado) {
-        showToast("Preencha os campos obrigatórios (Cliente, Equipamento a Substituir e Equipamento Solicitado).", "error");
+        showToast("Preencha os campos obrigatórios.", "error");
         return false;
       }
 
       const btn = document.getElementById('btnSalvarReq');
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ENVIANDO REQUISIÇÃO...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ENVIANDO...';
       }
 
       const payload = {
@@ -3710,14 +4307,14 @@
       const produto = document.getElementById('compProduto').value.trim();
 
       if (!osExterna || !solicitante || !produto) {
-        showToast("Preencha os campos obrigatórios (Nº O.S. Externa, Solicitante e Produto).", "error");
+        showToast("Preencha os campos obrigatórios.", "error");
         return false;
       }
 
       const vencedor = calcularMenorPrecoCotacao();
       const btn = document.getElementById('btnSalvarCompra');
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> GERANDO COTAÇÃO...';
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> GERANDO...';
 
       const payload = {
         acao: "CRIAR_SOLICITACAO_COMPRA",
@@ -3787,7 +4384,7 @@
       const tbody = document.getElementById('corpoRequisicoes');
       if (!tbody) return;
       if (!lista || lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="td-center text-slate-500 py-6">Nenhuma requisição encontrada para o filtro selecionado.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="td-center text-slate-500 py-6">Nenhuma requisição encontrada.</td></tr>';
         return;
       }
 
@@ -4061,458 +4658,4 @@
       );
       if (eq) {
         document.getElementById('osTag').value = eq.tag || "-";
-        document.getElementById('osSerie').value = eq.serie || "-";
-        document.getElementById('osPatrimonio').value = eq.patrimonio || "-";
-        document.getElementById('osNomeEquip').value = `${eq.nome || ''} ${eq.modelo ? '(' + eq.modelo + ')' : ''}`.trim() || "-";
-      }
-    }
-
-    const canvas = document.getElementById('canvasAssinatura');
-    const ctx = canvas?.getContext('2d');
-    let desenhando = false;
-    function obterPosicao(e) {
-      const rect = canvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: clientX - rect.left, y: clientY - rect.top };
-    }
-    function iniciarDesenho(e) { desenhando = true; desenhar(e); }
-    function pararDesenho() { desenhando = false; ctx?.beginPath(); }
-    function desenhar(e) {
-      if (!desenhando || !ctx) return;
-      e.preventDefault();
-      const pos = obterPosicao(e);
-      ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#0f172a';
-      ctx.lineTo(pos.x, pos.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
-    }
-    if (canvas) {
-      canvas.addEventListener('mousedown', iniciarDesenho);
-      canvas.addEventListener('mouseup', pararDesenho);
-      canvas.addEventListener('mousemove', desenhar);
-      canvas.addEventListener('touchstart', iniciarDesenho);
-      canvas.addEventListener('touchend', pararDesenho);
-      canvas.addEventListener('touchmove', desenhar);
-    }
-    function limparAssinatura() { ctx?.clearRect(0, 0, canvas.width, canvas.height); }
-
-    function gerarTermo(e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      if (!equipamentoSelecionado) {
-        showToast("Selecione um equipamento válido.", "error");
-        return false;
-      }
-
-      const nomeTec = document.getElementById('selectTecnico').value;
-      if (!nomeTec) {
-        showToast("Selecione o técnico responsável.", "error");
-        return false;
-      }
-
-      const acessoriosList = [];
-      document.querySelectorAll('#corpoAcessorios tr').forEach((tr, idx) => {
-        const tds = tr.querySelectorAll('td');
-        if (tds.length >= 3 && !tr.innerText.includes("NÃO POSSUI")) {
-          const inputQtd = tr.querySelector('.qtd-acessorio');
-          acessoriosList.push({
-            item: idx + 1,
-            qtd: inputQtd ? (parseInt(inputQtd.value) || 1) : 1,
-            descricao: tds[2].innerText.trim(),
-            conformidade: "CONFORME"
-          });
-        }
-      });
-
-      const payload = {
-        acao: "CRIAR_TERMO",
-        cliente: document.getElementById('inputCliente').value,
-        equipamento: equipamentoSelecionado,
-        tipoOperacao: document.querySelector('input[name="tipoOperacao"]:checked').value,
-        acessorios: acessoriosList,
-        tecnico: { nome: nomeTec },
-        assinaturaCliente: canvas ? canvas.toDataURL() : "",
-        protocoloReq: document.getElementById('reqVinculadaProtocolo').value
-      };
-
-      const btn = document.getElementById('btnEnviar');
-      btn.disabled = true;
-      btn.innerText = "GERANDO PDF NO SERVIDOR...";
-
-      fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-      .then(res => res.json())
-      .then(res => {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Gerar Termo Duplo PDF (Entrega + Higienização)';
-        const prot = res.protocolo || `PT00${(bancoDados.termosEmitidos?.length || 20) + 1}`;
-        bancoDados.termosEmitidos.unshift({
-          protocolo: prot,
-          dataHora: new Date().toLocaleDateString('pt-BR'),
-          cliente: payload.cliente,
-          tag: equipamentoSelecionado.tag,
-          equipamento: equipamentoSelecionado.nome,
-          tipo: payload.tipoOperacao,
-          tecnico: nomeTec,
-          pdfUrl: res.pdfUrl || ""
-        });
-        desvincularRequisicao();
-        document.getElementById('termoForm').reset();
-        limparAssinatura();
-        equipamentoSelecionado = null;
-        renderizarTabelaTermos(bancoDados.termosEmitidos);
-        showToast(`Termo ${prot} gerado com sucesso!`, "success");
-        if (res.pdfUrl) window.open(res.pdfUrl, '_blank');
-        mudarAba('consulta');
-      })
-      .catch(() => {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Gerar Termo Duplo PDF (Entrega + Higienização)';
-        const prot = `PT00${(bancoDados.termosEmitidos?.length || 20) + 1}`;
-        bancoDados.termosEmitidos.unshift({
-          protocolo: prot,
-          dataHora: new Date().toLocaleDateString('pt-BR'),
-          cliente: payload.cliente,
-          tag: equipamentoSelecionado.tag,
-          equipamento: equipamentoSelecionado.nome,
-          tipo: payload.tipoOperacao,
-          tecnico: nomeTec,
-          pdfUrl: ""
-        });
-        desvincularRequisicao();
-        document.getElementById('termoForm').reset();
-        limparAssinatura();
-        equipamentoSelecionado = null;
-        renderizarTabelaTermos(bancoDados.termosEmitidos);
-        showToast(`Termo ${prot} registado no histórico!`, "success");
-        mudarAba('consulta');
-      });
-
-      return false;
-    }
-
-    function renderizarTabelaOS() {
-      const tbody = document.getElementById('corpoOS');
-      if (!tbody) return;
-      const listaOS = bancoDados.ordensServico || [];
-      const statusFiltro = document.getElementById('filtroStatusOS')?.value || "TODOS";
-      const textoFiltro = (document.getElementById('filtroTextoOS')?.value || "").toLowerCase().trim();
-
-      const filtradas = listaOS.filter(os => {
-        if (!os) return false;
-        const st = (os.status || "").toUpperCase();
-        if (statusFiltro !== "TODOS" && st !== statusFiltro) return false;
-        if (textoFiltro) {
-          const hay = `${os.protocoloOS} ${os.cliente} ${os.tag} ${os.equipamento}`.toLowerCase();
-          if (!hay.includes(textoFiltro)) return false;
-        }
-        return true;
-      });
-
-      if (filtradas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="td-center text-slate-500 py-6">Nenhuma O.S. encontrada para os filtros.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = filtradas.map(os => `
-        <tr>
-          <td class="td-center"><b>${os.protocoloOS || '-'}</b></td>
-          <td>${os.dataAbertura || '-'}</td>
-          <td>${os.cliente || '-'}</td>
-          <td class="td-center"><b>${os.tag || '-'}</b></td>
-          <td>${os.equipamento || '-'}</td>
-          <td class="td-center">${os.tipoManutencao || '-'}</td>
-          <td class="td-center"><b>${os.prioridade || '-'}</b></td>
-          <td class="td-center"><span class="badge-status ${os.status === 'CONCLUÍDA' ? 'badge-atendido' : 'badge-pendente'}">${os.status || 'ABERTA'}</span></td>
-          <td class="td-center">
-            ${os.pdfUrlOS ? `<a href="${os.pdfUrlOS}" target="_blank" class="btn-pdf"><i class="fa-solid fa-file-pdf"></i> PDF</a>` : '-'}
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    function salvarNovaOS(e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      const cliente = document.getElementById('osCliente').value.trim();
-      const tipo = document.getElementById('osTipo').value;
-      const prioridade = document.getElementById('osPrioridade').value;
-      const tag = document.getElementById('osTag').value.trim() || document.getElementById('osBuscaEquip').value.trim();
-      const equip = document.getElementById('osNomeEquip').value.trim() || tag;
-      const solicitante = document.getElementById('osSolicitante').value.trim();
-      const tecnico = document.getElementById('osTecnico').value.trim();
-      const defeito = document.getElementById('osDefeito').value.trim();
-      const diagnostico = document.getElementById('osDiagnostico').value.trim();
-      const servico = document.getElementById('osServico').value.trim();
-
-      if (!cliente || !solicitante || !defeito) {
-        showToast("Preencha os campos obrigatórios da O.S.", "error");
-        return false;
-      }
-
-      const payload = {
-        acao: "CRIAR_OS",
-        cliente,
-        tipoManutencao: tipo,
-        prioridade,
-        tag,
-        equipamento: equip,
-        solicitante,
-        tecnico,
-        defeitoRelatado: defeito,
-        diagnosticoTecnico: diagnostico,
-        servicoRealizado: servico
-      };
-
-      const prot = `OS-${Math.floor(8805 + Math.random() * 900)}`;
-      bancoDados.ordensServico.unshift({
-        protocoloOS: prot,
-        dataAbertura: new Date().toLocaleDateString('pt-BR'),
-        cliente,
-        tag,
-        equipamento: equip,
-        tipoManutencao: tipo,
-        prioridade,
-        status: "ABERTA",
-        pdfUrlOS: ""
-      });
-
-      document.getElementById('formNovaOS').reset();
-      showToast(`Ordem de Serviço ${prot} registrada com sucesso!`, "success");
-      mudarAba('os_gestao');
-
-      fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(() => buscarAtualizacoesSilenciosas()).catch(() => {});
-      return false;
-    }
-
-    function salvarNovoEquipamento(e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      const tag = document.getElementById('cadTag').value.trim().toUpperCase();
-      const serie = document.getElementById('cadSerie').value.trim();
-      const patrimonio = document.getElementById('cadPatrimonio').value.trim();
-      const nome = document.getElementById('cadNome').value.trim().toUpperCase();
-      const modelo = document.getElementById('cadModelo').value.trim().toUpperCase();
-      const fabricante = document.getElementById('cadFabricante').value.trim().toUpperCase();
-      const acessorios = document.getElementById('cadAcessorios').value.trim();
-
-      if (!tag || !nome) {
-        showToast("Informe a TAG e a descrição do equipamento.", "error");
-        return false;
-      }
-
-      bancoDados.equipamentos.unshift({ tag, serie, patrimonio, nome, modelo, fabricante, acessorios });
-      popularAutocomplete();
-      document.getElementById('formNovoEquip').reset();
-      showToast(`Equipamento ${tag} (${nome}) cadastrado com sucesso!`, "success");
-
-      fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ acao: "CADASTRAR_EQUIPAMENTO", tag, serie, patrimonio, nome, modelo, fabricante, acessorios })
-      }).catch(() => {});
-      return false;
-    }
-
-    function salvarAuxiliarVinculado(e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      const descricao = document.getElementById('vinculoDescricao').value.trim().toUpperCase();
-      const modelo = document.getElementById('vinculoModelo').value.trim().toUpperCase();
-      const fabricante = document.getElementById('vinculoFabricante').value.trim().toUpperCase();
-      if (!descricao || !modelo || !fabricante) return false;
-
-      bancoDados.relacoesAuxiliares.unshift({ descricao, modelo, fabricante });
-      renderizarListasAuxiliares();
-      document.getElementById('vinculoDescricao').value = "";
-      document.getElementById('vinculoModelo').value = "";
-      document.getElementById('vinculoFabricante').value = "";
-      showToast("Combinação padrão cadastrada!", "success");
-      return false;
-    }
-
-    function renderizarTabelaTermos(lista) {
-      const tbody = document.getElementById('corpoTermos');
-      if (!tbody) return;
-      const filtroVal = (document.getElementById('filtroTermos')?.value || "").toLowerCase().trim();
-      let dadosExibir = lista || [];
-      if (filtroVal) {
-        dadosExibir = dadosExibir.filter(t =>
-          t && `${t.protocolo} ${t.cliente} ${t.tag} ${t.equipamento} ${t.tecnico}`.toLowerCase().includes(filtroVal)
-        );
-      }
-
-      if (dadosExibir.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="td-center text-slate-500 py-6">Nenhum termo encontrado.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = dadosExibir.map(t => `
-        <tr>
-          <td class="td-center"><b>${t.protocolo || '-'}</b></td>
-          <td>${t.dataHora || '-'}</td>
-          <td>${t.cliente || '-'}</td>
-          <td class="td-center"><b>${t.tag || '-'}</b></td>
-          <td>${t.equipamento || '-'}</td>
-          <td class="td-center">${t.tipo || '-'}</td>
-          <td>${t.tecnico || '-'}</td>
-          <td class="td-center">
-            ${t.pdfUrl ? `<button type="button" class="btn-pdf" onclick="abrirModalVisualizadorReq('${t.pdfUrl}', 'Visualizar Termo: ${t.protocolo}')"><i class="fa-solid fa-file-pdf"></i> PDF</button>` : '<span class="text-xs text-slate-500">Registado</span>'}
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    function renderizarListasAuxiliares() {
-      const rels = bancoDados.relacoesAuxiliares || [];
-      const descricoesUnicas = Array.from(new Set(rels.map(r => r ? r.descricao : '').filter(Boolean))).sort();
-      const dlDesc = document.getElementById('listDescricoesPadrao');
-      if (dlDesc) dlDesc.innerHTML = descricoesUnicas.map(d => `<option value="${d}">`).join('');
-
-      const tbody = document.getElementById('tabelaAuxiliaresList');
-      if (tbody) {
-        tbody.innerHTML = rels.length === 0
-          ? '<tr><td colspan="3" class="td-center text-slate-500 py-6">Nenhuma combinação registrada.</td></tr>'
-          : rels.map(r => `<tr><td><b>${r.descricao || '-'}</b></td><td>${r.modelo || "-"}</td><td>${r.fabricante || "-"}</td></tr>`).join('');
-      }
-    }
-
-    function atualizarDashboard() {
-      if (!bancoDados || !bancoDados.requisicoes) return;
-      const modo = document.getElementById('dashModoPeriodo')?.value || "MES";
-      const mesFiltro = document.getElementById('dashFiltroMes')?.value || "";
-      let reqs = bancoDados.requisicoes || [];
-
-      if (modo === "MES" && mesFiltro) {
-        reqs = reqs.filter(r => {
-          if (!r || !r.dataHora) return false;
-          const partesData = String(r.dataHora).split(' ')[0].split('/');
-          if (partesData.length === 3) {
-            return `${partesData[2]}-${partesData[1].padStart(2, '0')}` === mesFiltro;
-          }
-          return true;
-        });
-      }
-
-      document.getElementById('dashTotalReq').innerText = reqs.length;
-      let pendentes = 0, atendidos = 0, recusados = 0;
-      const contagemClientes = {};
-      const contagemFamilias = {};
-
-      reqs.forEach(r => {
-        const st = (r.status || "PENDENTE").toUpperCase();
-        if (st === "PENDENTE") pendentes++;
-        else if (st === "ATENDIDO") atendidos++;
-        else if (st === "RECUSADO") recusados++;
-
-        const cli = r.cliente || "Não informado";
-        contagemClientes[cli] = (contagemClientes[cli] || 0) + 1;
-        const eq = r.equipamentoSolicitado || "Diversos";
-        contagemFamilias[eq] = (contagemFamilias[eq] || 0) + 1;
-      });
-
-      document.getElementById('dashPendentes').innerText = pendentes;
-      document.getElementById('dashAtendidos').innerText = atendidos;
-      document.getElementById('dashRecusados').innerText = recusados;
-
-      const renderBars = (elId, obj, colorClass) => {
-        const container = document.getElementById(elId);
-        if (!container) return;
-        const top = Object.entries(obj).sort((a, b) => b[1] - a[1]).slice(0, 5);
-        if (top.length === 0) {
-          container.innerHTML = '<div class="text-slate-500 text-center py-6 text-xs">Sem dados para o período.</div>';
-          return;
-        }
-        const maxVal = top[0][1] || 1;
-        container.innerHTML = top.map(([nome, qtd]) => {
-          const pct = Math.round((qtd / maxVal) * 100);
-          return `
-            <div class="mb-3">
-              <div class="flex justify-between text-xs font-bold mb-1">
-                <span class="text-slate-200">${nome}</span>
-                <span class="text-sky-400">${qtd} reqs</span>
-              </div>
-              <div class="bg-slate-800 rounded-full h-2 overflow-hidden">
-                <div class="${colorClass} h-full rounded-full" style="width: ${pct}%;"></div>
-              </div>
-            </div>
-          `;
-        }).join('');
-      };
-
-      renderBars('chartClientes', contagemClientes, 'bg-sky-500');
-      renderBars('chartFamilias', contagemFamilias, 'bg-indigo-500');
-    }
-
-    function atualizarNotificacoes() {
-      if (!bancoDados || !bancoDados.requisicoes) return;
-      const pendentes = bancoDados.requisicoes.filter(r => r && (r.status || '').toUpperCase() === "PENDENTE");
-      const badge = document.getElementById('notifBadge');
-      const sbReqBadge = document.getElementById('sidebarReqBadge');
-      const textCount = document.getElementById('notifCountText');
-      const listContainer = document.getElementById('notifList');
-
-      if (sbReqBadge) {
-        sbReqBadge.classList.toggle('hidden', pendentes.length === 0);
-        sbReqBadge.innerText = pendentes.length;
-      }
-
-      if (!badge || !textCount || !listContainer) return;
-
-      if (pendentes.length > 0) {
-        badge.innerText = pendentes.length;
-        badge.classList.remove('hidden');
-        textCount.innerText = `${pendentes.length} pendente(s)`;
-        listContainer.innerHTML = pendentes.map(p => `
-          <div class="notif-item" onclick="irParaRequisicaoEspecifica(event, '${p.protocolo}')">
-            <div class="notif-item-title">
-              <span>${p.protocolo || '-'}</span>
-              <span class="text-amber-400"><i class="fa-solid fa-clock"></i> Pendente</span>
-            </div>
-            <div class="notif-item-sub"><b>${p.cliente || '-'}</b></div>
-            <div class="notif-item-sub">${p.equipamentoSolicitado || '-'}</div>
-          </div>
-        `).join('');
-      } else {
-        badge.innerText = "0";
-        badge.classList.add('hidden');
-        textCount.innerText = "0 pendentes";
-        listContainer.innerHTML = '<div class="p-4 text-center text-slate-500 text-xs">Nenhuma pendência no momento.</div>';
-      }
-    }
-
-    function irParaRequisicaoEspecifica(e, protocolo) {
-      if (e) e.stopPropagation();
-      fecharTodosDropdowns();
-      if (document.getElementById('filtroStatusReq')) document.getElementById('filtroStatusReq').value = "PENDENTE";
-      if (document.getElementById('filtroTextoReq')) document.getElementById('filtroTextoReq').value = protocolo || "";
-      mudarAba('requisicoes');
-      filtrarRequisicoes();
-    }
-
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeCalendarModal();
-    });
-
-    window.onload = function() {
-      aplicarTemaSalvo();
-      const mesFormatado = `${curY}-${curM}`;
-      if (document.getElementById('filtroMesReq')) document.getElementById('filtroMesReq').value = mesFormatado;
-      if (document.getElementById('dashFiltroMes')) document.getElementById('dashFiltroMes').value = mesFormatado;
-      if (document.getElementById('agDataHora')) document.getElementById('agDataHora').value = `${curY}-${curM}-${curD}T09:00`;
-
-      atualizarTodasAsVisoes();
-      verificarSessao();
-      buscarAtualizacoesSilenciosas();
-
-      setInterval(buscarAtualizacoesSilenciosas, 30000);
-      setInterval(enviarHeartbeat, 15000);
-    };
-  </script>
-</body>
-</html>
+        document.getElementById('osSerie').value = eq.serie || "-
