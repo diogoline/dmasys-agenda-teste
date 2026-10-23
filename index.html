@@ -6,7 +6,9 @@
   <title>DMA SYS v2.0 - Gestão de Termos, Requisições, O.S., Locação, Compras e Agenda</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>  
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
     * {
@@ -2355,52 +2357,31 @@ abaAgenda.appendRow([
 
   <div id="toastContainer" class="fixed bottom-14 left-1/2 -translate-x-1/2 z-[100000] flex flex-col gap-2 max-w-md w-full px-4 pointer-events-none"></div>
 
-  <script>
+    <script>
     let API_URL = localStorage.getItem("dmasys_custom_api_url") || "https://script.google.com/macros/s/AKfycbzlemt_vTpfx7Qq-JQUcCNroQ0IaP3QeK4Y8Lw6tzmhWxhWvjNm8up0pHtyhi4QEyf4FA/exec";
     const SPREADSHEET_ID_AGENDA = "12kuq9JKe6s9Dpui4GPoq-fqAI0jtozO5dWcFb7xOddo";
     const GID_ABA_AGENDA = "153961340";
     const NUMERO_WHATSAPP_SUPORTE = "5511970116092";
 
-    let bancoDados = {
-      clientes: [
-        "HOSPITAL SANTA CLARA",
-        "MATERNIDADE SÃO LUCAS",
-        "UNIDADE DE PRONTO ATENDIMENTO CENTRAL",
-        "INSTITUTO CARDIOLÓGICO PAULISTA"
-      ],
-      equipamentos: [
-        { tag: "LMD-4654", nome: "VENTILADOR PULMONAR", modelo: "MONNAL T75", fabricante: "AIR LIQUIDE", serie: "2329918", patrimonio: "00412", acessorios: "CABO DE FORÇA; CIRCUITO PACIENTE ADULTO; SENSOR DE FLUXO" },
-        { tag: "LMD-5384", nome: "MONITOR MULTIPARAMÉTRICO", modelo: "B40", fabricante: "GE HEALTHCARE", serie: "8849201", patrimonio: "00589", acessorios: "CABO ECG 5 VIAS; SENSOR SPO2; MANGUITO PNI ADULTO" },
-        { tag: "LMD-6102", nome: "BOMBA DE INFUSÃO", modelo: "INFUSOMAT COMPACT", fabricante: "B.BRAUN", serie: "9910234", patrimonio: "00711", acessorios: "CABO DE FORÇA; SUPORTE DE SORO" },
-        { tag: "LMD-7019", nome: "DESFIBRILADOR / CARDIOVERSOR", modelo: "HEARTSTART XL+", fabricante: "PHILIPS", serie: "4412098", patrimonio: "00890", acessorios: "PÁS EXTERNAS ADULTO/INFANTIL; CABO ECG 3 VIAS; CABO DE FORÇA" }
-      ],
-      usuarios: [
-        { usuario: "carlos.eduardo", nome: "Carlos Eduardo", online: true, ultimoAcesso: "Online agora" },
-        { usuario: "ana.beatriz", nome: "Ana Beatriz", online: true, ultimoAcesso: "Online agora" },
-        { usuario: "fabio.bezerra", nome: "Fabrício Bezerra", online: true, ultimoAcesso: "Online agora" }
-      ],
-      termosEmitidos: [
-        { protocolo: "PT0018", dataHora: "26/10/2026 09:15", cliente: "HOSPITAL SANTA CLARA", tag: "LMD-4654", equipamento: "VENTILADOR PULMONAR", tipo: "LOCAÇÃO", tecnico: "Carlos Eduardo", pdfUrl: "" }
-      ],
-      requisicoes: [
-        { protocolo: "REQ-0104", dataHora: "26/10/2026 08:30", cliente: "HOSPITAL SANTA CLARA", operacao: "LOCAÇÃO", equipamentoAntigo: "LMD-5384 - Monitor com falha PNI", equipamentoSolicitado: "MONITOR MULTIPARAMÉTRICO", motivo: "Substituição preventiva", solicitante: "Administração", status: "PENDENTE", protocoloTermo: "", pdfUrlReq: "" }
-      ],
-      ordensServico: [
-        { protocoloOS: "OS-8801", dataAbertura: "26/10/2026 08:00", cliente: "HOSPITAL SANTA CLARA", tag: "LMD-4654", equipamento: "VENTILADOR PULMONAR (MONNAL T75)", tipoManutencao: "PREVENTIVA", prioridade: "ALTA", status: "ABERTA", pdfUrlOS: "" }
-      ],
-      relacoesAuxiliares: [
-        { descricao: "VENTILADOR PULMONAR", modelo: "MONNAL T75", fabricante: "AIR LIQUIDE" },
-        { descricao: "MONITOR MULTIPARAMÉTRICO", modelo: "B40", fabricante: "GE HEALTHCARE" }
-      ],
-      locacoes: [
-        { id: "LOC-01", cliente: "HOSPITAL SANTA CLARA", contrato: "CTR-2026/01", unidade: "UTI Geral Adulto", localizacao: "São Paulo - SP", equipamento: "VENTILADOR PULMONAR", qtdContratada: 20, qtdFisica: 18, saldo: 2, situacao: "ATIVO", valorUnitario: 1450, valorTotal: 26100 }
-      ],
-      compras: [],
-      agenda: [
-        { protocolo: "AG-101", dataHora: "2026-10-26T09:00", dataHoraExibicao: "26/10/2026 09:00", setorSolicitante: "Carlos Eduardo", setorExecutante: "QUALIDADE", servico: "QUALIFICAÇÃO TÉRMICA", cliente: "HOSPITAL SANTA CLARA", tag: "LMD-4654", equipamento: "VENTILADOR PULMONAR", tecnico: "Carlos Eduardo", observacao: "Manter distanciamento", status: "AGENDADO" }
-      ]
-    };
+    // 1. LIGAÇÃO AO SUPABASE (Insira sua chave anon do painel do Supabase abaixo)
+    const supabaseUrl = 'https://ohyeskqzrpxdfrciyjjz.supabase.co';
+    const supabaseKey = 'sb_publishable_ru60PVN-ZqAKasY20UQcFQ_MZiXD0VW';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
+    
+    let bancoDados = {
+      clientes: [],
+      equipamentos: [],
+      usuarios: [],
+      termosEmitidos: [],
+      requisicoes: [],
+      ordensServico: [],
+      relacoesAuxiliares: [],
+      locacoes: [],
+      compras: [],
+      agenda: []
+    };
+            
     let equipamentoSelecionado = null;
     let protocoloReqEmVinculo = null;
     let protocoloReqEmRecusa = null;
@@ -2418,6 +2399,50 @@ abaAgenda.appendRow([
     const curM = String(todayRef.getMonth() + 1).padStart(2, '0');
     const curD = String(todayRef.getDate()).padStart(2, '0');
     let selectedDateStr = `${curY}-${curM}-${curD}`;
+
+    async function buscarAtualizacoesSilenciosas() {
+     if (estaBuscandoDados) return;
+     estaBuscandoDados = true;
+
+     try {
+       const [req, os, ag, loc, com, ter, eq, usr, aux] = await Promise.all([
+         supabase.from('requisicoes').select('*'),
+         supabase.from('ordens_servico').select('*'),
+         supabase.from('agenda').select('*'),
+         supabase.from('locacoes').select('*'),
+         supabase.from('compras').select('*'),
+         supabase.from('termos_emitidos').select('*'),
+         supabase.from('equipamentos').select('*'),
+         supabase.from('usuarios').select('*'),
+         supabase.from('cad_auxiliares').select('*')
+       ]);
+
+       bancoDados = {
+         requisicoes: req.data || [],
+         ordensServico: os.data || [],
+         agenda: ag.data || [],
+         locacoes: loc.data || [],
+         compras: com.data || [],
+         termosEmitidos: ter.data || [],
+         equipamentos: eq.data || [],
+         usuarios: usr.data || [],
+         relacoesAuxiliares: aux.data || [],
+         clientes: [...new Set((loc.data || []).map(l => l.cliente).filter(Boolean))]
+       };
+
+       const badge = document.getElementById('statusBadge');
+       if (badge) {
+         badge.innerHTML = '<i class="fa-solid fa-bolt"></i> <span class="hidden sm:inline">Supabase Online</span>';
+         badge.className = "px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 cursor-pointer";
+       }
+
+       atualizarTodasAsVisoes();
+     } catch (err) {
+       console.error("Erro ao sincronizar com Supabase:", err);
+     } finally {
+       estaBuscandoDados = false;
+     }
+   }
 
     function showToast(message, type = 'info') {
       const container = document.getElementById('toastContainer');
