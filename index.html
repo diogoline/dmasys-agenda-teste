@@ -2614,8 +2614,8 @@ abaAgenda.appendRow([
       document.getElementById('appContainer').style.display = "none";
     }
 
-    async function efetuarLogin() {
-      const usr = document.getElementById('loginUsuario').value.trim().toLowerCase();
+    function efetuarLogin() {
+      const usr = document.getElementById('loginUsuario').value.trim();
       const pass = document.getElementById('loginSenha').value.trim();
       const divErro = document.getElementById('loginErro');
       const btn = document.getElementById('btnEntrarLogin');
@@ -2628,36 +2628,29 @@ abaAgenda.appendRow([
 
       divErro.classList.add("hidden");
       btn.disabled = true;
-      btn.innerText = "AUTENTICANDO NO SUPABASE...";
+      btn.innerText = "VALIDANDO ACESSO...";
 
-      try {
-        // Consulta direta e segura na tabela 'usuarios' do Supabase
-        const { data: usuario, error } = await supabase
-          .from('usuarios')
-          .select('*')
-          .eq('usuario', usr)
-          .eq('senha', pass)
-          .single();
-
-        if (error || !usuario) {
-          throw new Error("Usuário ou senha incorretos.");
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ acao: "VERIFICAR_LOGIN", usuario: usr, senha: pass })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status === "sucesso" && res.usuario) {
+          concluirAcessoLogin(res.usuario);
+        } else {
+          divErro.innerText = res.mensagem || "Usuário ou senha incorretos.";
+          divErro.classList.remove("hidden");
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> ENTRAR NO SISTEMA';
         }
-
-        // Sucesso! Atualiza o último acesso e entra no sistema
-        await supabase.from('usuarios').update({ ultimo_acesso: new Date().toISOString() }).eq('id', usuario.id);
-        
-        concluirAcessoLogin({
-          usuario: usuario.usuario,
-          nome: usuario.nome,
-          assinaturaUrl: usuario.assinatura_url || ""
-        });
-
-      } catch (err) {
-        divErro.innerText = "Usuário ou senha incorretos.";
+      })
+      .catch(() => {
+        divErro.innerText = "Não foi possível conectar ao servidor. Verifique a internet e a implantação do Apps Script.";
         divErro.classList.remove("hidden");
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> ENTRAR NO SISTEMA';
-      }
+      });
     }
 
     function concluirAcessoLogin(usuario) {
