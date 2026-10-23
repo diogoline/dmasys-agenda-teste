@@ -2635,21 +2635,13 @@ abaAgenda.appendRow([
       btn.innerText = "VALIDANDO ACESSO...";
 
       try {
-        const { data, error } = await supabaseClient
-          .from('usuarios')
-          .select('id,nome,usuario,assinatura_url,ativo')
-          .ilike('usuario', usr)
-          .eq('senha', pass)
-          .eq('ativo', true)
-          .limit(1);
+        const { data, error } = await supabaseClient.rpc('login_usuario', { p_usuario: usr, p_senha: pass });
+        console.log("login_usuario ->", { data, error });
 
         if (error) throw error;
 
-        if (data && data.length > 0) {
-          const u = data[0];
-          supabaseClient.from('usuarios')
-            .update({ ultimo_acesso: new Date().toISOString() })
-            .eq('id', u.id).then(() => {});
+        if (data && data.usuario) {
+          const u = data;
           concluirAcessoLogin({
             nome: u.nome || u.usuario.toUpperCase(),
             usuario: u.usuario,
