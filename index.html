@@ -4111,31 +4111,7 @@ abaAgenda.appendRow([
         }
       }
 
-      return false;
-    }
-    
-        if (!bancoDados.requisicoes) bancoDados.requisicoes = [];
-        bancoDados.requisicoes.unshift(novaReq);
-
-        filtrarRequisicoes();
-        atualizarNotificacoes();
-        atualizarDashboard();
-        showToast(`Requisição ${protocolo} salva com sucesso no Supabase!`, "success");
-        buscarAtualizacoesSilenciosas();
-
-      } catch (err) {
-        console.error("Erro ao salvar requisição:", err);
-        showToast("Erro ao salvar no Supabase: " + (err.message || err), "error");
-      } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Requisição e Gerar PDF';
-        }
-      }
-
-      return false;
-    }
-
+      
     function abrirModalVisualizadorReq(pdfUrl, titulo) {
       const modal = document.getElementById('modalVisualizadorReq');
       const iframe = document.getElementById('iframeVisualizadorReq');
