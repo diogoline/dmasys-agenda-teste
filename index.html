@@ -3193,25 +3193,7 @@ abaAgenda.appendRow([
       try { renderizarUsuariosOnline(); } catch(e) {}
       try { renderizarListasAuxiliares(); } catch(e) {}
     }
-
-    function buscarAtualizacoesSilenciosas() {
-      if (estaBuscandoDados) return;
-      estaBuscandoDados = true;
-      sincronizarColunasJKDiretoDaPlanilha();
-      const script = document.createElement('script');
-      script.src = API_URL + "?callback=carregarDadosPlanilha&t=" + new Date().getTime();
-      script.onload = () => script.remove();
-      script.onerror = () => {
-        script.remove();
-        estaBuscandoDados = false;
-        const badge = document.getElementById('statusBadge');
-        if (badge) {
-          badge.innerHTML = '<i class="fa-solid fa-cloud-bolt"></i> <span class="hidden sm:inline">Modo Híbrido</span>';
-        }
-      };
-      document.body.appendChild(script);
-    }
-
+  
     function extrairDataHoraAgenda(item) {
       const rawExib = (item.dataHoraExibicao || "").toString().trim();
       if (rawExib.includes('/')) {
