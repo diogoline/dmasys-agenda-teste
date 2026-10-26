@@ -4079,6 +4079,57 @@ abaAgenda.appendRow([
 
         if (error) throw error;
 
+        /**
+     * =====================================================================
+     * MÓDULO DE REQUISIÇÕES: Salvar Requisição Diretamente no Supabase
+     * =====================================================================
+     */
+    async function salvarRequisicao(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      const cliente = document.getElementById('reqCliente').value.trim();
+      const operacao = document.querySelector('input[name="reqOperacao"]:checked')?.value || "LOCAÇÃO";
+      const eqAntigo = document.getElementById('reqEqAntigo').value.trim();
+      const eqSolicitado = document.getElementById('reqEqSolicitado').value.trim();
+      const motivo = document.getElementById('reqMotivo').value.trim();
+      const solicitante = usuarioLogado ? (usuarioLogado.nome || usuarioLogado.usuario || "Solicitante") : "Solicitante";
+
+      if (!cliente || !eqAntigo || !eqSolicitado) {
+        showToast("Preencha os campos obrigatórios.", "error");
+        return false;
+      }
+
+      const btn = document.getElementById('btnSalvarReq');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> SALVANDO NO SUPABASE...';
+      }
+
+      try {
+        // 1. Gera o próximo protocolo seguro diretamente no Supabase
+        const protocolo = await proximoProtocolo('requisicoes', 'protocolo', 'REQ', 4);
+        const agoraIso = new Date().toISOString();
+
+        // 2. Insere o registro na tabela 'requisicoes'
+        const { error } = await supabaseClient.from('requisicoes').insert({
+          protocolo,
+          data_hora: agoraIso,
+          cliente,
+          operacao,
+          equipamento_antigo: eqAntigo,
+          equipamento_solicitado: eqSolicitado,
+          motivo,
+          solicitante,
+          status: "PENDENTE",
+          protocolo_termo: "",
+          pdf_url: ""
+        });
+
+        if (error) throw error;
+
         // 3. Atualiza a interface local e coloca o item no topo (.unshift)
         document.getElementById('formReq').reset();
         const novaReq = {
@@ -4091,9 +4142,31 @@ abaAgenda.appendRow([
           motivo,
           solicitante,
           status: "PENDENTE",
-          protocolo_termo: "",
+          protocoloTermo: "",
           pdfUrlReq: ""
         };
+
+        if (!bancoDados.requisicoes) bancoDados.requisicoes = [];
+        bancoDados.requisicoes.unshift(novaReq);
+
+        filtrarRequisicoes();
+        atualizarNotificacoes();
+        atualizarDashboard();
+        showToast(`Requisição ${protocolo} salva com sucesso no Supabase!`, "success");
+        buscarAtualizacoesSilenciosas();
+
+      } catch (err) {
+        console.error("Erro ao salvar requisição:", err);
+        showToast("Erro ao salvar no Supabase: " + (err.message || err), "error");
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Requisição e Gerar PDF';
+        }
+      }
+
+      return false;
+    }
 
         if (!bancoDados.requisicoes) bancoDados.requisicoes = [];
         bancoDados.requisicoes.unshift(novaReq);
