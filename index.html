@@ -3996,12 +3996,23 @@ abaAgenda.appendRow([
       win.document.close();
     }
 
-    function salvarRequisicao(e) {
+    /**
+     * =====================================================================
+     * MÓDULO DE REQUISIÇÕES: Salvar Requisição Diretamente no Supabase
+     * =====================================================================
+     * Responsável por:
+     * 1. Validar os campos do formulário.
+     * 2. Gerar um novo protocolo único sequencial (ex: REQ0047).
+     * 3. Inserir o registro diretamente na tabela 'requisicoes' do Supabase.
+     * 4. Atualizar a interface instantaneamente colocando o item no topo.
+     */
+    async function salvarRequisicao(e) {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
 
+      // 1. Coleta e limpa os dados preenchidos pelo usuário no formulário
       const cliente = document.getElementById('reqCliente').value.trim();
       const operacao = document.querySelector('input[name="reqOperacao"]:checked')?.value || "LOCAÇÃO";
       const eqAntigo = document.getElementById('reqEqAntigo').value.trim();
@@ -4009,72 +4020,46 @@ abaAgenda.appendRow([
       const motivo = document.getElementById('reqMotivo').value.trim();
       const solicitante = usuarioLogado ? (usuarioLogado.nome || usuarioLogado.usuario || "Solicitante") : "Solicitante";
 
+      // 2. Validação básica de preenchimento obrigatório
       if (!cliente || !eqAntigo || !eqSolicitado) {
         showToast("Preencha os campos obrigatórios.", "error");
         return false;
       }
 
+      // 3. Feedback visual no botão de envio
       const btn = document.getElementById('btnSalvarReq');
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ENVIANDO...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> SALVANDO NO SUPABASE...';
       }
 
-      const payload = {
-        acao: "CRIAR_REQUISICAO",
-        cliente,
-        operacao,
-        equipamentoAntigo: eqAntigo,
-        equipamentoSolicitado: eqSolicitado,
-        motivo,
-        solicitante
-      };
+      try {
+        // 4. Gera o próximo protocolo único no banco (ex: REQ0047)
+        const protocolo = await proximoProtocolo('requisicoes', 'protocolo', 'REQ', 4);
+        const agoraIso = new Date().toISOString();
 
-      fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-      .then(res => res.json())
-      .then(res => {
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Requisição e Gerar PDF';
-        }
-        if (res.status === "sucesso") {
-          document.getElementById('formReq').reset();
-          const novaReq = {
-            protocolo: res.protocoloReq || res.protocolo || `REQ-${Math.floor(100 + Math.random()*900)}`,
-            dataHora: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
-            cliente,
-            operacao,
-            equipamentoAntigo: eqAntigo,
-            equipamentoSolicitado: eqSolicitado,
-            motivo,
-            solicitante,
-            status: "PENDENTE",
-            protocoloTermo: "",
-            pdfUrlReq: res.pdfUrlReq || res.pdfUrl || ""
-          };
-          if (!bancoDados.requisicoes) bancoDados.requisicoes = [];
-          bancoDados.requisicoes.unshift(novaReq);
-          filtrarRequisicoes();
-          atualizarNotificacoes();
-          atualizarDashboard();
-          showToast(`Requisição ${novaReq.protocolo} criada com sucesso!`, "success");
-          if (novaReq.pdfUrlReq) {
-            abrirModalVisualizadorReq(novaReq.pdfUrlReq, "Visualizar Requisição: " + novaReq.protocolo);
-          }
-          buscarAtualizacoesSilenciosas();
-        } else {
-          showToast("Erro ao enviar requisição: " + (res.mensagem || "Erro desconhecido."), "error");
-        }
-      })
-      .catch(() => {
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Requisição e Gerar PDF';
-        }
-        const prot = `REQ-${Math.floor(200 + Math.random() * 800)}`;
-        bancoDados.requisicoes.unshift({
-          protocolo: prot,
-          dataHora: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
+        // 5. Executa a inserção diretamente no Supabase (Sem Google Sheets)
+        const { error } = await supabaseClient.from('requisicoes').insert({
+          protocolo,
+          data_hora: agoraIso,
+          cliente,
+          operacao,
+          equipamento_antigo: eqAntigo,
+          equipamento_solicitado: eqSolicitado,
+          motivo,
+          solicitante,
+          status: "PENDENTE",
+          protocolo_termo: "",
+          pdf_url: ""
+        });
+
+        if (error) throw error;
+
+        // 6. Limpa o formulário e monta o objeto local
+        document.getElementById('formReq').reset();
+        const novaReq = {
+          protocolo,
+          dataHora: fmtBR(agoraIso),
           cliente,
           operacao,
           equipamentoAntigo: eqAntigo,
@@ -4082,15 +4067,33 @@ abaAgenda.appendRow([
           motivo,
           solicitante,
           status: "PENDENTE",
-          protocoloTermo: "",
+          protocolo_termo: "",
           pdfUrlReq: ""
-        });
-        document.getElementById('formReq').reset();
+        };
+
+        // 7. Adiciona o novo registro no TOPO da lista local (.unshift)
+        if (!bancoDados.requisicoes) bancoDados.requisicoes = [];
+        bancoDados.requisicoes.unshift(novaReq);
+
+        // 8. Atualiza os componentes visuais da tela
         filtrarRequisicoes();
         atualizarNotificacoes();
         atualizarDashboard();
-        showToast(`Requisição ${prot} registada!`, "success");
-      });
+        showToast(`Requisição ${protocolo} salva com sucesso no Supabase!`, "success");
+        
+        // Sincroniza silenciosamente com o banco para garantir consistência
+        buscarAtualizacoesSilenciosas();
+
+      } catch (err) {
+        console.error("Erro ao salvar requisição no Supabase:", err);
+        showToast("Erro ao salvar no Supabase: " + (err.message || err), "error");
+      } finally {
+        // Restaura o botão ao estado original
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Requisição e Gerar PDF';
+        }
+      }
 
       return false;
     }
