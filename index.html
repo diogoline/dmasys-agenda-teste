@@ -2400,6 +2400,30 @@ abaAgenda.appendRow([
     const curD = String(todayRef.getDate()).padStart(2, '0');
     let selectedDateStr = `${curY}-${curM}-${curD}`;
 
+        // Converte colunas snake_case do Supabase para camelCase (mantém as originais)
+    function paraCamel(rows) {
+      return (rows || []).map(r => {
+        const o = { ...r };
+        for (const k in r) {
+          const c = k.replace(/_([a-z0-9])/g, (_, ch) => ch.toUpperCase());
+          if (!(c in o)) o[c] = r[k];
+        }
+        return o;
+      });
+    }
+
+    // Formata data ISO para dd/mm/aaaa hh:mm (horário de Brasília)
+    function fmtBR(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d)) return String(iso);
+      return d.toLocaleString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      }).replace(',', '');
+    }
+
     async function buscarAtualizacoesSilenciosas() {
      if (estaBuscandoDados) return;
      estaBuscandoDados = true;
@@ -2417,18 +2441,18 @@ abaAgenda.appendRow([
          supabaseClient.from('cad_auxiliares').select('*')
        ]);
 
-       bancoDados = {
-         requisicoes: req.data || [],
-         ordensServico: os.data || [],
-         agenda: ag.data || [],
-         locacoes: loc.data || [],
-         compras: com.data || [],
-         termosEmitidos: ter.data || [],
-         equipamentos: eq.data || [],
-         usuarios: usr.data || [],
-         relacoesAuxiliares: aux.data || [],
-         clientes: [...new Set((loc.data || []).map(l => l.cliente).filter(Boolean))]
-       };
+         bancoDados = {
+          requisicoes: paraCamel(req.data).map(r => ({ ...r, dataHora: fmtBR(r.data_hora) })),
+          ordensServico: paraCamel(os.data),
+          agenda: paraCamel(ag.data),
+          locacoes: paraCamel(loc.data),
+          compras: paraCamel(com.data),
+          termosEmitidos: paraCamel(ter.data),
+          equipamentos: paraCamel(eq.data),
+          usuarios: paraCamel(usr.data),
+          relacoesAuxiliares: paraCamel(aux.data),
+          clientes: [...new Set((loc.data || []).map(l => l.cliente).filter(Boolean))]
+        };
 
        const badge = document.getElementById('statusBadge');
        if (badge) {
