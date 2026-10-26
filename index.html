@@ -4006,13 +4006,31 @@ abaAgenda.appendRow([
      * 3. Inserir o registro diretamente na tabela 'requisicoes' do Supabase.
      * 4. Atualizar a interface instantaneamente colocando o item no topo.
      */
+    /**
+     * Auxiliar: Gera o próximo protocolo sequencial (ex: REQ0047) diretamente no Supabase.
+     */
+    async function proximoProtocolo(tabela, coluna, prefixo, largura) {
+      const { data, error } = await supabaseClient.from(tabela).select(coluna)
+        .ilike(coluna, prefixo + '%').order(coluna, { ascending: false }).limit(1000);
+      if (error) throw error;
+      const re = new RegExp('^' + prefixo + '-?(\\d+)$', 'i');
+      let max = 0;
+      (data || []).forEach(r => {
+        const m = re.exec(str_(r[coluna]).trim());
+        if (m) max = Math.max(max, parseInt(m[1], 10));
+      });
+      return prefixo + String(max + 1).padStart(largura, '0');
+    }
+
+    /**
+     * MÓDULO DE REQUISIÇÕES: Salva a requisição diretamente na tabela 'requisicoes' do Supabase.
+     */
     async function salvarRequisicao(e) {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
 
-      // 1. Coleta e limpa os dados preenchidos pelo usuário no formulário
       const cliente = document.getElementById('reqCliente').value.trim();
       const operacao = document.querySelector('input[name="reqOperacao"]:checked')?.value || "LOCAÇÃO";
       const eqAntigo = document.getElementById('reqEqAntigo').value.trim();
@@ -4020,13 +4038,11 @@ abaAgenda.appendRow([
       const motivo = document.getElementById('reqMotivo').value.trim();
       const solicitante = usuarioLogado ? (usuarioLogado.nome || usuarioLogado.usuario || "Solicitante") : "Solicitante";
 
-      // 2. Validação básica de preenchimento obrigatório
       if (!cliente || !eqAntigo || !eqSolicitado) {
         showToast("Preencha os campos obrigatórios.", "error");
         return false;
       }
 
-      // 3. Feedback visual no botão de envio
       const btn = document.getElementById('btnSalvarReq');
       if (btn) {
         btn.disabled = true;
@@ -4034,11 +4050,11 @@ abaAgenda.appendRow([
       }
 
       try {
-        // 4. Gera o próximo protocolo único no banco (ex: REQ0047)
+        // 1. Gera o próximo protocolo seguro diretamente no Supabase
         const protocolo = await proximoProtocolo('requisicoes', 'protocolo', 'REQ', 4);
         const agoraIso = new Date().toISOString();
 
-        // 5. Executa a inserção diretamente no Supabase (Sem Google Sheets)
+        // 2. Insere o registro na tabela 'requisicoes'
         const { error } = await supabaseClient.from('requisicoes').insert({
           protocolo,
           data_hora: agoraIso,
@@ -4055,7 +4071,7 @@ abaAgenda.appendRow([
 
         if (error) throw error;
 
-        // 6. Limpa o formulário e monta o objeto local
+        // 3. Atualiza a interface local e coloca o item no topo (.unshift)
         document.getElementById('formReq').reset();
         const novaReq = {
           protocolo,
@@ -4071,24 +4087,19 @@ abaAgenda.appendRow([
           pdfUrlReq: ""
         };
 
-        // 7. Adiciona o novo registro no TOPO da lista local (.unshift)
         if (!bancoDados.requisicoes) bancoDados.requisicoes = [];
         bancoDados.requisicoes.unshift(novaReq);
 
-        // 8. Atualiza os componentes visuais da tela
         filtrarRequisicoes();
         atualizarNotificacoes();
         atualizarDashboard();
         showToast(`Requisição ${protocolo} salva com sucesso no Supabase!`, "success");
-        
-        // Sincroniza silenciosamente com o banco para garantir consistência
         buscarAtualizacoesSilenciosas();
 
       } catch (err) {
-        console.error("Erro ao salvar requisição no Supabase:", err);
+        console.error("Erro ao salvar requisição:", err);
         showToast("Erro ao salvar no Supabase: " + (err.message || err), "error");
       } finally {
-        // Restaura o botão ao estado original
         if (btn) {
           btn.disabled = false;
           btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Requisição e Gerar PDF';
