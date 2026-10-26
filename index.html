@@ -4009,6 +4009,14 @@ abaAgenda.appendRow([
     /**
      * Auxiliar: Gera o próximo protocolo sequencial (ex: REQ0047) diretamente no Supabase.
      */
+    /**
+     * Auxiliar: Converte valores nulos ou indefinidos em string vazia de forma segura.
+     */
+    const str_ = v => (v === null || v === undefined) ? "" : String(v);
+
+    /**
+     * Auxiliar: Gera o próximo protocolo sequencial (ex: REQ0047) diretamente no Supabase.
+     */
     async function proximoProtocolo(tabela, coluna, prefixo, largura) {
       const { data, error } = await supabaseClient.from(tabela).select(coluna)
         .ilike(coluna, prefixo + '%').order(coluna, { ascending: false }).limit(1000);
