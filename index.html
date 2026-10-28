@@ -1931,7 +1931,7 @@
 
       <footer class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 text-slate-400 text-[11px] px-5 py-2.5 flex justify-between items-center z-40">
         <div><b class="text-white">DMA SYS</b> v2.0 | Sistema de Gestão Operacional</div>
-        <div>Ambiente Integrado Google Drive &amp; Apps Script</div>
+        <div>Ambiente Integrado Supabase</div>
       </footer>
 
     </div>
@@ -2358,15 +2358,682 @@ abaAgenda.appendRow([
   <div id="toastContainer" class="fixed bottom-14 left-1/2 -translate-x-1/2 z-[100000] flex flex-col gap-2 max-w-md w-full px-4 pointer-events-none"></div>
 
     <script>
-    let API_URL = localStorage.getItem("dmasys_custom_api_url") || "https://script.google.com/macros/s/AKfycbzlemt_vTpfx7Qq-JQUcCNroQ0IaP3QeK4Y8Lw6tzmhWxhWvjNm8up0pHtyhi4QEyf4FA/exec";
-    const SPREADSHEET_ID_AGENDA = "12kuq9JKe6s9Dpui4GPoq-fqAI0jtozO5dWcFb7xOddo";
-    const GID_ABA_AGENDA = "153961340";
     const NUMERO_WHATSAPP_SUPORTE = "5511970116092";
 
     // 1. LIGAÇÃO AO SUPABASE (Insira sua chave anon do painel do Supabase abaixo)
     const supabaseUrl = 'https://ohyeskqzrpxdfrciyjjz.supabase.co';
     const supabaseKey = 'sb_publishable_ru60PVN-ZqAKasY20UQcFQ_MZiXD0VW';
     const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // =====================================================================
+    // CAMADA DE DADOS SUPABASE (substitui o Google Apps Script / planilha)
+    // =====================================================================
+    const TZ_BR = 'America/Sao_Paulo';
+    const BUCKET_DOCS = 'documentos';
+
+    function fmtBR(v, comSegundos) {
+      if (!v) return "";
+      const d = new Date(v);
+      if (isNaN(d.getTime())) return String(v);
+      const p = {};
+      new Intl.DateTimeFormat('pt-BR', {
+        timeZone: TZ_BR, day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+      }).formatToParts(d).forEach(x => { p[x.type] = x.value; });
+      const hh = p.hour === '24' ? '00' : p.hour;
+      return `${p.day}/${p.month}/${p.year} ${hh}:${p.minute}` + (comSegundos ? `:${p.second}` : '');
+    }
+
+    function horaBR(v) {
+      const s = fmtBR(v);
+      return s ? s.split(' ')[1] : "";
+    }
+
+    function dataHoraParaISO(v) {
+      const s = String(v || "").trim();
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(s)) {
+        return (s.length === 16 ? s + ":00" : s) + "-03:00";
+      }
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+    }
+
+    const str_ = v => (v === null || v === undefined) ? "" : String(v);
+    const up_ = v => str_(v).trim().toUpperCase();
+
+    // ---------- Mapeadores: linha do banco (snake_case) -> objeto da interface ----------
+    const mapa = {
+      equipamento: r => ({ tag: str_(r.tag).trim(), serie: str_(r.serie), patrimonio: str_(r.patrimonio), nome: str_(r.nome), modelo: str_(r.modelo), fabricante: str_(r.fabricante), acessorios: str_(r.acessorios) }),
+      termo: r => ({ protocolo: str_(r.protocolo), dataHora: fmtBR(r.data_hora), cliente: str_(r.cliente), tag: str_(r.tag), equipamento: str_(r.equipamento), tipo: str_(r.tipo_operacao), tecnico: str_(r.tecnico), pdfUrl: str_(r.pdf_url), logErro: str_(r.log_erro) }),
+      requisicao: r => ({ protocolo: str_(r.protocolo), dataHora: fmtBR(r.data_hora), cliente: str_(r.cliente), operacao: str_(r.operacao), equipamentoAntigo: str_(r.equipamento_antigo), equipamentoSolicitado: str_(r.equipamento_solicitado), motivo: str_(r.motivo), solicitante: str_(r.solicitante), status: up_(r.status) || "PENDENTE", protocoloTermo: str_(r.protocolo_termo), pdfUrlReq: str_(r.pdf_url) }),
+      os: r => ({ protocoloOS: str_(r.protocolo), dataAbertura: fmtBR(r.data_abertura), cliente: str_(r.cliente), tag: str_(r.tag), serie: str_(r.serie), patrimonio: str_(r.patrimonio), equipamento: str_(r.equipamento), tipoManutencao: str_(r.tipo_manutencao), prioridade: str_(r.prioridade), solicitante: str_(r.solicitante), tecnico: str_(r.tecnico), defeitoRelatado: str_(r.defeito_relatado), diagnosticoTecnico: str_(r.diagnostico_tecnico), servicoRealizado: str_(r.servico_realizado), status: str_(r.status) || "ABERTA", pdfUrlOS: str_(r.pdf_url), anexosUrl: str_(r.anexos_url) }),
+      aux: r => ({ descricao: str_(r.descricao), modelo: str_(r.modelo), fabricante: str_(r.fabricante) }),
+      locacao: r => ({ id: str_(r.id), cliente: str_(r.cliente), contrato: str_(r.contrato), unidade: str_(r.unidade), localizacao: str_(r.localizacao), equipamento: str_(r.equipamento), qtdContratada: Number(r.qtd_contratada) || 0, qtdFisica: Number(r.qtd_fisica) || 0, saldo: Number(r.saldo) || 0, situacao: up_(r.situacao) || "ATIVO", valorUnitario: Number(r.valor_unitario) || 0, valorTotal: Number(r.valor_total) || 0, observacaoLog: str_(r.observacao_log) }),
+      compra: r => ({ protocolo: str_(r.protocolo), dataHora: fmtBR(r.data_hora), osExterna: str_(r.os_externa), solicitante: str_(r.solicitante), produto: str_(r.produto), fornVencedor: str_(r.forn_vencedor), menorValor: Number(r.menor_valor) || 0, status: up_(r.status) || "PENDENTE", pdfUrlCompra: str_(r.pdf_url) }),
+      agenda: r => ({ protocolo: str_(r.protocolo), dataHoraExibicao: fmtBR(r.data_hora), setorSolicitante: str_(r.setor_solicitante), setorExecutante: str_(r.setor_executante), servico: str_(r.servico), tag: str_(r.tag), equipamento: str_(r.equipamento), tecnico: str_(r.tecnico), status: up_(r.status) || "AGENDADO", cliente: str_(r.cliente), observacao: str_(r.observacao) }),
+      usuario: r => ({ nome: str_(r.nome) || str_(r.usuario).toUpperCase(), usuario: str_(r.usuario), assinaturaUrl: str_(r.assinatura_url), ultimoAcesso: fmtBR(r.ultimo_acesso), online: !!r.ultimo_acesso && (Date.now() - new Date(r.ultimo_acesso).getTime()) < 120000 })
+    };
+
+    async function lerTabela(nome, ordem, asc) {
+      let q = supabaseClient.from(nome).select('*');
+      if (ordem) q = q.order(ordem, { ascending: asc !== false });
+      const { data, error } = await q.range(0, 4999);
+      if (error) { console.error("Erro ao ler " + nome + ":", error); return { rows: [], erro: error }; }
+      return { rows: data || [], erro: null };
+    }
+
+    async function lerUsuarios() {
+      const { data, error } = await supabaseClient.rpc('listar_usuarios');
+      if (!error && Array.isArray(data)) return data;
+      if (error) console.warn("listar_usuarios indisponível, tentando leitura direta:", error.message);
+      const r = await supabaseClient.from('usuarios').select('nome,usuario,assinatura_url,ultimo_acesso,ativo');
+      return r.data || [];
+    }
+
+    // ---------- Protocolos sequenciais (REQ0001, PT0001, ...) ----------
+    async function proximoProtocolo(tabela, coluna, prefixo, largura) {
+      const { data, error } = await supabaseClient.from(tabela).select(coluna)
+        .ilike(coluna, prefixo + '%').order(coluna, { ascending: false }).limit(1000);
+      if (error) throw error;
+      const re = new RegExp('^' + prefixo + '-?(\\d+)$', 'i');
+      let max = 0;
+      (data || []).forEach(r => {
+        const m = re.exec(str_(r[coluna]).trim());
+        if (m) max = Math.max(max, parseInt(m[1], 10));
+      });
+      return prefixo + String(max + 1).padStart(largura, '0');
+    }
+
+    async function inserirComProtocolo(tabela, coluna, prefixo, largura, montar) {
+      for (let i = 0; i < 4; i++) {
+        const protocolo = await proximoProtocolo(tabela, coluna, prefixo, largura);
+        const { error } = await supabaseClient.from(tabela).insert(montar(protocolo));
+        if (!error) return protocolo;
+        if (error.code !== '23505') throw error;
+      }
+      throw new Error("Não foi possível gerar um protocolo único. Tente novamente.");
+    }
+
+    // ---------- PDFs gerados no navegador e guardados no Supabase Storage ----------
+    const PDF_LOGO_URL_ORIG = "https://lh3.googleusercontent.com/d/1HXyjKck77LqnlnSTGXDRq28EM_eYQg8r";
+    let PDF_LOGO_SRC = PDF_LOGO_URL_ORIG;
+    const PDF_AZUL = "#1e3a8a", PDF_BORDA = "#cbd5e1", PDF_BORDA_FORTE = "#94a3b8",
+          PDF_FUNDO = "#f1f5f9", PDF_TEXTO = "#1e293b", PDF_CINZA = "#64748b";
+    const PDF_RODAPE_TXT =
+      "LINEMED COMÉRCIO E MANUTENÇÃO DE EQUIPAMENTOS HOSPITALARES LTDA ME<br/>" +
+      "AV. FELIPE CARRILLO PUERTO, Nº 35 - JD. IAE | CNPJ: 08.407.651/0001-02<br/>" +
+      "TELS: (11) 5851-3087 / (11) 5824-5317 | MANUTENCAO@LINEMEDHOSPITALAR.COM.BR";
+
+
+    // ---------- Geradores de HTML dos PDFs (portados do Apps Script) ----------
+    function pdfEsc_(v) {
+      return String(v === null || v === undefined ? "" : v)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    function pdfLbl_(txt, largura) {
+      return "<td bgcolor='" + PDF_FUNDO + "' style='background:" + PDF_FUNDO + "; border:1px solid " + PDF_BORDA + "; padding:5px 7px; " +
+        "font-size:7px; font-weight:bold; letter-spacing:0.6px; color:" + PDF_CINZA + ";" + (largura ? " width:" + largura + ";" : "") + "'>" + txt + "</td>";
+    }
+
+    function pdfVal_(txt, colspan, largura, fs) {
+      return "<td" + (colspan ? " colspan='" + colspan + "'" : "") + " style='border:1px solid " + PDF_BORDA + "; padding:5px 7px; " +
+        "font-size:" + (fs || 9.5) + "px; font-weight:bold; color:#0f172a;" + (largura ? " width:" + largura + ";" : "") + "'>" + txt + "</td>";
+    }
+
+    function pdfTituloSecao_(txt) {
+      return "<div style='font-size:10px; font-weight:bold; color:" + PDF_AZUL + "; letter-spacing:1px; " +
+        "border-bottom:1px solid " + PDF_AZUL + "; padding-bottom:4px; margin:20px 0 10px 0;'>" + txt + "</div>";
+    }
+
+    function pdfBlocoReq_(rotulo, valor) {
+      return "<table width='100%' style='margin-bottom:10px;'>" +
+        "<tr>" + pdfLbl_(rotulo) + "</tr>" +
+        "<tr><td style='border:1px solid " + PDF_BORDA + "; border-left:3px solid " + PDF_AZUL + "; padding:9px 10px; " +
+        "font-size:11.5px; font-weight:bold; color:#0f172a;'>" + (valor || "NÃO INFORMADO") + "</td></tr></table>";
+    }
+
+    function pdfCabecalhoTermo_(titulo, dados, dataStr) {
+      var eq = dados.equipamento || {};
+      var cli = pdfEsc_((dados.cliente || "").toUpperCase());
+      var op = pdfEsc_((dados.tipoOperacao || "").toUpperCase());
+      var tag = pdfEsc_((eq.tag || "-").toUpperCase());
+      var serie = pdfEsc_((eq.serie || "-").toUpperCase());
+      var pat = pdfEsc_((eq.patrimonio || "-").toUpperCase());
+      var nome = pdfEsc_((eq.nome || "-").toUpperCase());
+
+      return "<table width='100%' style='border-bottom:1px solid " + PDF_AZUL + ";'><tr>" +
+          "<td style='vertical-align:middle; padding:0 0 6px 0;'>" +
+            "<div style='font-size:14px; font-weight:bold; color:" + PDF_AZUL + "; letter-spacing:0.4px;'>" + titulo + "</div>" +
+            "<div style='font-size:8px; font-weight:bold; color:" + PDF_CINZA + "; margin-top:3px;'>LINEMED HOSPITALAR</div>" +
+          "</td>" +
+          "<td style='vertical-align:middle; text-align:right; width:125px; padding:0 0 6px 0;'><img src='" + PDF_LOGO_SRC + "' style='width:110px;'/></td>" +
+        "</tr></table>" +
+
+        "<table width='100%' style='margin:9px 0 9px 0;'>" +
+          "<tr>" + pdfLbl_("PROTOCOLO", "13%") + pdfVal_(pdfEsc_(dados.protocolo), 0, "20%") +
+                   pdfLbl_("DATA / HORA", "13%") + pdfVal_(dataStr, 3, "54%") + "</tr>" +
+          "<tr>" + pdfLbl_("CLIENTE / LOCATÁRIO") + pdfVal_(cli, 5, 0, 9) + "</tr>" +
+          "<tr>" + pdfLbl_("EQUIPAMENTO") + pdfVal_(nome, 3) + pdfLbl_("OPERAÇÃO") + pdfVal_(op) + "</tr>" +
+          "<tr>" + pdfLbl_("TAG", "13%") + pdfVal_(tag, 0, "20%") + pdfLbl_("SÉRIE", "13%") + pdfVal_(serie, 0, "20%") +
+                   pdfLbl_("PATRIMÔNIO", "13%") + pdfVal_(pat, 0, "21%") + "</tr>" +
+        "</table>";
+    }
+
+    function pdfTextoLegal_(txt) {
+      return "<div style='border:1px solid " + PDF_BORDA + "; border-left:3px solid " + PDF_AZUL + "; " +
+        "padding:6px 9px; margin-top:9px; font-size:7px; line-height:1.35; text-align:justify; font-weight:bold; color:#334155;'>" + txt + "</div>";
+    }
+
+    function pdfAssinaturas_(caixas) {
+      var gap = 3;
+      var largura = Math.floor((100 - gap * (caixas.length - 1)) / caixas.length);
+      var linhaImg = "<tr>";
+      var linhaLbl = "<tr>";
+      caixas.forEach(function (c, i) {
+        linhaImg += "<td style='width:" + largura + "%; height:32px; text-align:center; vertical-align:bottom; padding:0 3px 1px 3px;'>" + (c.conteudo || "&nbsp;") + "</td>";
+        linhaLbl += "<td style='width:" + largura + "%; border-top:1px solid #334155; padding:2px 3px 0 3px; text-align:center; vertical-align:top; " +
+          "font-size:7px; font-weight:bold; color:#0f172a;'>" + c.rotulo +
+          (c.sub ? "<br/><span style='font-weight:normal; color:" + PDF_CINZA + ";'>" + c.sub + "</span>" : "") + "</td>";
+        if (i < caixas.length - 1) {
+          linhaImg += "<td style='width:" + gap + "%;'>&nbsp;</td>";
+          linhaLbl += "<td style='width:" + gap + "%;'>&nbsp;</td>";
+        }
+      });
+      return "<table width='100%' style='margin-top:5px;'>" + linhaImg + "</tr>" + linhaLbl + "</tr></table>";
+    }
+
+    function pdfRodapeTermo_() {
+      return "<div style='margin-top:8px; border-top:1px solid " + PDF_BORDA + "; padding-top:4px; text-align:center; " +
+        "font-size:6.5px; line-height:1.4; color:" + PDF_CINZA + "; font-weight:bold;'>" + PDF_RODAPE_TXT + "</div>";
+    }
+
+    function htmlRequisicao(dados) {
+      var dataStr = fmtBR(dados.dataHora, true);
+
+      var html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><style>" +
+        "@page { size: A4 portrait; margin: 12mm; }" +
+        "body { font-family: Arial, Helvetica, sans-serif; color:" + PDF_TEXTO + "; margin:0; padding:0; font-size:11px; }" +
+        "table { border-collapse: collapse; }" +
+        "</style></head><body>" +
+
+        "<table width='100%' style='border-bottom:1px solid " + PDF_AZUL + ";'><tr>" +
+          "<td style='vertical-align:middle; padding:0 0 10px 0;'>" +
+            "<div style='font-size:17px; font-weight:bold; color:" + PDF_AZUL + "; letter-spacing:0.5px;'>SOLICITAÇÃO DE REQUISIÇÃO INTERNA</div>" +
+            "<div style='font-size:10px; font-weight:bold; color:" + PDF_CINZA + "; margin-top:4px;'>LINEMED HOSPITALAR</div>" +
+          "</td>" +
+          "<td style='vertical-align:middle; text-align:right; width:150px; padding:0 0 10px 0;'><img src='" + PDF_LOGO_SRC + "' style='width:135px;'/></td>" +
+        "</tr></table>" +
+
+        pdfTituloSecao_("DADOS DA REQUISIÇÃO") +
+        "<table width='100%'>" +
+          "<tr>" + pdfLbl_("PROTOCOLO", "18%") + pdfVal_(pdfEsc_(dados.protocolo), 0, "32%", 11) +
+                   pdfLbl_("DATA / HORA", "18%") + pdfVal_(dataStr, 0, "32%", 11) + "</tr>" +
+          "<tr>" + pdfLbl_("CLIENTE / LOCATÁRIO") + pdfVal_(pdfEsc_(dados.cliente), 3, 0, 11) + "</tr>" +
+          "<tr>" + pdfLbl_("TIPO DE OPERAÇÃO") + pdfVal_(pdfEsc_(dados.operacao), 3, 0, 11) + "</tr>" +
+        "</table>" +
+
+        pdfTituloSecao_("DETALHES DO EQUIPAMENTO") +
+        pdfBlocoReq_("EQUIPAMENTO A SUBSTITUIR (ATUAL)", pdfEsc_(dados.equipamentoAntigo)) +
+        pdfBlocoReq_("EQUIPAMENTO SOLICITADO (QUALIDADE)", pdfEsc_(dados.equipamentoSolicitado)) +
+        pdfBlocoReq_("MOTIVO / OBSERVAÇÕES", pdfEsc_(dados.motivo)) +
+        pdfBlocoReq_("SOLICITANTE", pdfEsc_(dados.solicitante)) +
+
+        "<table width='100%' style='margin-top:40px;'>" +
+          "<tr><td style='width:45%; height:30px;'>&nbsp;</td><td style='width:10%;'>&nbsp;</td><td style='width:45%;'>&nbsp;</td></tr>" +
+          "<tr><td style='border-top:1px solid #334155; padding-top:4px; text-align:center; font-size:9px; font-weight:bold;'>SOLICITANTE</td><td>&nbsp;</td>" +
+          "<td style='border-top:1px solid #334155; padding-top:4px; text-align:center; font-size:9px; font-weight:bold;'>RESPONSÁVEL / APROVAÇÃO</td></tr>" +
+        "</table>" +
+
+        "<div style='margin-top:28px; border-top:1px solid " + PDF_BORDA + "; padding-top:8px; text-align:center; font-size:8px; color:" + PDF_CINZA + "; font-weight:bold;'>" +
+          "LINEMED COMÉRCIO E MANUTENÇÃO DE EQUIPAMENTOS HOSPITALARES LTDA ME</div>" +
+
+        "</body></html>";
+      return html;
+    }
+
+    function htmlTermo(dados) {
+      var dataStr = fmtBR(dados.dataHora, true);
+      var acessorios = dados.acessorios || [];
+
+      var n = acessorios.length;
+      var pad = n <= 5 ? 6 : (n <= 8 ? 4.5 : (n <= 10 ? 3 : 2));
+      var fs = n <= 5 ? 10 : (n <= 8 ? 9.5 : (n <= 10 ? 8.5 : 8));
+  
+      var tdBase = "border:1px solid " + PDF_BORDA + "; padding:" + pad + "px 5px; font-size:" + fs + "px; color:#0f172a; line-height:1.1;";
+      var thBase = "background:" + PDF_FUNDO + "; border:1px solid " + PDF_BORDA + "; border-bottom:1.5px solid " + PDF_AZUL + "; " +
+        "padding:3px 5px; font-size:7px; font-weight:bold; letter-spacing:0.5px; color:" + PDF_AZUL + ";";
+      var thAttr = " bgcolor='" + PDF_FUNDO + "'";
+
+      var linhasEntrega = "";
+      var linhasHigi = "";
+
+      if (n > 0) {
+        acessorios.forEach(function (ac) {
+          var desc = pdfEsc_((ac.descricao || "").toUpperCase());
+          var conf = (ac.conformidade || "CONFORME").toUpperCase();
+          var corConf = conf === "CONFORME" ? "#166534" : "#b91c1c";
+          var item = pdfEsc_(ac.item);
+          var qtd = pdfEsc_(ac.qtd);
+          var celConf = "<td style='" + tdBase + " text-align:center; font-weight:bold; color:" + corConf + ";'>" + pdfEsc_(conf) + "</td>";
+
+          linhasEntrega += "<tr>" +
+            "<td style='" + tdBase + " text-align:center; color:" + PDF_CINZA + ";'>" + item + "</td>" +
+            "<td style='" + tdBase + "'>" + desc + "</td>" +
+            "<td style='" + tdBase + " text-align:center;'>" + qtd + "</td>" + celConf + "</tr>";
+
+          linhasHigi += "<tr>" +
+            "<td style='" + tdBase + " text-align:center; color:" + PDF_CINZA + ";'>" + item + "</td>" +
+            "<td style='" + tdBase + " text-align:center;'>" + qtd + "</td>" +
+            "<td style='" + tdBase + "'>" + desc + "</td>" + celConf + "</tr>";
+        });
+      } else {
+        var vazio = "<tr><td colspan='4' style='" + tdBase + " text-align:center; font-weight:bold; color:" + PDF_CINZA + ";'>NÃO POSSUI</td></tr>";
+        linhasEntrega = vazio;
+        linhasHigi = vazio;
+      }
+
+      var nomeTecnico = pdfEsc_((dados.tecnico ? (dados.tecnico.nome || "") : "").toUpperCase());
+      var imgTecnico = (dados.tecnico && dados.tecnico.assinaturaUrl)
+        ? "<img src='" + dados.tecnico.assinaturaUrl + "' style='max-height:30px; max-width:100%;'/>"
+        : "<b style='font-size:8px;'>" + nomeTecnico + "</b>";
+      var imgCliente = dados.assinaturaCliente
+        ? "<img src='" + dados.assinaturaCliente + "' style='max-height:30px; max-width:100%;'/>"
+        : "&nbsp;";
+      var dataCurta = dataStr.split(" ")[0];
+
+      var legalEntrega =
+        "A EMPRESA LINEMED COMÉRCIO E MANUTENÇÃO DE EQUIPAMENTOS MÉDICOS HOSPITALARES LTDA ME, ATRAVÉS DESTE TERMO DE ENTREGA, DATADO E COM OS DADOS DO CLIENTE/LOCATÁRIO, ESTARÁ DISPONIBILIZANDO O EQUIPAMENTO MÉDICO, QUE SERÁ ENTREGUE PELO PROFISSIONAL DA EMPRESA E RETIRADO AO TÉRMINO DO CONTRATO. PARA DEVOLUÇÃO O EQUIPAMENTO DEVERÁ ESTAR HIGIENIZADO E DESINFECTADO. SERÁ DE RESPONSABILIDADE DO CLIENTE/LOCATÁRIO O EQUIPAMENTO E ACESSÓRIOS ACIMA DESCRITOS, SENDO CUSTEADO PELO MESMO QUALQUER DANO OU EXTRAVIO CAUSADO.";
+
+      var legalHigi =
+        "CASO NÃO ACOMPANHE ACESSÓRIOS, PREENCHER O CAMPO 'NÃO POSSUI'.<br/>A EMPRESA LINEMED COMÉRCIO E MANUTENÇÃO DE EQUIPAMENTOS HOSPITALARES, POR MEIO DESTE DOCUMENTO, DECLARA PARA OS DEVIDOS FINS QUE TODOS OS EQUIPAMENTOS E ACESSÓRIOS DESCRITOS ACIMA, ENTREGUES A ESTA EMPRESA, FORAM DEVIDAMENTE HIGIENIZADOS E DESINFECTADOS E, QUANDO NECESSÁRIO, OS ACESSÓRIOS FORAM ESTERILIZADOS, CONFORME AS NORMAS SANITÁRIAS VIGENTES.";
+
+      var html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><style>" +
+        "@page { size: A4 portrait; margin: 5mm 8mm; }" +
+        "body { font-family: Arial, Helvetica, sans-serif; color:" + PDF_TEXTO + "; margin:0; padding:0; font-size:8.5px; line-height:1.15; }" +
+        "table { border-collapse: collapse; }" +
+        "</style></head><body>" +
+
+        pdfCabecalhoTermo_("TERMO DE ENTREGA DE EQUIPAMENTO", dados, dataStr) +
+        "<table width='100%'><thead><tr>" +
+          "<th" + thAttr + " style='" + thBase + " width:22px; text-align:center;'>#</th>" +
+          "<th" + thAttr + " style='" + thBase + " text-align:left;'>DESCRIÇÃO DO ACESSÓRIO</th>" +
+          "<th" + thAttr + " style='" + thBase + " width:36px; text-align:center;'>QTD</th>" +
+          "<th" + thAttr + " style='" + thBase + " width:100px; text-align:center;'>CONFORMIDADE</th>" +
+        "</tr></thead><tbody>" + linhasEntrega + "</tbody></table>" +
+        pdfTextoLegal_(legalEntrega) +
+        pdfAssinaturas_([
+          { conteudo: imgTecnico, rotulo: "TÉCNICO / LIBERAÇÃO", sub: nomeTecnico },
+          { conteudo: imgCliente, rotulo: "RECEBIDO POR (CLIENTE)" },
+          { conteudo: "&nbsp;", rotulo: "ENTREGUE POR", sub: "LINEMED EQUIPAMENTOS - DATA: " + dataCurta }
+        ]) +
+        pdfRodapeTermo_() +
+
+        "<div style='border-top:1px dashed " + PDF_BORDA_FORTE + "; margin:8px 0;'></div>" +
+
+        pdfCabecalhoTermo_("TERMO DE RESPONSABILIDADE DE HIGIENIZAÇÃO", dados, dataStr) +
+        "<table width='100%'><thead><tr>" +
+          "<th" + thAttr + " style='" + thBase + " width:22px; text-align:center;'>#</th>" +
+          "<th" + thAttr + " style='" + thBase + " width:36px; text-align:center;'>QTD</th>" +
+          "<th" + thAttr + " style='" + thBase + " text-align:left;'>ACESSÓRIOS HIGIENIZADOS</th>" +
+          "<th" + thAttr + " style='" + thBase + " width:100px; text-align:center;'>STATUS</th>" +
+        "</tr></thead><tbody>" + linhasHigi + "</tbody></table>" +
+        pdfTextoLegal_(legalHigi) +
+        pdfAssinaturas_([
+          { conteudo: imgTecnico, rotulo: "LIBERADO PARA ENTREGA (TÉCNICO)", sub: nomeTecnico },
+          { conteudo: imgCliente, rotulo: "ASSINATURA E CARIMBO (CLIENTE)" }
+        ]) +
+        pdfRodapeTermo_() +
+
+        "</body></html>";
+      return html;
+    }
+
+
+
+    function carregarScriptExterno(src) {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src; s.onload = resolve; s.onerror = () => reject(new Error("Falha ao carregar " + src));
+        document.head.appendChild(s);
+      });
+    }
+
+    async function prepararLogoPdf() {
+      if (PDF_LOGO_SRC.startsWith('data:')) return;
+      try {
+        const r = await fetch(PDF_LOGO_URL_ORIG);
+        const b = await r.blob();
+        PDF_LOGO_SRC = await new Promise((res, rej) => {
+          const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(b);
+        });
+      } catch (e) { /* mantém a URL original; se falhar, o PDF sai sem logo */ }
+    }
+
+    function prepararHtmlPdf(full) {
+      const style = (full.match(/<style>([\s\S]*?)<\/style>/) || [])[1] || '';
+      const body = (full.match(/<body>([\s\S]*)<\/body>/) || [])[1] || full;
+      const css = style.replace(/@page[^}]*\}/, '').replace(/body\s*\{/, '.pdfroot{');
+      return `<style>${css}</style><div class="pdfroot">${body}</div>`;
+    }
+
+    async function htmlParaPdfBlob(htmlCompleto, margemMm, larguraPx) {
+      if (!window.html2pdf) {
+        await carregarScriptExterno('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
+      }
+      const holder = document.createElement('div');
+      holder.style.cssText = `position:fixed;left:-10000px;top:0;width:${larguraPx}px;background:#fff;color:#1e293b;`;
+      holder.innerHTML = prepararHtmlPdf(htmlCompleto);
+      document.body.appendChild(holder);
+      try {
+        return await window.html2pdf().set({
+          margin: margemMm,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['css', 'legacy'] }
+        }).from(holder).outputPdf('blob');
+      } finally {
+        holder.remove();
+      }
+    }
+
+    // Guarda o PDF no Storage; se falhar, devolve um link local temporário
+    async function guardarPdf(blob, caminho) {
+      try {
+        const up = await supabaseClient.storage.from(BUCKET_DOCS).upload(caminho, blob, { contentType: 'application/pdf', upsert: true });
+        if (up.error) throw up.error;
+        const url = supabaseClient.storage.from(BUCKET_DOCS).getPublicUrl(caminho).data.publicUrl;
+        return { url, persistido: true, aviso: "" };
+      } catch (err) {
+        console.error("Erro ao enviar PDF ao Storage:", err);
+        return { url: URL.createObjectURL(blob), persistido: false, aviso: err.message || String(err) };
+      }
+    }
+
+    // código aleatório no nome do arquivo: o link do PDF não pode ser adivinhado
+    function tokenArquivo() {
+      const b = new Uint8Array(6);
+      (window.crypto || {}).getRandomValues ? window.crypto.getRandomValues(b) : b.forEach((_, i) => { b[i] = Math.floor(Math.random() * 256); });
+      return Array.from(b).map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+
+    function limparNomeArquivo(s) {
+      return str_(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '_').slice(0, 40) || 'Cliente';
+    }
+
+    // ---------- Ações (mesmo contrato de resposta que o Apps Script tinha) ----------
+    async function acaoPingPresenca(d) {
+      const { error } = await supabaseClient.rpc('ping_presenca', { p_usuario: str_(d.usuario) });
+      return error ? { status: "erro", mensagem: error.message } : { status: "sucesso" };
+    }
+
+    async function acaoCriarAgendamento(d) {
+      const iso = dataHoraParaISO(d.dataHora);
+      const { data: existentes, error: e1 } = await supabaseClient.from('agenda')
+        .select('protocolo,tecnico,tag,status').eq('data_hora', iso);
+      if (e1) throw e1;
+      const tecNovo = up_(d.tecnico), tagNova = up_(d.tag);
+      for (const ex of (existentes || [])) {
+        if (up_(ex.status) === "CANCELADO") continue;
+        if (tecNovo && up_(ex.tecnico) === tecNovo) {
+          return { status: "erro", mensagem: "Conflito: O técnico " + d.tecnico + " já possui agendamento neste mesmo horário!" };
+        }
+        if (tagNova && up_(ex.tag) === tagNova) {
+          return { status: "erro", mensagem: "Conflito: O equipamento TAG " + d.tag + " já possui intervenção agendada neste horário!" };
+        }
+      }
+      const protocolo = await inserirComProtocolo('agenda', 'protocolo', 'AG', 4, p => ({
+        protocolo: p, data_hora: iso,
+        setor_solicitante: d.setorSolicitante || "", setor_executante: d.setorExecutante || "",
+        servico: d.servico || "", cliente: d.cliente || "", tag: d.tag || "",
+        equipamento: d.equipamento || "", tecnico: d.tecnico || "", status: "AGENDADO",
+        observacao: d.observacao || ""
+      }));
+      return { status: "sucesso", protocolo };
+    }
+
+    async function acaoAtualizarAgenda(d) {
+      const { error } = await supabaseClient.from('agenda')
+        .update({ cliente: d.cliente || "", observacao: d.observacao || "" }).eq('protocolo', d.protocolo);
+      return error ? { status: "erro", mensagem: error.message } : { status: "sucesso" };
+    }
+
+    async function acaoCriarRequisicao(d) {
+      const agora = new Date();
+      const protocolo = await inserirComProtocolo('requisicoes', 'protocolo', 'REQ', 4, p => ({
+        protocolo: p, data_hora: agora.toISOString(), cliente: d.cliente || "", operacao: d.operacao || "",
+        equipamento_antigo: d.equipamentoAntigo || "", equipamento_solicitado: d.equipamentoSolicitado || "",
+        motivo: d.motivo || "", solicitante: d.solicitante || "", status: "PENDENTE", protocolo_termo: "", pdf_url: ""
+      }));
+      let pdfUrlReq = "", aviso = "";
+      try {
+        await prepararLogoPdf();
+        const html = htmlRequisicao({
+          protocolo, dataHora: agora, cliente: d.cliente || "", operacao: d.operacao || "",
+          equipamentoAntigo: d.equipamentoAntigo || "", equipamentoSolicitado: d.equipamentoSolicitado || "",
+          motivo: d.motivo || "", solicitante: d.solicitante || ""
+        });
+        const blob = await htmlParaPdfBlob(html, [12, 12, 12, 12], 703);
+        const r = await guardarPdf(blob, `requisicoes/Requisicao_${protocolo}_${tokenArquivo()}.pdf`);
+        pdfUrlReq = r.url; aviso = r.aviso;
+        if (r.persistido) await supabaseClient.from('requisicoes').update({ pdf_url: r.url }).eq('protocolo', protocolo);
+      } catch (err) { console.error("Erro ao gerar PDF da requisição:", err); aviso = err.message || String(err); }
+      return { status: "sucesso", protocoloReq: protocolo, pdfUrlReq, avisoPdf: aviso };
+    }
+
+    async function acaoRecusarRequisicao(d) {
+      const { data, error } = await supabaseClient.from('requisicoes').select('motivo').eq('protocolo', d.protocoloReq).limit(1);
+      if (error) return { status: "erro", mensagem: error.message };
+      if (!data || !data.length) return { status: "erro", mensagem: "Requisição não encontrada." };
+      const motivoAtual = str_(data[0].motivo);
+      const novo = (motivoAtual ? motivoAtual + " | " : "") + "MOTIVO RECUSA: " + (d.motivoRecusa || "");
+      const up = await supabaseClient.from('requisicoes').update({ status: "RECUSADO", motivo: novo }).eq('protocolo', d.protocoloReq);
+      return up.error ? { status: "erro", mensagem: up.error.message } : { status: "sucesso" };
+    }
+
+    async function atenderRequisicao_(protocoloReq, protocoloTermo) {
+      const alvo = up_(protocoloReq), termo = str_(protocoloTermo).trim();
+      const { data, error } = await supabaseClient.from('requisicoes').select('protocolo,status,protocolo_termo');
+      if (error) return { ok: false, mensagem: error.message };
+      const linhas = (data || []).filter(r => up_(r.protocolo) === alvo);
+      if (!linhas.length) return { ok: false, mensagem: "Requisição " + alvo + " não encontrada." };
+      const r = linhas[0];
+      if (up_(r.status) === "RECUSADO") return { ok: false, mensagem: "Requisição " + alvo + " foi RECUSADA e não pode ser atendida." };
+      if (up_(r.status) === "ATENDIDO" && up_(r.protocolo_termo) && up_(r.protocolo_termo) !== up_(termo)) {
+        return { ok: false, mensagem: "Requisição " + alvo + " já foi atendida pelo termo " + r.protocolo_termo + "." };
+      }
+      const up = await supabaseClient.from('requisicoes').update({ status: "ATENDIDO", protocolo_termo: termo }).eq('protocolo', r.protocolo);
+      return up.error ? { ok: false, mensagem: up.error.message } : { ok: true };
+    }
+
+    async function acaoVincularTermo(d) {
+      const protReq = str_(d.protocoloReq).trim();
+      const protTermo = str_(d.protocoloTermo || d.protocolo).trim();
+      if (!protReq || !protTermo) return { status: "erro", mensagem: "Informe protocoloReq e protocoloTermo." };
+      const r = await atenderRequisicao_(protReq, protTermo);
+      return r.ok ? { status: "sucesso", protocoloReq: protReq.toUpperCase(), protocoloTermo: protTermo.toUpperCase() }
+                  : { status: "erro", mensagem: r.mensagem };
+    }
+
+    async function acaoCriarTermo(d) {
+      const agora = new Date();
+      const tecObj = (d.tecnico && typeof d.tecnico === 'object') ? d.tecnico : {};
+      const tecnicoNome = tecObj.nome || (typeof d.tecnico === 'string' ? d.tecnico : "");
+      const eq = d.equipamento || {};
+      if (!tecObj.assinaturaUrl && usuarioLogado && up_(usuarioLogado.nome) === up_(tecnicoNome) && usuarioLogado.assinaturaUrl) {
+        tecObj.assinaturaUrl = usuarioLogado.assinaturaUrl;
+      }
+      const protocolo = await inserirComProtocolo('termos_emitidos', 'protocolo', 'PT', 4, p => ({
+        protocolo: p, data_hora: agora.toISOString(), cliente: d.cliente || "", tag: eq.tag || "",
+        equipamento: eq.nome || "", tipo_operacao: d.tipoOperacao || "", tecnico: tecnicoNome, pdf_url: "-", log_erro: ""
+      }));
+
+      let vinculo = { solicitado: false, ok: true, mensagem: "" };
+      if (d.protocoloReq && str_(d.protocoloReq).trim()) {
+        vinculo.solicitado = true;
+        const r = await atenderRequisicao_(d.protocoloReq, protocolo);
+        vinculo.ok = r.ok; vinculo.mensagem = r.ok ? "" : r.mensagem;
+      }
+
+      let pdfUrl = "";
+      try {
+        await prepararLogoPdf();
+        const acessorios = (d.acessorios || []).map((a, i) => ({ item: a.item || (i + 1), ...a }));
+        const html = htmlTermo({
+          protocolo, dataHora: agora, cliente: d.cliente || "", equipamento: eq,
+          tipoOperacao: d.tipoOperacao || "", tecnico: { ...tecObj, nome: tecnicoNome },
+          acessorios, assinaturaCliente: d.assinaturaCliente || ""
+        });
+        const blob = await htmlParaPdfBlob(html, [5, 8, 5, 8], 733);
+        const r = await guardarPdf(blob, `termos/Termo_${protocolo}_${limparNomeArquivo(d.cliente)}_${tokenArquivo()}.pdf`);
+        pdfUrl = r.url;
+        if (r.persistido) {
+          await supabaseClient.from('termos_emitidos').update({ pdf_url: r.url }).eq('protocolo', protocolo);
+        } else {
+          await supabaseClient.from('termos_emitidos').update({ log_erro: "ERRO PDF (upload): " + r.aviso }).eq('protocolo', protocolo);
+        }
+      } catch (err) {
+        console.error("Erro ao gerar PDF do termo:", err);
+        await supabaseClient.from('termos_emitidos').update({ log_erro: "ERRO PDF: " + (err.message || err) }).eq('protocolo', protocolo);
+      }
+      return { status: "sucesso", protocolo, pdfUrl, vinculo };
+    }
+
+    async function acaoCriarOS(d) {
+      const protocolo = await inserirComProtocolo('ordens_servico', 'protocolo', 'OS', 5, p => ({
+        protocolo: p, data_abertura: new Date().toISOString(), cliente: d.cliente || "", tag: d.tag || "",
+        serie: d.serie || "", patrimonio: d.patrimonio || "", equipamento: d.equipamento || "",
+        tipo_manutencao: d.tipoManutencao || "", prioridade: d.prioridade || "", solicitante: d.solicitante || "",
+        tecnico: d.tecnico || "", defeito_relatado: d.defeitoRelatado || "", diagnostico_tecnico: d.diagnosticoTecnico || "",
+        servico_realizado: d.servicoRealizado || "", status: d.status || "CONCLUÍDA", pdf_url: "", anexos_url: ""
+      }));
+      return { status: "sucesso", protocoloOS: protocolo, pdfUrlOS: "" };
+    }
+
+    async function acaoAlterarStatusOS(d, novoStatus) {
+      const campos = { status: novoStatus };
+      if (d.novoTipo) campos.tipo_manutencao = d.novoTipo;
+      if (d.novoDiagnostico) campos.diagnostico_tecnico = d.novoDiagnostico;
+      if (d.novoServico) campos.servico_realizado = d.novoServico;
+      const { error } = await supabaseClient.from('ordens_servico').update(campos).eq('protocolo', d.protocoloOS);
+      return error ? { status: "erro", mensagem: error.message } : { status: "sucesso" };
+    }
+
+    async function acaoCriarEquipamento(d) {
+      const tag = str_(d.tag).trim();
+      if (!tag) return { status: "erro", mensagem: "Informe a TAG do equipamento." };
+      const { data: ja } = await supabaseClient.from('equipamentos').select('tag').eq('tag', tag).limit(1);
+      if (ja && ja.length) return { status: "erro", mensagem: "Já existe um equipamento com a TAG " + tag + "." };
+      const { error } = await supabaseClient.from('equipamentos').insert({
+        tag, serie: d.serie || "", patrimonio: d.patrimonio || "", nome: d.nome || "",
+        modelo: d.modelo || "", fabricante: d.fabricante || "", acessorios: d.acessorios || ""
+      });
+      return error ? { status: "erro", mensagem: error.message } : { status: "sucesso" };
+    }
+
+    async function acaoCriarAuxiliar(d) {
+      const { error } = await supabaseClient.from('cad_auxiliares').insert({
+        descricao: d.descricao || "", modelo: d.modelo || "", fabricante: d.fabricante || ""
+      });
+      return error ? { status: "erro", mensagem: error.message } : { status: "sucesso" };
+    }
+
+    async function acaoAtualizarLocacao(d) {
+      const id = str_(d.id).trim();
+      const { data, error } = await supabaseClient.from('locacoes').select('qtd_contratada,observacao_log').eq('id', id).limit(1);
+      if (error) return { status: "erro", mensagem: error.message };
+      if (!data || !data.length) return { status: "erro", mensagem: "ID de locação não encontrado." };
+      const qtdFisica = Number(d.qtdFisica) || 0;
+      const valUnit = Number(d.valorUnitario) || 0;
+      const valTotal = Number(d.valorTotal) || (qtdFisica * valUnit);
+      const saldo = (Number(data[0].qtd_contratada) || 0) - qtdFisica;
+      const novoLog = "[" + fmtBR(new Date()) + " - " + (d.usuarioNome || "Sistema") + "] Qtd Física: " + qtdFisica +
+        " | R$ " + valTotal.toFixed(2) + (d.observacao ? " | " + d.observacao : "");
+      const logAnterior = str_(data[0].observacao_log);
+      const up = await supabaseClient.from('locacoes').update({
+        qtd_fisica: qtdFisica, saldo, valor_unitario: valUnit, valor_total: valTotal,
+        observacao_log: logAnterior ? novoLog + " \n " + logAnterior : novoLog
+      }).eq('id', id);
+      return up.error ? { status: "erro", mensagem: up.error.message } : { status: "sucesso" };
+    }
+
+    async function acaoCriarCompra(d) {
+      const opcoes = [];
+      if (d.val1 > 0) opcoes.push({ nome: d.forn1 || "Forn 1", valor: d.val1 });
+      if (d.val2 > 0) opcoes.push({ nome: d.forn2 || "Forn 2", valor: d.val2 });
+      if (d.val3 > 0) opcoes.push({ nome: d.forn3 || "Forn 3", valor: d.val3 });
+      opcoes.sort((a, b) => a.valor - b.valor);
+      const venc = opcoes.length ? opcoes[0] : { nome: "-", valor: 0 };
+      const protocolo = await inserirComProtocolo('compras', 'protocolo', 'COM', 4, p => ({
+        protocolo: p, data_hora: new Date().toISOString(), os_externa: d.osExterna || "", solicitante: d.solicitante || "",
+        produto: d.produto || "", forn_vencedor: venc.nome, menor_valor: venc.valor, status: "PENDENTE", pdf_url: ""
+      }));
+      return { status: "sucesso", protocolo };
+    }
+
+    // ---------- Chat interno ----------
+    async function acaoEnviarMensagemChat(d) {
+      const { error } = await supabaseClient.from('mensagens_chat').insert({
+        remetente: d.remetente || "", destinatario: d.destinatario || "GERAL", mensagem: d.mensagem || ""
+      });
+      return error ? { status: "erro", mensagem: error.message } : { status: "sucesso" };
+    }
+
+    async function acaoBuscarMensagensChat(d) {
+      const { data, error } = await supabaseClient.from('mensagens_chat').select('*')
+        .order('created_at', { ascending: false }).limit(300);
+      if (error) return { status: "erro", mensagem: error.message };
+      const eu = str_(d.usuario).toLowerCase().trim();
+      const msgs = (data || []).reverse().filter(m => {
+        const dest = str_(m.destinatario).toLowerCase().trim();
+        const rem = str_(m.remetente).toLowerCase().trim();
+        return dest === "geral" || dest === "" || dest === eu || rem === eu;
+      }).map(m => ({ remetente: m.remetente, destinatario: m.destinatario, mensagem: m.mensagem, hora: horaBR(m.created_at) }));
+      return { status: "sucesso", mensagens: msgs };
+    }
+
+    const ACOES_AVISAR_ERRO = ["ATUALIZAR_QTD_FISICA_LOCACAO", "VINCULAR_TERMO_REQUISICAO", "FECHAR_OS", "REABRIR_OS", "RECUSAR_REQUISICAO", "ATUALIZAR_AGENDA"];
+
+    async function enviarAcao(d) {
+      let res;
+      try {
+        switch (d.acao) {
+          case "PING_PRESENCA": res = await acaoPingPresenca(d); break;
+          case "CRIAR_AGENDAMENTO": res = await acaoCriarAgendamento(d); break;
+          case "ATUALIZAR_AGENDA": res = await acaoAtualizarAgenda(d); break;
+          case "CRIAR_REQUISICAO": res = await acaoCriarRequisicao(d); break;
+          case "RECUSAR_REQUISICAO": res = await acaoRecusarRequisicao(d); break;
+          case "VINCULAR_TERMO_REQUISICAO": res = await acaoVincularTermo(d); break;
+          case "CRIAR_TERMO": res = await acaoCriarTermo(d); break;
+          case "CRIAR_OS": res = await acaoCriarOS(d); break;
+          case "FECHAR_OS": res = await acaoAlterarStatusOS(d, "CONCLUÍDA"); break;
+          case "REABRIR_OS": res = await acaoAlterarStatusOS(d, "ABERTA"); break;
+          case "CRIAR_EQUIPAMENTO": res = await acaoCriarEquipamento(d); break;
+          case "CRIAR_AUXILIAR_VINCULADO": res = await acaoCriarAuxiliar(d); break;
+          case "ATUALIZAR_QTD_FISICA_LOCACAO": res = await acaoAtualizarLocacao(d); break;
+          case "CRIAR_SOLICITACAO_COMPRA": res = await acaoCriarCompra(d); break;
+          case "ENVIAR_MENSAGEM_CHAT": res = await acaoEnviarMensagemChat(d); break;
+          case "BUSCAR_MENSAGENS_CHAT": res = await acaoBuscarMensagensChat(d); break;
+          case "DIGITANDO_CHAT": res = { status: "sucesso" }; break;
+          default: res = { status: "erro", mensagem: "Ação não reconhecida: " + d.acao };
+        }
+      } catch (err) {
+        console.error("Erro em " + d.acao + ":", err);
+        res = { status: "erro", mensagem: (err && err.message) ? err.message : String(err) };
+      }
+      if (res.status === "erro" && ACOES_AVISAR_ERRO.includes(d.acao)) {
+        try { showToast("⚠️ " + (res.mensagem || "Não foi possível salvar."), "error"); } catch (e) {}
+      }
+      return res;
+    }
+
+    // Compatível com os pontos de chamada antigos: fetch(...).then(res => res.json())
+    function apiFetch(payload) {
+      return enviarAcao(payload).then(r => ({ json: () => Promise.resolve(r) }));
+    }
+
 
     
     let bancoDados = {
@@ -2400,73 +3067,60 @@ abaAgenda.appendRow([
     const curD = String(todayRef.getDate()).padStart(2, '0');
     let selectedDateStr = `${curY}-${curM}-${curD}`;
 
-        // Converte colunas snake_case do Supabase para camelCase (mantém as originais)
-    function paraCamel(rows) {
-      return (rows || []).map(r => {
-        const o = { ...r };
-        for (const k in r) {
-          const c = k.replace(/_([a-z0-9])/g, (_, ch) => ch.toUpperCase());
-          if (!(c in o)) o[c] = r[k];
-        }
-        return o;
-      });
-    }
-
-    // Formata data ISO para dd/mm/aaaa hh:mm (horário de Brasília)
-    function fmtBR(iso) {
-      if (!iso) return '';
-      const d = new Date(iso);
-      if (isNaN(d)) return String(iso);
-      return d.toLocaleString('pt-BR', {
-        timeZone: 'America/Sao_Paulo',
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      }).replace(',', '');
-    }
-
     async function buscarAtualizacoesSilenciosas() {
-     if (estaBuscandoDados) return;
-     estaBuscandoDados = true;
+      if (estaBuscandoDados) return;
+      estaBuscandoDados = true;
+      try {
+        const [req, os, ag, loc, com, ter, eq, aux, usr] = await Promise.all([
+          lerTabela('requisicoes', 'data_hora', false),
+          lerTabela('ordens_servico', 'data_abertura', false),
+          lerTabela('agenda', 'data_hora', false),
+          lerTabela('locacoes'),
+          lerTabela('compras', 'data_hora', false),
+          lerTabela('termos_emitidos', 'data_hora', false),
+          lerTabela('equipamentos'),
+          lerTabela('cad_auxiliares'),
+          lerUsuarios()
+        ]);
 
-     try {
-       const [req, os, ag, loc, com, ter, eq, usr, aux] = await Promise.all([
-         supabaseClient.from('requisicoes').select('*'),
-         supabaseClient.from('ordens_servico').select('*'),
-         supabaseClient.from('agenda').select('*'),
-         supabaseClient.from('locacoes').select('*'),
-         supabaseClient.from('compras').select('*'),
-         supabaseClient.from('termos_emitidos').select('*'),
-         supabaseClient.from('equipamentos').select('*'),
-         supabaseClient.from('usuarios').select('id,nome,usuario,assinatura_url,ultimo_acesso,ativo'),
-         supabaseClient.from('cad_auxiliares').select('*')
-       ]);
+        const comErro = [req, os, ag, loc, com, ter, eq, aux].filter(x => x.erro);
 
-         bancoDados = {
-          requisicoes: paraCamel(req.data).map(r => ({ ...r, dataHora: fmtBR(r.data_hora) })),
-          ordensServico: paraCamel(os.data),
-          agenda: paraCamel(ag.data),
-          locacoes: paraCamel(loc.data),
-          compras: paraCamel(com.data),
-          termosEmitidos: paraCamel(ter.data),
-          equipamentos: paraCamel(eq.data),
-          usuarios: paraCamel(usr.data),
-          relacoesAuxiliares: paraCamel(aux.data),
-          clientes: [...new Set((loc.data || []).map(l => l.cliente).filter(Boolean))]
+        const clientesSet = new Set();
+        [loc, req, ter, os, ag].forEach(t => t.rows.forEach(r => { const c = str_(r.cliente).trim(); if (c) clientesSet.add(c); }));
+
+        bancoDados = {
+          requisicoes: req.rows.map(mapa.requisicao),
+          ordensServico: os.rows.map(mapa.os),
+          agenda: normalizarListaAgenda(ag.rows.map(mapa.agenda)),
+          locacoes: loc.rows.map(mapa.locacao),
+          compras: com.rows.map(mapa.compra),
+          termosEmitidos: ter.rows.map(mapa.termo),
+          equipamentos: eq.rows.map(mapa.equipamento).filter(e => e.tag),
+          usuarios: (usr || []).filter(u => u.ativo !== false).map(mapa.usuario),
+          relacoesAuxiliares: aux.rows.map(mapa.aux),
+          clientes: Array.from(clientesSet).sort((a, b) => a.localeCompare(b, 'pt-BR'))
         };
 
-       const badge = document.getElementById('statusBadge');
-       if (badge) {
-         badge.innerHTML = '<i class="fa-solid fa-bolt"></i> <span class="hidden sm:inline">Supabase Online</span>';
-         badge.className = "px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 cursor-pointer";
-       }
+        const badge = document.getElementById('statusBadge');
+        if (badge) {
+          if (comErro.length) {
+            badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> <span class="hidden sm:inline">Erro no Supabase</span>';
+            badge.className = "px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 cursor-pointer";
+            badge.title = comErro.map(x => x.erro.message).join(" | ");
+          } else {
+            badge.innerHTML = '<i class="fa-solid fa-bolt"></i> <span class="hidden sm:inline">Supabase Online</span>';
+            badge.className = "px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 cursor-pointer";
+            badge.title = "";
+          }
+        }
 
-       atualizarTodasAsVisoes();
-     } catch (err) {
-       console.error("Erro ao sincronizar com Supabase:", err);
-     } finally {
-       estaBuscandoDados = false;
-     }
-   }
+        atualizarTodasAsVisoes();
+      } catch (err) {
+        console.error("Erro ao sincronizar com Supabase:", err);
+      } finally {
+        estaBuscandoDados = false;
+      }
+    }
 
     function showToast(message, type = 'info') {
       const container = document.getElementById('toastContainer');
@@ -2711,14 +3365,11 @@ abaAgenda.appendRow([
     let usuarioDigitandoAtual = "";
 
     function enviarHeartbeat() {
-  if (!usuarioLogado || (!usuarioLogado.usuario && !usuarioLogado.nome)) return;
-  const idUsr = usuarioLogado.usuario || usuarioLogado.nome;
-  supabaseClient.from('usuarios')
-    .update({ ultimo_acesso: new Date().toISOString() })
-    .eq('usuario', idUsr)
-    .then(({ error }) => { if (error) console.error('Heartbeat:', error.message); });
-  buscarMensagensChatServidor();
-}
+      if (!usuarioLogado || (!usuarioLogado.usuario && !usuarioLogado.nome)) return;
+      const idUsr = usuarioLogado.usuario || usuarioLogado.nome;
+      apiFetch({ acao: "PING_PRESENCA", usuario: idUsr }).catch(() => {});
+      buscarMensagensChatServidor();
+    }
 
     function renderizarUsuariosOnline() {
       if (!bancoDados || !bancoDados.usuarios) return;
@@ -2852,10 +3503,7 @@ abaAgenda.appendRow([
       if (agora - ultimoTempoDigitandoEnviado < 600) return;
       ultimoTempoDigitandoEnviado = agora;
       const rem = usuarioLogado ? (usuarioLogado.nome || usuarioLogado.usuario) : "Sistema";
-      fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ acao: "DIGITANDO_CHAT", remetente: rem, destinatario: chatAtivoDestinatario })
-      }).catch(() => {});
+      apiFetch({ acao: "DIGITANDO_CHAT", remetente: rem, destinatario: chatAtivoDestinatario }).catch(() => {});
     }
 
     function enviarMensagemChat() {
@@ -2872,10 +3520,7 @@ abaAgenda.appendRow([
       input.value = "";
       renderizarMensagensChatNaTela();
 
-      fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ acao: "ENVIAR_MENSAGEM_CHAT", remetente: rem, destinatario: dest, mensagem: texto })
-      }).then(res => res.json()).then(res => {
+      apiFetch({ acao: "ENVIAR_MENSAGEM_CHAT", remetente: rem, destinatario: dest, mensagem: texto }).then(res => res.json()).then(res => {
         if (res.status === "sucesso") buscarMensagensChatServidor();
       }).catch(() => {});
     }
@@ -2883,10 +3528,7 @@ abaAgenda.appendRow([
     function buscarMensagensChatServidor() {
       if (!usuarioLogado) return;
       const usr = usuarioLogado.nome || usuarioLogado.usuario || "";
-      fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ acao: "BUSCAR_MENSAGENS_CHAT", usuario: usr, chatAtivo: chatAtivoDestinatario })
-      })
+      apiFetch({ acao: "BUSCAR_MENSAGENS_CHAT", usuario: usr, chatAtivo: chatAtivoDestinatario })
       .then(res => res.json())
       .then(res => {
         if (res.status === "sucesso" && res.mensagens) {
@@ -3072,6 +3714,8 @@ abaAgenda.appendRow([
       renderDayInspector();
       popularAutocomplete();
       showToast(`Dados do agendamento ${prot} atualizados!`, "success");
+      enviarAcao({ acao: "ATUALIZAR_AGENDA", protocolo: prot, cliente: cli, observacao: obs })
+        .then(() => buscarAtualizacoesSilenciosas());
     }
 
     function normalizarListaAgenda(listaBruta) {
@@ -3117,66 +3761,7 @@ abaAgenda.appendRow([
       });
     }
 
-    function sincronizarColunasJKDiretoDaPlanilha() {
-      if (!SPREADSHEET_ID_AGENDA) return;
-      const script = document.createElement('script');
-      script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID_AGENDA}/gviz/tq?gid=${GID_ABA_AGENDA}&headers=1&tqx=responseHandler:receberDadosGvizAgenda&t=${new Date().getTime()}`;
-      script.onload = () => script.remove();
-      script.onerror = () => script.remove();
-      document.body.appendChild(script);
-    }
-
-    window.receberDadosGvizAgenda = function(resp) {
-      if (!resp || resp.status !== 'ok' || !resp.table || !resp.table.rows) return;
-      const rows = resp.table.rows;
-      let houveAtualizacao = false;
-
-      rows.forEach(r => {
-        const c = r.c || [];
-        const getVal = (idx) => {
-          if (!c[idx]) return "";
-          if (c[idx].f !== undefined && c[idx].f !== null) return String(c[idx].f).trim();
-          if (c[idx].v !== undefined && c[idx].v !== null) return String(c[idx].v).trim();
-          return "";
-        };
-
-        const prot = getVal(0);
-        if (!prot || prot.toUpperCase() === "PROTOCOLO") return;
-
-        const clienteColJ = getVal(9); // Coluna J: CLIENTE
-        const obsColK = getVal(10);    // Coluna K: OBSERVAÇÃO
-        const solColC = getVal(2);     // Coluna C: SOLICITANTE
-
-        if (clienteColJ || obsColK) {
-          salvarCacheComplementarAgenda(prot, {
-            cliente: clienteColJ,
-            observacao: obsColK,
-            setorSolicitante: solColC
-          });
-        }
-
-        const item = (bancoDados.agenda || []).find(
-          a => a && String(a.protocolo || '').trim().toUpperCase() === prot.toUpperCase()
-        );
-        if (item) {
-          if (clienteColJ && item.cliente !== clienteColJ) {
-            item.cliente = clienteColJ;
-            houveAtualizacao = true;
-          }
-          if (obsColK && item.observacao !== obsColK) {
-            item.observacao = obsColK;
-            houveAtualizacao = true;
-          }
-        }
-      });
-
-      if (houveAtualizacao) {
-        renderizarTabelaAgenda();
-        renderCalendarGrid();
-        renderDayInspector();
-        popularAutocomplete();
-      }
-    };
+    function sincronizarColunasJKDiretoDaPlanilha() { /* não é mais necessário: a agenda lê cliente/observação direto do Supabase */ }
 
     function obterClasseCorServico(servico, temConflito = false) {
       if (temConflito) return 'srv-pill-conflito';
@@ -3187,23 +3772,6 @@ abaAgenda.appendRow([
       if (s.includes('PREVENTIVA')) return 'srv-pill-preventiva';
       if (s.includes('INSPEÇÃO') || s.includes('INSPECAO')) return 'srv-pill-inspecao';
       return 'srv-pill-calibracao';
-    }
-
-    function carregarDadosPlanilha(data) {
-      estaBuscandoDados = false;
-      if (data && !data.erro) {
-        bancoDados = data;
-        if (bancoDados.agenda) {
-          bancoDados.agenda = normalizarListaAgenda(bancoDados.agenda);
-        }
-        const badge = document.getElementById('statusBadge');
-        if (badge) {
-          badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span class="hidden sm:inline">Conectado</span>';
-          badge.className = "px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 cursor-pointer";
-        }
-        atualizarTodasAsVisoes();
-        sincronizarColunasJKDiretoDaPlanilha();
-      }
     }
 
     function atualizarTodasAsVisoes() {
@@ -3220,7 +3788,7 @@ abaAgenda.appendRow([
       try { renderizarUsuariosOnline(); } catch(e) {}
       try { renderizarListasAuxiliares(); } catch(e) {}
     }
-  
+
     function extrairDataHoraAgenda(item) {
       const rawExib = (item.dataHoraExibicao || "").toString().trim();
       if (rawExib.includes('/')) {
@@ -3390,7 +3958,7 @@ abaAgenda.appendRow([
         setorSolicitante: setorSol
       });
 
-      fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+      apiFetch(payload)
       .then(res => res.json())
       .then(res => {
         btn.disabled = false;
@@ -3851,7 +4419,7 @@ abaAgenda.appendRow([
       checkModalRealtimeConflict();
       showToast(`Agendamento ${protLocal} confirmado para ${dataHoraExibicao} em ${cliente}!`, "success");
 
-      fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+      apiFetch(payload)
       .then(res => res.json())
       .then(res => {
         if (res.status === "sucesso") {
@@ -3862,6 +4430,9 @@ abaAgenda.appendRow([
               setorSolicitante: setorSol
             });
           }
+          buscarAtualizacoesSilenciosas();
+        } else {
+          showToast("⚠️ " + (res.mensagem || "Não foi possível salvar o agendamento."), "warning");
           buscarAtualizacoesSilenciosas();
         }
       })
@@ -4005,43 +4576,12 @@ abaAgenda.appendRow([
       win.document.close();
     }
 
-    /**
-     * =====================================================================
-     * MÓDULO DE REQUISIÇÕES: Salvar Requisição Diretamente no Supabase
-     * =====================================================================
-     */
-
-    /**
-     * Auxiliar: Converte valores nulos ou indefinidos em string vazia de forma segura.
-     */
-    const str_ = v => (v === null || v === undefined) ? "" : String(v);
-
-    /**
-     * Auxiliar: Gera o próximo protocolo sequencial (ex: REQ0047) diretamente no Supabase.
-     */
-    async function proximoProtocolo(tabela, coluna, prefixo, largura) {
-      const { data, error } = await supabaseClient.from(tabela).select(coluna)
-        .ilike(coluna, prefixo + '%').order(coluna, { ascending: false }).limit(1000);
-      if (error) throw error;
-      const re = new RegExp('^' + prefixo + '-?(\\d+)$', 'i');
-      let max = 0;
-      (data || []).forEach(r => {
-        const m = re.exec(str_(r[coluna]).trim());
-        if (m) max = Math.max(max, parseInt(m[1], 10));
-      });
-      return prefixo + String(max + 1).padStart(largura, '0');
-    }
-
-    /**
-     * MÓDULO DE REQUISIÇÕES: Salva a requisição diretamente na tabela 'requisicoes' do Supabase.
-     */
-    async function salvarRequisicao(e) {
+    function salvarRequisicao(e) {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
 
-      // 1. Captura os dados preenchidos no formulário
       const cliente = document.getElementById('reqCliente').value.trim();
       const operacao = document.querySelector('input[name="reqOperacao"]:checked')?.value || "LOCAÇÃO";
       const eqAntigo = document.getElementById('reqEqAntigo').value.trim();
@@ -4049,46 +4589,72 @@ abaAgenda.appendRow([
       const motivo = document.getElementById('reqMotivo').value.trim();
       const solicitante = usuarioLogado ? (usuarioLogado.nome || usuarioLogado.usuario || "Solicitante") : "Solicitante";
 
-      // 2. Valida campos obrigatórios
       if (!cliente || !eqAntigo || !eqSolicitado) {
         showToast("Preencha os campos obrigatórios.", "error");
         return false;
       }
 
-      // 3. Feedback visual de processamento no botão
       const btn = document.getElementById('btnSalvarReq');
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> SALVANDO NO SUPABASE...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ENVIANDO...';
       }
 
-      try {
-        // 4. Gera o próximo protocolo seguro diretamente no Supabase
-        const protocolo = await proximoProtocolo('requisicoes', 'protocolo', 'REQ', 4);
-        const agoraIso = new Date().toISOString();
+      const payload = {
+        acao: "CRIAR_REQUISICAO",
+        cliente,
+        operacao,
+        equipamentoAntigo: eqAntigo,
+        equipamentoSolicitado: eqSolicitado,
+        motivo,
+        solicitante
+      };
 
-        // 5. Insere o registro na tabela 'requisicoes' do Supabase
-        const { error } = await supabaseClient.from('requisicoes').insert({
-          protocolo,
-          data_hora: agoraIso,
-          cliente,
-          operacao,
-          equipamento_antigo: eqAntigo,
-          equipamento_solicitado: eqSolicitado,
-          motivo,
-          solicitante,
-          status: "PENDENTE",
-          protocolo_termo: "",
-          pdf_url: ""
-        });
-
-        if (error) throw error;
-
-        // 6. Atualiza a interface local e coloca o item no topo (.unshift)
-        document.getElementById('formReq').reset();
-        const novaReq = {
-          protocolo,
-          dataHora: fmtBR(agoraIso),
+      apiFetch(payload)
+      .then(res => res.json())
+      .then(res => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Requisição e Gerar PDF';
+        }
+        if (res.status === "sucesso") {
+          document.getElementById('formReq').reset();
+          const novaReq = {
+            protocolo: res.protocoloReq || res.protocolo || `REQ-${Math.floor(100 + Math.random()*900)}`,
+            dataHora: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
+            cliente,
+            operacao,
+            equipamentoAntigo: eqAntigo,
+            equipamentoSolicitado: eqSolicitado,
+            motivo,
+            solicitante,
+            status: "PENDENTE",
+            protocoloTermo: "",
+            pdfUrlReq: res.pdfUrlReq || res.pdfUrl || ""
+          };
+          if (!bancoDados.requisicoes) bancoDados.requisicoes = [];
+          bancoDados.requisicoes.unshift(novaReq);
+          filtrarRequisicoes();
+          atualizarNotificacoes();
+          atualizarDashboard();
+          showToast(`Requisição ${novaReq.protocolo} criada com sucesso!`, "success");
+          if (novaReq.pdfUrlReq) {
+            abrirModalVisualizadorReq(novaReq.pdfUrlReq, "Visualizar Requisição: " + novaReq.protocolo);
+          }
+          buscarAtualizacoesSilenciosas();
+        } else {
+          showToast("Erro ao enviar requisição: " + (res.mensagem || "Erro desconhecido."), "error");
+        }
+      })
+      .catch(() => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Requisição e Gerar PDF';
+        }
+        const prot = `REQ-${Math.floor(200 + Math.random() * 800)}`;
+        bancoDados.requisicoes.unshift({
+          protocolo: prot,
+          dataHora: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
           cliente,
           operacao,
           equipamentoAntigo: eqAntigo,
@@ -4098,30 +4664,17 @@ abaAgenda.appendRow([
           status: "PENDENTE",
           protocoloTermo: "",
           pdfUrlReq: ""
-        };
-
-        if (!bancoDados.requisicoes) bancoDados.requisicoes = [];
-        bancoDados.requisicoes.unshift(novaReq);
-
+        });
+        document.getElementById('formReq').reset();
         filtrarRequisicoes();
         atualizarNotificacoes();
         atualizarDashboard();
-        showToast(`Requisição ${protocolo} salva com sucesso no Supabase!`, "success");
-        buscarAtualizacoesSilenciosas();
+        showToast(`Requisição ${prot} registada!`, "success");
+      });
 
-      } catch (err) {
-        console.error("Erro ao salvar requisição:", err);
-        showToast("Erro ao salvar no Supabase: " + (err.message || err), "error");
-      } finally {
-        // 7. Restaura o botão ao estado original
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Requisição e Gerar PDF';
-        }
-      }
+      return false;
     }
 
-      
     function abrirModalVisualizadorReq(pdfUrl, titulo) {
       const modal = document.getElementById('modalVisualizadorReq');
       const iframe = document.getElementById('iframeVisualizadorReq');
@@ -4283,9 +4836,7 @@ abaAgenda.appendRow([
       showToast(`Saldo da locação ${id} atualizado com sucesso!`, "success");
 
       const nomeUsr = usuarioLogado ? (usuarioLogado.nome || usuarioLogado.usuario) : "Sistema";
-      fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({
+      apiFetch({
           acao: "ATUALIZAR_QTD_FISICA_LOCACAO",
           id,
           qtdFisica: Number(novaQtd),
@@ -4293,8 +4844,7 @@ abaAgenda.appendRow([
           valorTotal: Number(valTotal) || 0,
           observacao: obs,
           usuarioNome: nomeUsr
-        })
-      }).then(() => buscarAtualizacoesSilenciosas()).catch(() => {});
+        }).then(() => buscarAtualizacoesSilenciosas()).catch(() => {});
     }
 
     function renderizarTabelaCompras() {
@@ -4394,7 +4944,7 @@ abaAgenda.appendRow([
         frete: document.getElementById('compFrete').value.trim()
       };
 
-      fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+      apiFetch(payload)
       .then(res => res.json())
       .then(res => {
         btn.disabled = false;
@@ -4540,11 +5090,14 @@ abaAgenda.appendRow([
         req.status = "RECUSADO";
         if (motivo) req.motivo = `${req.motivo || ''} [Recusado: ${motivo}]`;
       }
+      const protRecusado = protocoloReqEmRecusa;
       fecharModalRecusa();
       filtrarRequisicoes();
       atualizarNotificacoes();
       atualizarDashboard();
       showToast("Requisição recusada.", "warning");
+      enviarAcao({ acao: "RECUSAR_REQUISICAO", protocoloReq: protRecusado, motivoRecusa: motivo })
+        .then(() => buscarAtualizacoesSilenciosas());
     }
 
     function abrirModalVincularTermo(protReq, cliente) {
@@ -4585,10 +5138,7 @@ abaAgenda.appendRow([
       atualizarNotificacoes();
       showToast(`Termo ${protTermo} vinculado à requisição ${protReqAlvo}!`, "success");
 
-      fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ acao: "VINCULAR_TERMO_REQUISICAO", protocoloReq: protReqAlvo, protocoloTermo: protTermo })
-      }).then(() => buscarAtualizacoesSilenciosas()).catch(() => {});
+      apiFetch({ acao: "VINCULAR_TERMO_REQUISICAO", protocoloReq: protReqAlvo, protocoloTermo: protTermo }).then(() => buscarAtualizacoesSilenciosas()).catch(() => {});
     }
 
     function atenderRequisicao(protReq, cliente, operacao) {
@@ -4730,7 +5280,7 @@ abaAgenda.appendRow([
     }
 
     function postAPI(payload) {
-      return fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(r => r.json());
+      return apiFetch(payload).then(r => r.json());
     }
 
     // ---------- Termos ----------
