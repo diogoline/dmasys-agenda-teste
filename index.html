@@ -840,6 +840,119 @@
     .cfg-user-perms { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #334155; }
     html.light .cfg-user-perms { border-top-color: #cbd5e1; }
     .cfg-user-perms label { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+
+    /* campo principal do cadastro (tipo/descrição): maior e em destaque */
+    .combo-grande > label { font-size: 13px; }
+    .combo-grande .combo-input { min-height: 56px; font-size: 18px; font-weight: 600; padding-left: 18px; border-color: #38bdf8; }
+    html.light .combo-grande .combo-input { border-color: #0369a1; }
+
+    /* ===== TEMA CLARO v2: cores vivas e legíveis (textos com contraste mínimo de 4,5:1; ícones 3:1) ===== */
+    html.light body { background-color: #e8eef8 !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-sky-200:not(i),
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-sky-300:not(i),
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-sky-400:not(i),
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-sky-500:not(i) { color: #0b5ed7 !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-amber-200:not(i),
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-amber-300:not(i),
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-amber-400:not(i) { color: #b45309 !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-rose-200:not(i),
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-rose-300:not(i),
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-rose-400:not(i) { color: #be123c !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-emerald-200:not(i),
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-emerald-300:not(i),
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-emerald-400:not(i) { color: #047857 !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-indigo-400:not(i),
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-indigo-500:not(i) { color: #4338ca !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-purple-400:not(i) { color: #7e22ce !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-slate-400:not(i),
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-slate-500:not(i) { color: #475569 !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-slate-200:not(i),
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-slate-300:not(i) { color: #334155 !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) .text-slate-100:not(i) { color: #1e293b !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-sky-200,
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-sky-300,
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-sky-400,
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-sky-500 { color: #0284c7 !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-amber-200,
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-amber-300,
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-amber-400 { color: #d97706 !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-rose-200,
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-rose-300,
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-rose-400 { color: #e11d48 !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-emerald-200,
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-emerald-300,
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-emerald-400 { color: #059669 !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-indigo-400,
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-indigo-500 { color: #4f46e5 !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-purple-400 { color: #7c3aed !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-slate-400,
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-slate-500 { color: #64748b !important; }
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-slate-200,
+html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdown, .notification-dropdown, #calendarModal) i.text-slate-300 { color: #475569 !important; }
+
+    /* bordas das etiquetas coloridas (antes quase invisíveis sobre o branco) */
+    html.light [class*="border-sky-500/"] { border-color: rgba(11, 94, 215, .55) !important; }
+    html.light [class*="border-emerald-500/"] { border-color: rgba(5, 150, 105, .6) !important; }
+    html.light [class*="border-rose-500/"] { border-color: rgba(225, 29, 72, .55) !important; }
+    html.light [class*="border-amber-500/"] { border-color: rgba(217, 119, 6, .6) !important; }
+    html.light [class*="border-indigo-500/"] { border-color: rgba(79, 70, 229, .55) !important; }
+
+    /* textos de apoio das telas novas */
+    html.light .eq-k, html.light .eq-dl .k, html.light .combo-sub, html.light .combo-vazio { color: #475569 !important; }
+    html.light .eq-tag { color: #0b5ed7 !important; }
+    html.light .eq-btn { background: #fff; color: #0f172a; border-color: #7a8ca6; }
+    html.light .eq-btn:hover { border-color: #0b5ed7; color: #0b5ed7; background: #eff6ff; }
+    html.light .eq-chip.azul { background: #dbeafe; color: #1d4ed8; border-color: #60a5fa; }
+    html.light .eq-chip.verde { background: #d1fae5; color: #047857; border-color: #34d399; }
+    html.light .eq-chip.ambar { background: #fef3c7; color: #92400e; border-color: #f59e0b; }
+    html.light .eq-chip.vermelho { background: #ffe4e6; color: #be123c; border-color: #fb7185; }
+    html.light .eq-chip.cinza { background: #e2e8f0; color: #334155; border-color: #94a3b8; }
+
+    /* campos: fundo branco, borda visível, foco em azul vivo */
+    html.light input[type="text"], html.light input[type="password"], html.light input[type="month"], html.light input[type="date"],
+    html.light input[type="time"], html.light input[type="number"], html.light input[type="datetime-local"], html.light input[type="email"],
+    html.light input[type="search"], html.light select, html.light textarea {
+      background: #ffffff !important; border-color: #7a8ca6 !important; color: #0f172a !important;
+    }
+    html.light input[type="text"]:focus, html.light input[type="password"]:focus, html.light input[type="month"]:focus, html.light input[type="date"]:focus,
+    html.light input[type="time"]:focus, html.light input[type="number"]:focus, html.light input[type="datetime-local"]:focus, html.light input[type="email"]:focus,
+    html.light input[type="search"]:focus, html.light select:focus, html.light textarea:focus {
+      border-color: #0b5ed7 !important; box-shadow: 0 0 0 3px rgba(11, 94, 215, .2) !important; outline: none !important;
+    }
+    html.light input[readonly] { background-color: #e3ebf7 !important; color: #1e293b !important; border-color: #b6c4d8 !important; }
+    html.light input:disabled, html.light select:disabled, html.light textarea:disabled { background-color: #edf1f7 !important; color: #475569 !important; opacity: 1 !important; border-color: #b6c4d8 !important; }
+    html.light ::placeholder { color: #64748b !important; opacity: 1 !important; }
+    html.light .combo-grande .combo-input { border-color: #0b5ed7 !important; border-width: 2px; }
+    html.light .combo-lista { border-color: #7a8ca6; }
+    html.light label { color: #334155 !important; }
+
+    /* cartões, tabelas e menu lateral com mais definição */
+    html.light .card, html.light .metric-card, html.light .modal-box { border-color: #aebfd6 !important; box-shadow: 0 6px 20px rgba(15, 23, 42, 0.09) !important; }
+    html.light .nav-group-btn { background: #ffffff; border-color: #b6c4d8; color: #1e293b; }
+    html.light .nav-group-btn.open { background: #dbeafe; color: #1d4ed8; border-color: #60a5fa; }
+    html.light .nav-tab { color: #334155; }
+    html.light .nav-tab.active { background: #0b5ed7; border-color: #0b5ed7; box-shadow: 0 4px 14px rgba(11, 94, 215, .35); }
+    html.light th { background: #dfe8f5 !important; color: #0f172a !important; border-bottom-color: #9fb0c8 !important; }
+    html.light td { border-bottom-color: #e1e8f3 !important; }
+    html.light tbody tr:hover { background: #eef4ff !important; }
+    html.light .btn-submit { background: linear-gradient(135deg, #0369a1, #1d4ed8); box-shadow: 0 4px 14px rgba(29, 78, 216, .35); }
+    html.light .cfg-user { border-color: #aebfd6; }
+
+    /* tema claro v2 — ajustes finais encontrados na medição */
+    html.light .badge-pendente, html.light .badge-saldo-pendente { background: #fef3c7; color: #92400e; border-color: #f59e0b; }
+    html.light .badge-atendido { background: #d1fae5; color: #047857; border-color: #34d399; }
+    html.light .badge-recusado, html.light .badge-encerrado, html.light .badge-saldo-alerta { background: #ffe4e6; color: #be123c; border-color: #fb7185; }
+    html.light .badge-saldo-ok { background: #e2e8f0; color: #334155; border-color: #94a3b8; }
+    html.light .nav-group-btn.open .nav-group-chevron { color: #1d4ed8; }
+    html.light #mainSidebar .nav-tab.active i { color: #ffffff !important; }
+    html.light footer .text-white { color: #0f172a !important; }
+    .eq-btn-ativo { border-color: #38bdf8; color: #38bdf8; }
+    html.light .eq-btn-ativo { border-color: #0b5ed7 !important; color: #0b5ed7 !important; background: #eff6ff !important; }
+    /* botão de suporte (WhatsApp): verde mais escuro para o ícone branco ser legível nos dois temas */
+    button[title="Suporte / WhatsApp"] { background-color: #059669 !important; }
+    button[title="Suporte / WhatsApp"]:hover { background-color: #047857 !important; }
+    /* texto de apoio dentro dos rótulos: um pouco mais claro no tema escuro */
+    html:not(.light) .text-slate-500, label .text-slate-500 { color: #94a3b8; }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 selection:bg-sky-500 selection:text-white">
@@ -2002,6 +2115,18 @@
 
               <div class="text-xs font-bold uppercase tracking-wider text-sky-400" style="margin:20px 0 8px">1. Identificação</div>
               <div class="form-row">
+                <div class="form-group combo combo-grande" id="cmbTipo" style="flex: 1;"><label>Tipo (descrição) * <span class="text-slate-500">(escolha primeiro: filtra os modelos)</span></label><input type="text" class="combo-input" autocomplete="off" placeholder="Ex: bomba de infusão, monitor multiparâmetros..." /><div class="combo-lista" role="listbox"></div></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group combo" id="cmbModelo" style="flex: 2;"><label>Modelo * <span class="text-slate-500">(fabricante e ANVISA vêm do modelo)</span></label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite o fabricante ou o modelo..." /><div class="combo-lista" role="listbox"></div></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group" style="flex: 2;"><label>Fabricante</label><input type="text" id="cadFabricanteView" readonly placeholder="Vem do modelo" /></div>
+                <div class="form-group" style="flex: 1;"><label>Registro ANVISA</label><input type="text" id="cadAnvisaView" readonly placeholder="Vem do modelo" /></div>
+                <div class="form-group" style="flex: 1;"><label>Validade do registro</label><input type="text" id="cadAnvisaValidadeView" readonly /></div>
+              </div>
+              <div id="cadModeloAviso" class="text-xs text-amber-400" style="min-height:14px; margin-top:-6px; margin-bottom:12px;"></div>
+              <div class="form-row">
                 <div class="form-group" id="grpMascara" style="display:none; flex: 2;"><label>Máscara da TAG *</label><select id="cadMascara" onchange="atualizarPreviaTag()"></select></div>
                 <div class="form-group" style="flex: 1;"><label>TAG *</label><input type="text" id="cadTag" placeholder="Ex: LMD-9999" required /><div id="cadTagInfo" class="text-xs text-slate-500" style="margin-top:4px;"></div></div>
                 <div id="grpTagManual" style="display:none; align-items:center; gap:10px; flex-wrap:wrap;">
@@ -2014,16 +2139,6 @@
                 <div class="form-group"><label>Patrimônio</label><input type="text" id="cadPatrimonio" placeholder="Ex: 00984" /></div>
                 <div class="form-group"><label>Código extra</label><input type="text" id="cadCodigoExtra" /></div>
               </div>
-              <div class="form-row">
-                <div class="form-group combo" id="cmbModelo" style="flex: 2;"><label>Modelo * <span class="text-slate-500">(fabricante, tipo e ANVISA vêm do modelo)</span></label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite o fabricante ou o modelo..." /><div class="combo-lista" role="listbox"></div></div>
-                <div class="form-group combo" id="cmbTipo" style="flex: 1;"><label>Tipo (descrição) *</label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite para buscar..." /><div class="combo-lista" role="listbox"></div></div>
-              </div>
-              <div class="form-row">
-                <div class="form-group" style="flex: 2;"><label>Fabricante</label><input type="text" id="cadFabricanteView" readonly placeholder="Vem do modelo" /></div>
-                <div class="form-group" style="flex: 1;"><label>Registro ANVISA</label><input type="text" id="cadAnvisaView" readonly placeholder="Vem do modelo" /></div>
-                <div class="form-group" style="flex: 1;"><label>Validade do registro</label><input type="text" id="cadAnvisaValidadeView" readonly /></div>
-              </div>
-              <div id="cadModeloAviso" class="text-xs text-amber-400" style="min-height:14px; margin-top:-6px;"></div>
 
               <div class="text-xs font-bold uppercase tracking-wider text-sky-400" style="margin:20px 0 8px">2. Unidade e localização</div>
               <div class="form-row">
@@ -5878,9 +5993,9 @@ abaAgenda.appendRow([
 
     function garantirCombosEquip() {
       if (combos.cmbModelo) return;
-      combos.cmbTipo = new Combo('cmbTipo', { catalogo: 'tipos_equipamento', msgSemPai: 'Definido pelo modelo' });
+      combos.cmbTipo = new Combo('cmbTipo', { catalogo: 'tipos_equipamento', aoMudar: it => aoMudarTipo(it) });
       combos.cmbModelo = new Combo('cmbModelo', {
-        catalogo: 'modelos', rotuloItem: it => `${it.fabricante_nome} — ${it.nome}`, subItem: it => it.tipo_nome || 'tipo ainda não definido', aoMudar: it => aoMudarModelo(it)
+        catalogo: 'modelos', tipo: () => combos.cmbTipo.valor, rotuloItem: it => `${it.fabricante_nome} — ${it.nome}`, subItem: it => it.tipo_nome || 'tipo ainda não definido', aoMudar: it => aoMudarModelo(it)
       });
       combos.cmbUnidade = new Combo('cmbUnidade', { catalogo: 'unidades', aoMudar: it => sugerirMascaraPorUnidade(it ? it.nome : '') });
       combos.cmbCliente = new Combo('cmbCliente', { catalogo: 'clientes', aoMudar: () => { combos.cmbSetor.limpar(); atualizarSetorCombo(); } });
@@ -5891,21 +6006,25 @@ abaAgenda.appendRow([
 
     function atualizarSetorCombo() { if (combos.cmbSetor) combos.cmbSetor.desabilitar(!combos.cmbCliente.valor); }
 
-    // ao escolher o modelo: fabricante, tipo e ANVISA vêm dele
+    // ao escolher o tipo: os modelos passam a mostrar só os desse tipo (e os genéricos); modelo de outro tipo é desfeito
+    function aoMudarTipo(it) {
+      const modelo = combos.cmbModelo && combos.cmbModelo.item;
+      if (modelo && modelo.tipo_id && (!it || modelo.tipo_id !== it.id)) { combos.cmbModelo.limpar(); aoMudarModelo(null, true); }
+    }
+
+    // ao escolher o modelo: fabricante e ANVISA vêm dele; se ele tem tipo definido, o tipo é preenchido
     function aoMudarModelo(it, manterTipo) {
       const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
       set('cadFabricanteView', it ? (it.fabricante_nome || '') : '');
       set('cadAnvisaView', it ? (it.registro_anvisa || '') : '');
       set('cadAnvisaValidadeView', it && it.validade_anvisa ? fmtDataISO_(it.validade_anvisa) : '');
       if (it && it.tipo_id && !manterTipo) combos.cmbTipo.definir({ id: it.tipo_id, nome: it.tipo_nome });
-      combos.cmbTipo.desabilitar(!!(it && it.tipo_id));
       const av = document.getElementById('cadModeloAviso');
-      if (av) av.textContent = !it ? '' : (!it.tipo_id ? 'Este modelo ainda não tem tipo definido: escolha o tipo ao lado.' : (!it.registro_anvisa ? 'Este modelo ainda não tem registro ANVISA cadastrado (quem gerencia os catálogos pode incluir).' : ''));
+      if (av) av.textContent = !it ? '' : ((!it.tipo_id && !combos.cmbTipo.valor) ? 'Este modelo ainda não tem tipo definido: escolha o tipo acima.' : (!it.registro_anvisa ? 'Este modelo ainda não tem registro ANVISA cadastrado (quem gerencia os catálogos pode incluir).' : ''));
     }
 
     function limparCombosEquip() {
       COMBOS_EQ.forEach(([id]) => { if (combos[id]) combos[id].limpar(); });
-      if (combos.cmbTipo) combos.cmbTipo.desabilitar(false);
       aoMudarModelo(null, true);
       atualizarSetorCombo();
     }
@@ -5970,10 +6089,10 @@ abaAgenda.appendRow([
     }
 
     // ---------- Catálogos padronizados (fabricantes, modelos, tipos, fornecedores, clientes, setores, unidades) ----------
-    async function buscarCatalogo(catalogo, termo, pai, limite, offset, somenteAtivos) {
+    async function buscarCatalogo(catalogo, termo, pai, limite, offset, somenteAtivos, tipo) {
       const { data, error } = await supabaseClient.rpc('buscar_catalogo', {
         p_catalogo: catalogo, p_termo: termo || '', p_pai: pai || null,
-        p_somente_ativos: somenteAtivos !== false, p_limite: limite || 30, p_offset: offset || 0
+        p_somente_ativos: somenteAtivos !== false, p_limite: limite || 30, p_offset: offset || 0, p_tipo: tipo || null
       });
       if (error || !data || data.erro) {
         console.error("Erro ao buscar catálogo:", error || data);
@@ -6009,7 +6128,7 @@ abaAgenda.appendRow([
       async buscar(termo) {
         const pai = this.cfg.pai ? this.cfg.pai() : null;
         if (this.cfg.exigePai && !pai) return { itens: [], aviso: this.cfg.msgSemPai || 'Escolha o item anterior primeiro.' };
-        const r = await buscarCatalogo(this.cfg.catalogo, termo, pai, 30, 0, true);
+        const r = await buscarCatalogo(this.cfg.catalogo, termo, pai, 30, 0, true, this.cfg.tipo ? this.cfg.tipo() : null);
         return { itens: r.itens || [], aviso: r.erro ? 'Não foi possível carregar a lista.' : '' };
       }
       aoDigitar(termo, abrir) {
@@ -6096,7 +6215,7 @@ abaAgenda.appendRow([
       const box = document.getElementById('catAbas');
       if (!box) return;
       box.innerHTML = Object.keys(CATALOGOS).map(k =>
-        `<button type="button" class="eq-btn" data-cat="${k}" style="${k === catAtual ? 'border-color:#38bdf8;color:#38bdf8;' : ''}" onclick="trocarCatalogo(this.dataset.cat)">${CATALOGOS[k].rotulo}</button>`).join('');
+        `<button type="button" class="eq-btn${k === catAtual ? ' eq-btn-ativo' : ''}" data-cat="${k}" onclick="trocarCatalogo(this.dataset.cat)">${CATALOGOS[k].rotulo}</button>`).join('');
     }
 
     function trocarCatalogo(c) {
