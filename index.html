@@ -816,7 +816,7 @@
     @media (max-width: 900px) { .eq-grid { grid-template-columns:1fr; } }
 
     /* telas de equipamento mais compactas e centralizadas */
-    #abaCadEquipamento > .card { max-width: 940px; margin-left: auto; margin-right: auto; }
+    #abaCadEquipamento .eq-form-wrap { max-width: 1180px; margin: 0 auto; }
     #eqVistaLista, #eqVistaFicha { max-width: 1120px; margin-left: auto; margin-right: auto; }
 
     /* lista com busca (catálogos) */
@@ -843,7 +843,7 @@
 
     /* campo principal do cadastro (tipo/descrição): maior e em destaque */
     .combo-grande > label { font-size: 13px; }
-    .combo-grande .combo-input { min-height: 56px; font-size: 18px; font-weight: 600; padding-left: 18px; border-color: #38bdf8; }
+    .combo-grande .combo-input { min-height: 50px; font-size: 16px; font-weight: 600; padding-left: 16px; border-color: #38bdf8; }
     html.light .combo-grande .combo-input { border-color: #0369a1; }
 
     /* ===== TEMA CLARO v2: cores vivas e legíveis (textos com contraste mínimo de 4,5:1; ícones 3:1) ===== */
@@ -953,6 +953,47 @@ html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdow
     button[title="Suporte / WhatsApp"]:hover { background-color: #047857 !important; }
     /* texto de apoio dentro dos rótulos: um pouco mais claro no tema escuro */
     html:not(.light) .text-slate-500, label .text-slate-500 { color: #94a3b8; }
+
+    /* formulário de equipamento em grade: cartões lado a lado, sem aparência de folha única */
+    .eq-g { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px; }
+    .eq-g > .c3 { grid-column: span 3; } .eq-g > .c4 { grid-column: span 4; } .eq-g > .c5 { grid-column: span 5; }
+    .eq-g > .c6 { grid-column: span 6; } .eq-g > .c7 { grid-column: span 7; } .eq-g > .c8 { grid-column: span 8; }
+    .eq-g > .c3, .eq-g > .c4, .eq-g > .c5, .eq-g > .c6, .eq-g > .c7, .eq-g > .c8 { min-width: 0; }
+    .eq-cols { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 20px; align-items: start; }
+    .eq-sec { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #38bdf8; margin: 0 0 12px; }
+    html.light .eq-sec { color: #0b5ed7; }
+    @media (max-width: 1000px) {
+      .eq-cols { grid-template-columns: minmax(0, 1fr); }
+      .eq-g > .c3, .eq-g > .c4, .eq-g > .c5, .eq-g > .c6, .eq-g > .c7, .eq-g > .c8 { grid-column: span 12; }
+    }
+
+    /* ===== tema claro: nenhum bloco escuro no meio da tela ===== */
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) .bg-slate-950,
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) .bg-slate-950\/40,
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) .bg-slate-950\/60,
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) .bg-slate-950\/70,
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) .bg-slate-950\/80,
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) .bg-slate-950\/85,
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) .bg-slate-950\/90 { background-color: #eaf0fa !important; }
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) .bg-slate-900,
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) .bg-slate-900\/40,
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) .bg-slate-900\/70,
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) .bg-slate-900\/90 { background-color: #f2f6fc !important; }
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) .bg-slate-800,
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) .bg-slate-800\/80 { background-color: #e2e8f0 !important; }
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) .bg-sky-950\/30 { background-color: #e0f2fe !important; }
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) .bg-rose-950\/20,
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) .bg-rose-950\/25 { background-color: #ffe4e6 !important; }
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) :is(.border-slate-800, .border-slate-800\/80, .border-slate-700) { border-color: #b6c4d8 !important; }
+    html.light :is(main, .modal-box, #chatBoxWhatsApp, #mainSidebar, #menuAjudaDropdown, .notification-dropdown) [class*="hover:bg-slate-"]:hover { background-color: #cbd5e1 !important; }
+    html.light .bg-gradient-to-r.via-slate-900 { background-image: linear-gradient(120deg, #dbeafe 0%, #eff6ff 55%, #e0e7ff 100%) !important; border-color: #93c5fd !important; }
+    html.light :is(.bg-slate-950, .bg-slate-950\/40, .bg-slate-950\/60, .bg-slate-950\/70, .bg-slate-950\/80, .bg-slate-950\/85, .bg-slate-950\/90, .bg-slate-900, .bg-slate-900\/40, .bg-slate-900\/70, .bg-slate-900\/90, .bg-slate-800, .bg-slate-800\/80, .bg-gradient-to-r.via-slate-900) .text-white:not(button):not([class*="bg-"]) { color: #0f172a !important; }
+
+    /* popup de suporte (WhatsApp) e botões verdes: claro no tema claro e com contraste suficiente */
+    html.light #chatBoxWhatsApp { background-color: #ffffff !important; border-color: #aebfd6 !important; box-shadow: 0 16px 40px rgba(15, 23, 42, .18) !important; }
+    .bg-emerald-600 { background-color: #047857; }
+    .hover\:bg-emerald-500:hover { background-color: #059669; }
+    html.light #chatBoxWhatsApp :is(.text-slate-200, .text-slate-300, .text-slate-400, .text-slate-500) { color: #334155 !important; }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 selection:bg-sky-500 selection:text-white">
@@ -2089,105 +2130,102 @@ html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdow
 
         <!-- ABA 11: CADASTRAR EQUIPAMENTO -->
         <div id="abaCadEquipamento" class="tab-content">
-          <div class="card">
-            <div class="card-title">Cadastrar Novo Equipamento</div>
+          <div class="eq-form-wrap">
             <form id="formNovoEquip" onsubmit="return salvarNovoEquipamento(event)">
 
-              <div class="text-xs font-bold uppercase tracking-wider text-sky-400" style="margin:8px 0 8px">Situação do equipamento</div>
-              <div class="form-row">
-                <div class="form-group" style="flex: 1;">
-                  <label>Situação *</label>
-                  <select id="cadPropriedade" onchange="alternarProprietario()" required>
-                    <option value="">Selecione...</option>
-                    <option value="PRÓPRIO">PRÓPRIO (da empresa)</option>
-                    <option value="CLIENTE">CLIENTE (do cliente)</option>
-                    <option value="COMODATO">COMODATO</option>
-                    <option value="LOCADO">LOCADO</option>
-                    <option value="EMPRESTADO">EMPRESTADO</option>
-                    <option value="TERCEIRO">TERCEIRO</option>
-                  </select>
-                  <div id="cadSituacaoInfo" class="text-xs text-slate-500" style="margin-top:4px;"></div>
-                  <button type="button" id="btnAlterarSituacao" class="eq-btn" style="display:none; margin-top:8px;" onclick="pedirAlteracaoSituacao()"><i class="fa-solid fa-lock"></i> Alterar situação (administrador)</button>
-                  <button type="button" id="btnBloquearSituacao" class="eq-btn" style="display:none; margin-top:8px;" onclick="bloquearSituacao()"><i class="fa-solid fa-lock"></i> Bloquear novamente</button>
+              <!-- 1) Situação e TAG -->
+              <div class="card">
+                <div class="card-title">Cadastrar Novo Equipamento</div>
+                <div class="eq-sec">Situação e TAG</div>
+                <div class="eq-g">
+                  <div class="form-group c5">
+                    <label>Situação *</label>
+                    <select id="cadPropriedade" onchange="alternarProprietario()" required>
+                      <option value="">Selecione...</option>
+                      <option value="PRÓPRIO">PRÓPRIO (da empresa)</option>
+                      <option value="CLIENTE">CLIENTE (do cliente)</option>
+                      <option value="COMODATO">COMODATO</option>
+                      <option value="LOCADO">LOCADO</option>
+                      <option value="EMPRESTADO">EMPRESTADO</option>
+                      <option value="TERCEIRO">TERCEIRO</option>
+                    </select>
+                    <div id="cadSituacaoInfo" class="text-xs text-slate-500" style="margin-top:4px;"></div>
+                    <button type="button" id="btnAlterarSituacao" class="eq-btn" style="display:none; margin-top:8px;" onclick="pedirAlteracaoSituacao()"><i class="fa-solid fa-lock"></i> Alterar situação (administrador)</button>
+                    <button type="button" id="btnBloquearSituacao" class="eq-btn" style="display:none; margin-top:8px;" onclick="bloquearSituacao()"><i class="fa-solid fa-lock"></i> Bloquear novamente</button>
+                  </div>
+                  <div class="form-group c7" id="grpProprietario" style="display:none;"><label>Proprietário *</label><input type="text" id="cadProprietario" placeholder="Quem é o dono do equipamento" /></div>
                 </div>
-                <div class="form-group" id="grpProprietario" style="display:none;"><label>Proprietário *</label><input type="text" id="cadProprietario" placeholder="Quem é o dono do equipamento" /></div>
-              </div>
-
-              <div class="text-xs font-bold uppercase tracking-wider text-sky-400" style="margin:20px 0 8px">1. Identificação</div>
-              <div class="form-row">
-                <div class="form-group combo combo-grande" id="cmbTipo" style="flex: 1;"><label>Tipo (descrição) * <span class="text-slate-500">(escolha primeiro: filtra os modelos)</span></label><input type="text" class="combo-input" autocomplete="off" placeholder="Ex: bomba de infusão, monitor multiparâmetros..." /><div class="combo-lista" role="listbox"></div></div>
-              </div>
-              <div class="form-row">
-                <div class="form-group combo" id="cmbModelo" style="flex: 2;"><label>Modelo * <span class="text-slate-500">(fabricante e ANVISA vêm do modelo)</span></label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite o fabricante ou o modelo..." /><div class="combo-lista" role="listbox"></div></div>
-              </div>
-              <div class="form-row">
-                <div class="form-group" style="flex: 2;"><label>Fabricante</label><input type="text" id="cadFabricanteView" readonly placeholder="Vem do modelo" /></div>
-                <div class="form-group" style="flex: 1;"><label>Registro ANVISA</label><input type="text" id="cadAnvisaView" readonly placeholder="Vem do modelo" /></div>
-                <div class="form-group" style="flex: 1;"><label>Validade do registro</label><input type="text" id="cadAnvisaValidadeView" readonly /></div>
-              </div>
-              <div id="cadModeloAviso" class="text-xs text-amber-400" style="min-height:14px; margin-top:-6px; margin-bottom:12px;"></div>
-              <div class="form-row">
-                <div class="form-group" id="grpMascara" style="display:none; flex: 2;"><label>Máscara da TAG *</label><select id="cadMascara" onchange="atualizarPreviaTag()"></select></div>
-                <div class="form-group" style="flex: 1;"><label>TAG *</label><input type="text" id="cadTag" placeholder="Ex: LMD-9999" required /><div id="cadTagInfo" class="text-xs text-slate-500" style="margin-top:4px;"></div></div>
-                <div id="grpTagManual" style="display:none; align-items:center; gap:10px; flex-wrap:wrap;">
-                  <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="cadTagManual" onchange="alternarTagManual()" style="width:auto;" /> <span id="txtTagManual">Informar TAG manualmente (requer administrador)</span></label>
-                  <button type="button" id="btnBloquearTag" class="eq-btn" style="display:none;" onclick="bloquearTagManual()"><i class="fa-solid fa-lock"></i> Bloquear campo</button>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group"><label>Nº de Série</label><input type="text" id="cadSerie" placeholder="Ex: 849302" /></div>
-                <div class="form-group"><label>Patrimônio</label><input type="text" id="cadPatrimonio" placeholder="Ex: 00984" /></div>
-                <div class="form-group"><label>Código extra</label><input type="text" id="cadCodigoExtra" /></div>
-              </div>
-
-              <div class="text-xs font-bold uppercase tracking-wider text-sky-400" style="margin:20px 0 8px">2. Unidade e localização</div>
-              <div class="form-row">
-                <div class="form-group combo" id="cmbUnidade" style="flex: 1;"><label>Unidade / contrato *</label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite para buscar..." /><div class="combo-lista" role="listbox"></div></div>
-                <div class="form-group combo" id="cmbCliente" style="flex: 2;"><label>Cliente <span class="text-slate-500">(obrigatório quando não for próprio)</span></label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite para buscar..." /><div class="combo-lista" role="listbox"></div></div>
-                <div class="form-group combo" id="cmbSetor" style="flex: 1;"><label>Setor</label><input type="text" class="combo-input" autocomplete="off" placeholder="Escolha o cliente primeiro" /><div class="combo-lista" role="listbox"></div></div>
-              </div>
-
-              <div class="text-xs font-bold uppercase tracking-wider text-sky-400" style="margin:20px 0 8px">3. Criticidade</div>
-              <div class="form-row">
-                <div class="form-group" style="max-width: 280px;">
-                  <label>Criticidade</label>
-                  <select id="cadCriticidade">
-                    <option value="">Não definida</option>
-                    <option value="BAIXA">BAIXA</option><option value="MÉDIA">MÉDIA</option>
-                    <option value="ALTA">ALTA</option><option value="CRÍTICA">CRÍTICA</option>
-                  </select>
+                <div class="eq-g" style="margin-top:14px;">
+                  <div class="form-group c5" id="grpMascara" style="display:none;"><label>Máscara da TAG *</label><select id="cadMascara" onchange="atualizarPreviaTag()"></select></div>
+                  <div class="form-group c3"><label>TAG *</label><input type="text" id="cadTag" placeholder="Ex: LMD-9999" required /><div id="cadTagInfo" class="text-xs text-slate-500" style="margin-top:4px;"></div></div>
+                  <div id="grpTagManual" class="c4" style="display:none; align-items:center; gap:10px; flex-wrap:wrap; padding-top:22px;">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="cadTagManual" onchange="alternarTagManual()" style="width:auto;" /> <span id="txtTagManual">Informar TAG manualmente (requer administrador)</span></label>
+                    <button type="button" id="btnBloquearTag" class="eq-btn" style="display:none;" onclick="bloquearTagManual()"><i class="fa-solid fa-lock"></i> Bloquear campo</button>
+                  </div>
                 </div>
               </div>
 
-              <div class="text-xs font-bold uppercase tracking-wider text-sky-400" style="margin:20px 0 8px">4. Acessórios e observações</div>
-              <div class="form-group mb-4">
-                <label>Acessórios padrão (separados por ;)</label>
-                <input type="text" id="cadAcessorios" placeholder="Ex: CABO DE FORÇA; CIRCUITO PACIENTE; SENSOR FLUXO" />
+              <div class="eq-cols">
+                <!-- 2) Equipamento -->
+                <div class="card">
+                  <div class="card-title">Equipamento</div>
+                  <div class="form-group combo combo-grande" id="cmbTipo" style="margin-bottom:14px;"><label>Tipo (descrição) * <span class="text-slate-500">(escolha primeiro: filtra os modelos)</span></label><input type="text" class="combo-input" autocomplete="off" placeholder="Ex: bomba de infusão..." /><div class="combo-lista" role="listbox"></div></div>
+                  <div class="form-group combo" id="cmbModelo" style="margin-bottom:14px;"><label>Modelo * <span class="text-slate-500">(fabricante e ANVISA vêm do modelo)</span></label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite o fabricante ou o modelo..." /><div class="combo-lista" role="listbox"></div></div>
+                  <div class="eq-g">
+                    <div class="form-group c6"><label>Fabricante</label><input type="text" id="cadFabricanteView" readonly placeholder="Vem do modelo" /></div>
+                    <div class="form-group c3"><label>Registro ANVISA</label><input type="text" id="cadAnvisaView" readonly placeholder="Vem do modelo" /></div>
+                    <div class="form-group c3"><label>Validade</label><input type="text" id="cadAnvisaValidadeView" readonly /></div>
+                  </div>
+                  <div id="cadModeloAviso" class="text-xs text-amber-400" style="min-height:14px; margin:6px 0 12px;"></div>
+                  <div class="eq-g">
+                    <div class="form-group c4"><label>Nº de Série</label><input type="text" id="cadSerie" placeholder="Ex: 849302" /></div>
+                    <div class="form-group c4"><label>Patrimônio</label><input type="text" id="cadPatrimonio" placeholder="Ex: 00984" /></div>
+                    <div class="form-group c4"><label>Código extra</label><input type="text" id="cadCodigoExtra" /></div>
+                  </div>
+                </div>
+
+                <!-- 3) Local e classificação -->
+                <div class="card">
+                  <div class="card-title">Local e classificação</div>
+                  <div class="form-group combo" id="cmbUnidade" style="margin-bottom:14px;"><label>Unidade / contrato *</label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite para buscar..." /><div class="combo-lista" role="listbox"></div></div>
+                  <div class="form-group combo" id="cmbCliente" style="margin-bottom:14px;"><label>Cliente <span class="text-slate-500">(obrigatório quando não for próprio)</span></label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite para buscar..." /><div class="combo-lista" role="listbox"></div></div>
+                  <div class="form-group combo" id="cmbSetor" style="margin-bottom:14px;"><label>Setor</label><input type="text" class="combo-input" autocomplete="off" placeholder="Escolha o cliente primeiro" /><div class="combo-lista" role="listbox"></div></div>
+                  <div class="form-group">
+                    <label>Criticidade</label>
+                    <select id="cadCriticidade">
+                      <option value="">Não definida</option>
+                      <option value="BAIXA">BAIXA</option><option value="MÉDIA">MÉDIA</option>
+                      <option value="ALTA">ALTA</option><option value="CRÍTICA">CRÍTICA</option>
+                    </select>
+                  </div>
+                </div>
               </div>
-              <div class="form-group mb-4"><label>Observação</label><input type="text" id="cadObservacao" /></div>
 
-              <details style="margin-bottom:16px;">
-                <summary class="text-xs font-bold uppercase tracking-wider text-sky-400" style="cursor:pointer;">5. Aquisição e garantia (opcional)</summary>
-                <div class="form-row" style="margin-top:12px;">
-                  <div class="form-group combo" id="cmbFornecedor" style="flex: 2;"><label>Fornecedor</label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite para buscar..." /><div class="combo-lista" role="listbox"></div></div>
-                  <div class="form-group"><label>Nota fiscal</label><input type="text" id="cadNotaFiscal" /></div>
-                  <div class="form-group"><label>Valor de aquisição (R$)</label><input type="text" id="cadValorAquisicao" inputmode="decimal" /></div>
+              <!-- 4) Complementos -->
+              <div class="card">
+                <div class="card-title">Acessórios, observações e aquisição</div>
+                <div class="eq-g">
+                  <div class="form-group c6"><label>Acessórios padrão (separados por ;)</label><input type="text" id="cadAcessorios" placeholder="Ex: CABO DE FORÇA; CIRCUITO PACIENTE; SENSOR FLUXO" /></div>
+                  <div class="form-group c6"><label>Observação</label><input type="text" id="cadObservacao" /></div>
                 </div>
-                <div class="form-row">
-                  <div class="form-group"><label>Data de fabricação</label><input type="date" id="cadDataFabricacao" /></div>
-                  <div class="form-group"><label>Data de aquisição</label><input type="date" id="cadDataAquisicao" /></div>
-                  <div class="form-group"><label>Data de instalação</label><input type="date" id="cadDataInstalacao" /></div>
+                <details style="margin-top:14px;">
+                  <summary class="eq-sec" style="cursor:pointer; margin:0;">Aquisição e garantia (opcional)</summary>
+                  <div class="eq-g" style="margin-top:12px;">
+                    <div class="form-group combo c6" id="cmbFornecedor"><label>Fornecedor</label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite para buscar..." /><div class="combo-lista" role="listbox"></div></div>
+                    <div class="form-group c3"><label>Nota fiscal</label><input type="text" id="cadNotaFiscal" /></div>
+                    <div class="form-group c3"><label>Valor de aquisição (R$)</label><input type="text" id="cadValorAquisicao" inputmode="decimal" /></div>
+                    <div class="form-group c3"><label>Data de fabricação</label><input type="date" id="cadDataFabricacao" /></div>
+                    <div class="form-group c3"><label>Data de aquisição</label><input type="date" id="cadDataAquisicao" /></div>
+                    <div class="form-group c3"><label>Data de instalação</label><input type="date" id="cadDataInstalacao" /></div>
+                    <div class="form-group c3"><label>Garantia original até</label><input type="date" id="cadGarantiaOriginal" /></div>
+                    <div class="form-group c3"><label>Garantia estendida até</label><input type="date" id="cadGarantiaEstendida" /></div>
+                  </div>
+                </details>
+                <datalist id="listUnidadesEquip"></datalist>
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-top:18px; padding-top:16px; border-top:1px solid rgba(148,163,184,.25);">
+                  <label id="grpContinuar" style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="cadContinuar" style="width:auto;" /> Continuar incluindo (mantém situação, modelo, unidade, cliente e setor)</label>
+                  <button type="submit" id="btnSalvarCadEquip" class="btn-submit"><i class="fa-solid fa-server"></i> Salvar Equipamento</button>
                 </div>
-                <div class="form-row">
-                  <div class="form-group"><label>Garantia original até</label><input type="date" id="cadGarantiaOriginal" /></div>
-                  <div class="form-group"><label>Garantia estendida até</label><input type="date" id="cadGarantiaEstendida" /></div>
-                </div>
-              </details>
-              <datalist id="listUnidadesEquip"></datalist>
-
-              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-                <label id="grpContinuar" style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="cadContinuar" style="width:auto;" /> Continuar incluindo (mantém situação, modelo, unidade, cliente e setor)</label>
-                <button type="submit" id="btnSalvarCadEquip" class="btn-submit"><i class="fa-solid fa-server"></i> Salvar Equipamento</button>
               </div>
             </form>
           </div>
