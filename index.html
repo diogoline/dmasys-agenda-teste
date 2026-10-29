@@ -814,6 +814,10 @@
     html.light .eq-btn { background:#fff; color:#0f172a; border-color:#cbd5e1; }
     html.light .eq-btn:hover { border-color:#0369a1; color:#0369a1; }
     @media (max-width: 900px) { .eq-grid { grid-template-columns:1fr; } }
+
+    /* telas de equipamento mais compactas e centralizadas */
+    #abaCadEquipamento > .card { max-width: 940px; margin-left: auto; margin-right: auto; }
+    #eqVistaLista, #eqVistaFicha { max-width: 1120px; margin-left: auto; margin-right: auto; }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 selection:bg-sky-500 selection:text-white">
@@ -1934,7 +1938,7 @@
               <div id="eqListaInfo" class="text-xs text-slate-500" style="margin:8px 0;">Digite ao menos 2 caracteres para buscar.</div>
               <div class="table-container">
                 <table>
-                  <thead><tr><th class="td-center">TAG</th><th>Equipamento</th><th>Fabricante / Modelo</th><th>Cliente / Setor</th><th class="td-center">Propriedade</th></tr></thead>
+                  <thead><tr><th class="td-center">TAG</th><th>Equipamento</th><th>Fabricante / Modelo</th><th>Cliente / Setor</th><th class="td-center">Situação</th></tr></thead>
                   <tbody id="corpoEquipamentos"></tbody>
                 </table>
               </div>
@@ -1949,11 +1953,34 @@
             <div class="card-title">Cadastrar Novo Equipamento</div>
             <form id="formNovoEquip" onsubmit="return salvarNovoEquipamento(event)">
 
+              <div class="text-xs font-bold uppercase tracking-wider text-sky-400" style="margin:8px 0 8px">Situação do equipamento</div>
+              <div class="form-row">
+                <div class="form-group" style="flex: 1;">
+                  <label>Situação *</label>
+                  <select id="cadPropriedade" onchange="alternarProprietario()" required>
+                    <option value="">Selecione...</option>
+                    <option value="PRÓPRIO">PRÓPRIO (da empresa)</option>
+                    <option value="CLIENTE">CLIENTE (do cliente)</option>
+                    <option value="COMODATO">COMODATO</option>
+                    <option value="LOCADO">LOCADO</option>
+                    <option value="EMPRESTADO">EMPRESTADO</option>
+                    <option value="TERCEIRO">TERCEIRO</option>
+                  </select>
+                  <div id="cadSituacaoInfo" class="text-xs text-slate-500" style="margin-top:4px;"></div>
+                  <button type="button" id="btnAlterarSituacao" class="eq-btn" style="display:none; margin-top:8px;" onclick="pedirAlteracaoSituacao()"><i class="fa-solid fa-lock"></i> Alterar situação (administrador)</button>
+                  <button type="button" id="btnBloquearSituacao" class="eq-btn" style="display:none; margin-top:8px;" onclick="bloquearSituacao()"><i class="fa-solid fa-lock"></i> Bloquear novamente</button>
+                </div>
+                <div class="form-group" id="grpProprietario" style="display:none;"><label>Proprietário *</label><input type="text" id="cadProprietario" placeholder="Quem é o dono do equipamento" /></div>
+              </div>
+
               <div class="text-xs font-bold uppercase tracking-wider text-sky-400" style="margin:20px 0 8px">1. Identificação</div>
               <div class="form-row">
                 <div class="form-group" id="grpMascara" style="display:none; flex: 2;"><label>Máscara da TAG *</label><select id="cadMascara" onchange="atualizarPreviaTag()"></select></div>
                 <div class="form-group" style="flex: 1;"><label>TAG *</label><input type="text" id="cadTag" placeholder="Ex: LMD-9999" required /><div id="cadTagInfo" class="text-xs text-slate-500" style="margin-top:4px;"></div></div>
-                <label id="grpTagManual" style="display:none; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="cadTagManual" onchange="alternarTagManual()" style="width:auto;" /> Informar TAG manualmente</label>
+                <div id="grpTagManual" style="display:none; align-items:center; gap:10px; flex-wrap:wrap;">
+                  <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="cadTagManual" onchange="alternarTagManual()" style="width:auto;" /> <span id="txtTagManual">Informar TAG manualmente (requer administrador)</span></label>
+                  <button type="button" id="btnBloquearTag" class="eq-btn" style="display:none;" onclick="bloquearTagManual()"><i class="fa-solid fa-lock"></i> Bloquear campo</button>
+                </div>
               </div>
               <div class="form-row">
                 <div class="form-group"><label>Nº de Série</label><input type="text" id="cadSerie" placeholder="Ex: 849302" /></div>
@@ -1966,24 +1993,9 @@
                 <div class="form-group" style="flex: 1;"><label>Modelo *</label><input type="text" id="cadModelo" list="listModelosPadrao" onchange="preencherAnvisaDoModelo()" required /></div>
               </div>
 
-              <div class="text-xs font-bold uppercase tracking-wider text-sky-400" style="margin:20px 0 8px">2. Propriedade e localização</div>
+              <div class="text-xs font-bold uppercase tracking-wider text-sky-400" style="margin:20px 0 8px">2. Unidade e localização</div>
               <div class="form-row">
-                <div class="form-group">
-                  <label>Propriedade *</label>
-                  <select id="cadPropriedade" onchange="alternarProprietario()" required>
-                    <option value="">Selecione...</option>
-                    <option value="PRÓPRIO">PRÓPRIO (da empresa)</option>
-                    <option value="CLIENTE">CLIENTE (do cliente)</option>
-                    <option value="COMODATO">COMODATO</option>
-                    <option value="LOCADO">LOCADO</option>
-                    <option value="EMPRESTADO">EMPRESTADO</option>
-                    <option value="TERCEIRO">TERCEIRO</option>
-                  </select>
-                </div>
-                <div class="form-group" id="grpProprietario" style="display:none;"><label>Proprietário *</label><input type="text" id="cadProprietario" placeholder="Quem é o dono do equipamento" /></div>
-                <div class="form-group"><label>Unidade / contrato *</label><input type="text" id="cadUnidade" list="listUnidadesEquip" placeholder="Ex: LINEMED (LMD)" onchange="sugerirMascaraPorUnidade()" required /></div>
-              </div>
-              <div class="form-row">
+                <div class="form-group" style="flex: 1;"><label>Unidade / contrato *</label><input type="text" id="cadUnidade" list="listUnidadesEquip" placeholder="Ex: LINEMED (LMD)" onchange="sugerirMascaraPorUnidade()" required /></div>
                 <div class="form-group" style="flex: 2;"><label>Cliente <span class="text-slate-500">(obrigatório quando não for próprio)</span></label><input type="text" id="cadCliente" list="listClientes" /></div>
                 <div class="form-group" style="flex: 1;"><label>Setor</label><input type="text" id="cadSetor" /></div>
               </div>
@@ -2445,6 +2457,22 @@ abaAgenda.appendRow([
   </div>
 
   <!-- MODAL MANUAL -->
+  <div id="modalAutorizacao" class="modal-overlay" style="z-index: 1100;">
+    <div class="modal-box" style="width: 420px;">
+      <div class="modal-title"><span><i class="fa-solid fa-user-shield text-sky-400 mr-2"></i> Autorização de administrador</span></div>
+      <form onsubmit="return confirmarAutorizacaoAdmin(event)" autocomplete="off">
+        <div id="autTexto" class="eq-k" style="margin-bottom:12px;"></div>
+        <div class="form-group mb-3"><label>Usuário do administrador</label><input type="text" id="autUsuario" autocomplete="off" required /></div>
+        <div class="form-group mb-3"><label>Senha</label><input type="password" id="autSenha" autocomplete="new-password" required /></div>
+        <div id="autErro" class="text-xs text-rose-400" style="min-height:16px; margin-bottom:8px;"></div>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button type="button" class="eq-btn" onclick="cancelarAutorizacaoAdmin()">Cancelar</button>
+          <button type="submit" id="autBtn" class="btn-submit"><i class="fa-solid fa-check"></i> Autorizar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="modalConfig" class="modal-overlay">
     <div class="modal-box" style="width: 980px;">
       <div class="modal-title">
@@ -2490,7 +2518,7 @@ abaAgenda.appendRow([
         <div class="eq-k" style="margin-bottom:12px;"><b>ADMIN</b> tem todas as permissões. Nos outros perfis, marque o que cada pessoa pode fazer. O sistema exige pelo menos um administrador ativo.</div>
         <div class="table-container">
           <table>
-            <thead><tr><th>Nome</th><th>Usuário</th><th>Perfil</th><th class="td-center">Máscaras de TAG</th><th class="td-center">Usuários</th><th class="td-center">TAG manual</th><th class="td-center">Ativo</th><th></th></tr></thead>
+            <thead><tr><th>Nome</th><th>Usuário</th><th>Perfil</th><th class="td-center">Máscaras de TAG</th><th class="td-center">Usuários</th><th class="td-center">TAG manual</th><th class="td-center">Alterar situação</th><th class="td-center">Ativo</th><th></th></tr></thead>
             <tbody id="cfgCorpoUsuarios"></tbody>
           </table>
         </div>
@@ -3172,23 +3200,11 @@ abaAgenda.appendRow([
     }
 
     async function acaoCriarEquipamento(d) {
-      let tag = str_(d.tag).trim().toUpperCase();
-      if (tag) {
-        const { data: ja, error: e0 } = await supabaseClient.from('equipamentos').select('tag').eq('tag', tag).limit(1);
-        if (e0) return { status: "erro", mensagem: e0.message };
-        if (ja && ja.length) return { status: "erro", mensagem: "Já existe um equipamento com a TAG " + tag + "." };
-      } else if (!d.mascaraId) {
-        return { status: "erro", mensagem: "Informe a TAG do equipamento." };
-      }
       const mod = await modeloDoEquipamento_(d);
       if (mod.erro) return { status: "erro", mensagem: mod.erro };
-      if (!tag) {
-        const g = await rpcPriv('gerar_tag', { p_mascara_id: d.mascaraId });
-        if (!g.ok) return { status: "erro", mensagem: textoErroPriv(g) };
-        tag = g.tag;
-      }
-      const { error } = await supabaseClient.from('equipamentos').insert({ tag, ativo: true, ...registroEquipamento_(d, mod.id) });
-      return error ? { status: "erro", mensagem: error.message } : { status: "sucesso", tag };
+      const dados = { ...registroEquipamento_(d, mod.id), tag: str_(d.tag).trim() };
+      const r = await rpcPriv('criar_equipamento', { p_dados: dados, p_mascara_id: d.mascaraId || null, p_autorizacao: d.autorizacao || null });
+      return r.ok ? { status: "sucesso", tag: r.tag } : { status: "erro", mensagem: textoErroPriv(r) };
     }
 
     async function acaoAtualizarEquipamento(d) {
@@ -3196,8 +3212,8 @@ abaAgenda.appendRow([
       if (!tag) return { status: "erro", mensagem: "TAG não informada." };
       const mod = await modeloDoEquipamento_(d);
       if (mod.erro) return { status: "erro", mensagem: mod.erro };
-      const { error } = await supabaseClient.from('equipamentos').update(registroEquipamento_(d, mod.id)).eq('tag', tag);
-      return error ? { status: "erro", mensagem: error.message } : { status: "sucesso", tag };
+      const r = await rpcPriv('atualizar_equipamento', { p_tag: tag, p_dados: registroEquipamento_(d, mod.id), p_autorizacao: d.autorizacao || null });
+      return r.ok ? { status: "sucesso", tag: r.tag } : { status: "erro", mensagem: textoErroPriv(r) };
     }
 
     async function acaoCriarAuxiliar(d) {
@@ -3587,7 +3603,11 @@ abaAgenda.appendRow([
 
         if (error) throw error;
 
-        if (data && data.usuario) {
+        if (data && data.erro) {
+          divErro.innerText = data.erro;
+          divErro.classList.remove("hidden");
+          resetBtn();
+        } else if (data && data.usuario) {
           const u = data;
           concluirAcessoLogin({
             nome: u.nome || u.usuario.toUpperCase(),
@@ -5787,11 +5807,18 @@ abaAgenda.appendRow([
       CAMPOS_CAD_EQ.forEach(([idCampo, chave]) => { payload[chave] = v(idCampo); });
       if (editando) payload.tag = equipEmEdicao;
       if (auto) { payload.tag = ''; payload.mascaraId = document.getElementById('cadMascara').value; }
+      if (!editando && tagManual && autorizacaoTag) payload.autorizacao = autorizacaoTag;
+      if (editando && autorizacaoSituacao) payload.autorizacao = autorizacaoSituacao;
       const btn = document.getElementById('btnSalvarCadEquip');
       btn.disabled = true;
       postAPI(payload).then(async res => {
         btn.disabled = false;
-        if (res.status !== "sucesso") { showToast("⚠️ " + (res.mensagem || "Erro ao salvar o equipamento."), "error"); return; }
+        if (res.status !== "sucesso") {
+          const msg = res.mensagem || "Erro ao salvar o equipamento.";
+          showToast("⚠️ " + msg, "error");
+          if (/administrador|autoriza/i.test(msg)) { if (editando) bloquearSituacao(); else if (tagManual) bloquearTagManual(); }
+          return;
+        }
         const tag = str_(res.tag || payload.tag).trim().toUpperCase();
         const manter = !editando && document.getElementById('cadContinuar').checked;
         const guardar = {};
@@ -5800,7 +5827,7 @@ abaAgenda.appendRow([
         document.getElementById('formNovoEquip').reset();
         Object.keys(guardar).forEach(i => { document.getElementById(i).value = guardar[i]; });
         document.getElementById('cadContinuar').checked = manter;
-        tagManual = false;
+        tagManual = false; autorizacaoTag = ''; autorizacaoSituacao = '';
         if (document.getElementById('cadTagManual')) document.getElementById('cadTagManual').checked = false;
         alternarProprietario();
         carregarListaUnidadesEq();
@@ -5820,7 +5847,8 @@ abaAgenda.appendRow([
     const PERMISSOES_SISTEMA = [
       ['config.tags', 'Configurar máscaras de TAG'],
       ['config.usuarios', 'Gerenciar usuários e permissões'],
-      ['equipamento.tag_manual', 'Informar a TAG manualmente no cadastro']
+      ['equipamento.tag_manual', 'Informar a TAG manualmente no cadastro'],
+      ['equipamento.situacao', 'Alterar a situação do equipamento (próprio/cliente/locado...)']
     ];
     const PERFIS_SISTEMA = ['ADMIN', 'GESTOR', 'OPERADOR', 'CONSULTA'];
     const PERMISSOES_PADRAO_PERFIL = { ADMIN: PERMISSOES_SISTEMA.map(p => p[0]), GESTOR: ['config.tags'], OPERADOR: [], CONSULTA: [] };
@@ -5980,9 +6008,9 @@ abaAgenda.appendRow([
     // ----- usuários e permissões -----
     async function carregarUsuariosAdmin() {
       const tb = document.getElementById('cfgCorpoUsuarios');
-      tb.innerHTML = '<tr><td colspan="8" class="td-center text-slate-500 py-6">Carregando...</td></tr>';
+      tb.innerHTML = '<tr><td colspan="9" class="td-center text-slate-500 py-6">Carregando...</td></tr>';
       const r = await rpcPriv('listar_usuarios_admin', {});
-      if (!r.ok) { tb.innerHTML = `<tr><td colspan="8" class="td-center text-rose-400 py-6">${escAttr_(textoErroPriv(r))}</td></tr>`; return; }
+      if (!r.ok) { tb.innerHTML = `<tr><td colspan="9" class="td-center text-rose-400 py-6">${escAttr_(textoErroPriv(r))}</td></tr>`; return; }
       _cfgUsuarios = r.usuarios || [];
       renderUsuariosAdmin();
     }
@@ -6063,10 +6091,70 @@ abaAgenda.appendRow([
       tag.value = m ? m.proxima_tag : '';
     }
 
-    function alternarTagManual() {
-      tagManual = !!document.getElementById('cadTagManual')?.checked;
-      const tag = document.getElementById('cadTag');
-      if (tag) tag.value = '';
+    // ----- TAG manual e situação travadas: autorização de administrador -----
+    let autorizacaoTag = '';
+    let autorizacaoSituacao = '';
+    let situacaoOriginal = '';
+    let _autResolver = null;
+    let _autAcao = '';
+
+    // abre a janela de senha de administrador; devolve o código de autorização (ou null se cancelar)
+    function solicitarAutorizacaoAdmin(acao, texto) {
+      return new Promise(resolve => {
+        _autResolver = resolve; _autAcao = acao;
+        document.getElementById('autTexto').textContent = texto;
+        document.getElementById('autUsuario').value = '';
+        document.getElementById('autSenha').value = '';
+        document.getElementById('autErro').textContent = '';
+        document.getElementById('modalAutorizacao').classList.add('active');
+        document.getElementById('autUsuario').focus();
+      });
+    }
+
+    function fecharAutorizacaoAdmin(codigo) {
+      document.getElementById('modalAutorizacao')?.classList.remove('active');
+      document.getElementById('autSenha').value = '';
+      const f = _autResolver; _autResolver = null;
+      if (f) f(codigo || null);
+    }
+    function cancelarAutorizacaoAdmin() { fecharAutorizacaoAdmin(null); }
+
+    async function confirmarAutorizacaoAdmin(ev) {
+      if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+      const btn = document.getElementById('autBtn'), erro = document.getElementById('autErro');
+      btn.disabled = true; erro.textContent = '';
+      const r = await rpcPriv('autorizar_acao', {
+        p_acao: _autAcao, p_usuario: document.getElementById('autUsuario').value.trim(), p_senha: document.getElementById('autSenha').value
+      });
+      btn.disabled = false;
+      if (!r.ok) { erro.textContent = textoErroPriv(r); document.getElementById('autSenha').value = ''; return false; }
+      showToast("Autorizado por " + (r.autorizado_por || "administrador") + ".", "success");
+      fecharAutorizacaoAdmin(r.codigo);
+      return false;
+    }
+
+    async function alternarTagManual() {
+      const cb = document.getElementById('cadTagManual'), tag = document.getElementById('cadTag');
+      if (cb.checked) {
+        if (!temPermissao('equipamento.tag_manual')) {
+          const cod = await solicitarAutorizacaoAdmin('tag_manual', 'Para informar a TAG manualmente, um administrador precisa autorizar. A liberação vale só para este cadastro.');
+          if (!cod) { cb.checked = false; return; }
+          autorizacaoTag = cod;
+        }
+        tagManual = true;
+        if (tag) tag.value = '';
+      } else {
+        tagManual = false; autorizacaoTag = '';
+      }
+      aplicarModoTagUI();
+      if (tagManual && tag) tag.focus();
+    }
+
+    function bloquearTagManual() {
+      const cb = document.getElementById('cadTagManual');
+      if (cb) cb.checked = false;
+      tagManual = false; autorizacaoTag = '';
+      const tag = document.getElementById('cadTag'); if (tag) tag.value = '';
       aplicarModoTagUI();
     }
 
@@ -6076,18 +6164,56 @@ abaAgenda.appendRow([
     function aplicarModoTagUI() {
       const grp = document.getElementById('grpMascara'), tag = document.getElementById('cadTag');
       if (!grp || !tag) return;
-      const editando = !!equipEmEdicao, temMasc = mascarasTag.length > 0, auto = modoTagAutomatico();
+      const editando = !!equipEmEdicao, temMasc = mascarasTag.length > 0;
+      if (!temMasc && !editando) { tagManual = false; autorizacaoTag = ''; }
+      const auto = modoTagAutomatico();
       grp.style.display = (!editando && temMasc) ? '' : 'none';
       tag.readOnly = editando || auto;
       tag.placeholder = auto ? 'Gerada ao salvar' : 'Ex: LMD-9999';
       const man = document.getElementById('grpTagManual');
-      if (man) man.style.display = (!editando && temMasc && temPermissao('equipamento.tag_manual')) ? 'flex' : 'none';
-      if (!temMasc && !editando) tagManual = false;
+      if (man) man.style.display = (!editando && temMasc) ? 'flex' : 'none';
+      const cb = document.getElementById('cadTagManual'); if (cb) cb.checked = tagManual;
+      const txt = document.getElementById('txtTagManual');
+      if (txt) txt.textContent = tagManual ? 'TAG manual liberada' : (temPermissao('equipamento.tag_manual') ? 'Informar TAG manualmente' : 'Informar TAG manualmente (requer administrador)');
+      const bb = document.getElementById('btnBloquearTag'); if (bb) bb.style.display = tagManual ? '' : 'none';
       const info = document.getElementById('cadTagInfo');
       if (info) info.textContent = editando ? 'A TAG não pode ser alterada.'
         : (auto ? 'Prévia: o número é reservado quando você salvar.'
         : (temMasc ? 'Modo manual: digite a TAG completa.' : 'Para TAG automática, entre novamente no sistema (e configure as máscaras na engrenagem).'));
       if (auto) atualizarPreviaTag();
+      aplicarSituacaoUI();
+    }
+
+    // ----- Situação (próprio/cliente/locado...) travada depois de preenchida -----
+    function situacaoBloqueada() {
+      return !!equipEmEdicao && !!situacaoOriginal && !temPermissao('equipamento.situacao') && !autorizacaoSituacao;
+    }
+
+    function aplicarSituacaoUI() {
+      const sel = document.getElementById('cadPropriedade');
+      if (!sel) return;
+      const editandoComSituacao = !!equipEmEdicao && !!situacaoOriginal && !temPermissao('equipamento.situacao');
+      const bloq = situacaoBloqueada();
+      sel.disabled = bloq;
+      const bAlt = document.getElementById('btnAlterarSituacao'), bBloq = document.getElementById('btnBloquearSituacao');
+      if (bAlt) bAlt.style.display = bloq ? '' : 'none';
+      if (bBloq) bBloq.style.display = (editandoComSituacao && !bloq) ? '' : 'none';
+      const info = document.getElementById('cadSituacaoInfo');
+      if (info) info.textContent = bloq ? 'Travada: só um administrador pode alterar a situação depois de salva.'
+        : ((editandoComSituacao && !bloq) ? 'Liberada por um administrador para esta alteração.' : '');
+    }
+
+    async function pedirAlteracaoSituacao() {
+      const cod = await solicitarAutorizacaoAdmin('alterar_situacao', 'A situação já foi definida. Para alterá-la, um administrador precisa autorizar. A liberação vale só para esta alteração.');
+      if (cod) { autorizacaoSituacao = cod; aplicarSituacaoUI(); }
+    }
+
+    function bloquearSituacao() {
+      autorizacaoSituacao = '';
+      const sel = document.getElementById('cadPropriedade');
+      if (sel) sel.value = situacaoOriginal;
+      alternarProprietario();
+      aplicarSituacaoUI();
     }
 
     // ---------- Equipamentos: consulta e ficha ----------
@@ -6110,7 +6236,7 @@ abaAgenda.appendRow([
 
     function chipPropriedade_(eq) {
       const p = eq.propriedade;
-      if (!p) return '<span class="eq-chip cinza">Propriedade não definida</span>';
+      if (!p) return '<span class="eq-chip cinza">Situação não definida</span>';
       const cor = p === 'PRÓPRIO' ? 'azul' : (p === 'CLIENTE' ? 'cinza' : 'ambar');
       const dono = eq.proprietario ? ' · ' + escAttr_(eq.proprietario) : '';
       return `<span class="eq-chip ${cor}">${escAttr_(p)}${dono}</span>`;
@@ -6262,7 +6388,7 @@ abaAgenda.appendRow([
     }
 
     function sairModoEdicaoEquip() {
-      equipEmEdicao = null;
+      equipEmEdicao = null; situacaoOriginal = ''; autorizacaoSituacao = ''; autorizacaoTag = '';
       const t = document.getElementById('cadTag'); if (t) t.readOnly = false;
       const c = document.querySelector('#abaCadEquipamento .card-title'); if (c) c.textContent = 'Cadastrar Novo Equipamento';
       const b = document.getElementById('btnSalvarCadEquip'); if (b) b.innerHTML = '<i class="fa-solid fa-server"></i> Salvar Equipamento';
@@ -6273,7 +6399,7 @@ abaAgenda.appendRow([
     function novoEquipamento() {
       sairModoEdicaoEquip();
       document.getElementById('formNovoEquip').reset();
-      tagManual = false;
+      tagManual = false; autorizacaoTag = '';
       alternarProprietario();
       mudarAba('cad_equipamento');
       aplicarModoTagUI();
@@ -6291,7 +6417,7 @@ abaAgenda.appendRow([
         document.getElementById(idCampo).value = v;
       });
       alternarProprietario();
-      equipEmEdicao = eq.tag;
+      equipEmEdicao = eq.tag; situacaoOriginal = eq.propriedade || ''; autorizacaoSituacao = ''; tagManual = false; autorizacaoTag = '';
       document.getElementById('cadTag').readOnly = true;
       const c = document.querySelector('#abaCadEquipamento .card-title'); if (c) c.textContent = 'Editar Equipamento ' + eq.tag;
       const b = document.getElementById('btnSalvarCadEquip'); if (b) b.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar alterações';
