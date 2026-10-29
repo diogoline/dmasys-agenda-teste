@@ -831,6 +831,15 @@
     html.light .combo-item.ativo, html.light .combo-item:hover { background: #e0f2fe; }
     .combo input:disabled { opacity: .65; cursor: not-allowed; }
     input[readonly].combo-input { cursor: pointer; }
+
+    /* usuários e permissões: cartões compactos, sem rolagem lateral */
+    .cfg-user { border: 1px solid #1e293b; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: #0b1220; }
+    html.light .cfg-user { border-color: #e2e8f0; background: #fff; }
+    .cfg-user-topo { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+    .cfg-user-nome { flex: 1 1 200px; min-width: 0; }
+    .cfg-user-perms { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #334155; }
+    html.light .cfg-user-perms { border-top-color: #cbd5e1; }
+    .cfg-user-perms label { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 selection:bg-sky-500 selection:text-white">
@@ -2079,6 +2088,7 @@
               <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
                 <input type="text" id="catBusca" placeholder="Buscar..." style="flex:1; min-width:220px;" oninput="buscarCatalogoTela()" autocomplete="off" />
                 <label style="display:flex; align-items:center; gap:6px; cursor:pointer; white-space:nowrap;"><input type="checkbox" id="catInativos" style="width:auto;" onchange="buscarCatalogoTela()" /> Mostrar inativos</label>
+                <button type="button" class="eq-btn" onclick="abrirImportacaoCatalogo()"><i class="fa-solid fa-file-import"></i> Importar planilha</button>
                 <button type="button" class="btn-submit" onclick="novoItemCatalogo()"><i class="fa-solid fa-plus"></i> Novo</button>
               </div>
               <div id="catInfo" class="eq-k" style="margin-bottom:8px;"></div>
@@ -2496,6 +2506,12 @@ abaAgenda.appendRow([
   </div>
 
   <!-- MODAL MANUAL -->
+  <div id="avisoSessao" role="alert" style="display:none; position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:300; max-width:min(720px, 94vw); align-items:center; gap:14px; flex-wrap:wrap; padding:12px 16px; border-radius:14px; background:#7c2d12; border:1px solid #fb923c; color:#ffedd5; box-shadow:0 12px 40px rgba(0,0,0,.55); font-size:13px;">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span id="avisoSessaoTxt" style="flex:1; min-width:220px;"></span>
+    <button type="button" class="eq-btn" onclick="efetuarLogout()" style="background:#fff7ed; color:#7c2d12; border-color:#fdba74;"><i class="fa-solid fa-right-to-bracket"></i> Entrar com meu usuário</button>
+  </div>
+
   <div id="modalAutorizacao" class="modal-overlay" style="z-index: 1100;">
     <div class="modal-box" style="width: 420px;">
       <div class="modal-title"><span><i class="fa-solid fa-user-shield text-sky-400 mr-2"></i> Autorização de administrador</span></div>
@@ -2524,6 +2540,23 @@ abaAgenda.appendRow([
           <button type="submit" id="catBtnSalvar" class="btn-submit"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <div id="modalImportCat" class="modal-overlay">
+    <div class="modal-box" style="width: 720px;">
+      <div class="modal-title"><span id="impTitulo">Importar planilha</span>
+        <button type="button" onclick="fecharImportacaoCatalogo()" aria-label="Fechar" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="eq-k" style="margin-bottom:10px;">Envie um arquivo <b>CSV</b> (no Excel: Salvar como → CSV UTF-8). A primeira linha precisa ter os nomes das colunas. Colunas aceitas (<b>*</b> = obrigatória): <span id="impColunas"></span>.
+        Nomes que já existem não são duplicados, e ANVISA/tipo só completam o que estiver em branco. Pode importar mais de uma vez com segurança.</div>
+      <input type="file" id="impArquivo" accept=".csv,text/csv,text/plain" onchange="lerArquivoImport(this)" style="margin-bottom:12px;" />
+      <div id="impPrevia" style="margin-bottom:12px;"></div>
+      <div id="impProgresso" class="eq-k" style="min-height:16px;"></div>
+      <div id="impResultado" style="margin-bottom:12px;"></div>
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button type="button" class="eq-btn" onclick="fecharImportacaoCatalogo()">Fechar</button>
+        <button type="button" id="impBtn" class="btn-submit" onclick="executarImportacaoCatalogo()" disabled><i class="fa-solid fa-file-import"></i> Importar</button>
+      </div>
     </div>
   </div>
 
@@ -2598,12 +2631,7 @@ abaAgenda.appendRow([
 
       <div id="cfgPainelUsuarios" style="display:none;">
         <div class="eq-k" style="margin-bottom:12px;"><b>ADMIN</b> tem todas as permissões. Nos outros perfis, marque o que cada pessoa pode fazer. O sistema exige pelo menos um administrador ativo.</div>
-        <div class="table-container">
-          <table>
-            <thead><tr><th>Nome</th><th>Usuário</th><th>Perfil</th><th class="td-center">Máscaras de TAG</th><th class="td-center">Usuários</th><th class="td-center">TAG manual</th><th class="td-center">Alterar situação</th><th class="td-center">Catálogos</th><th class="td-center">Auditoria</th><th class="td-center">Ativo</th><th></th></tr></thead>
-            <tbody id="cfgCorpoUsuarios"></tbody>
-          </table>
-        </div>
+        <div id="cfgCorpoUsuarios"></div>
       </div>
     </div>
   </div>
@@ -6175,6 +6203,132 @@ abaAgenda.appendRow([
       return false;
     }
 
+    // ----- Importar catálogos por planilha (CSV) -----
+    const IMPORT_COLUNAS = {
+      fabricantes: { obrig: ['nome'], todas: ['nome'] },
+      tipos_equipamento: { obrig: ['nome'], todas: ['nome'] },
+      fornecedores: { obrig: ['nome'], todas: ['nome', 'cnpj', 'telefone', 'email'] },
+      clientes: { obrig: ['nome'], todas: ['nome', 'cnpj', 'telefone', 'email', 'endereco'] },
+      unidades: { obrig: ['nome'], todas: ['nome', 'cnpj', 'telefone', 'email', 'endereco'] },
+      setores: { obrig: ['cliente', 'nome'], todas: ['cliente', 'nome'] },
+      modelos: { obrig: ['fabricante', 'modelo'], todas: ['fabricante', 'modelo', 'tipo', 'registro_anvisa', 'validade_anvisa'] }
+    };
+    let _impLinhas = [], _impEnviando = false;
+
+    // lê CSV com vírgula, ponto e vírgula ou tab; aceita aspas, aspas duplas e quebras de linha do Windows
+    function parseCSV(texto) {
+      const t = String(texto || '').replace(/^\uFEFF/, '');
+      const primeira = t.split(/\r?\n/, 1)[0] || '';
+      const cont = c => primeira.split(c).length - 1;
+      const sep = (cont(';') >= cont(',') && cont(';') >= cont('\t') && cont(';') > 0) ? ';' : (cont('\t') > cont(',') ? '\t' : ',');
+      const linhas = []; let campo = '', linha = [], aspas = false;
+      const fecha = () => { linha.push(campo); campo = ''; if (linha.some(c => c.trim() !== '')) linhas.push(linha); linha = []; };
+      for (let i = 0; i < t.length; i++) {
+        const ch = t[i];
+        if (aspas) {
+          if (ch === '"') { if (t[i + 1] === '"') { campo += '"'; i++; } else aspas = false; } else campo += ch;
+        } else if (ch === '"') aspas = true;
+        else if (ch === sep) { linha.push(campo); campo = ''; }
+        else if (ch === '\n' || ch === '\r') { if (ch === '\r' && t[i + 1] === '\n') i++; fecha(); }
+        else campo += ch;
+      }
+      if (campo !== '' || linha.length) fecha();
+      return linhas;
+    }
+
+    function chaveCabecalho_(h) { return semAcento_(h).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, ''); }
+    function dataParaISO_(v) {
+      const t = str_(v).trim(), m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(t);
+      return m ? `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}` : t;
+    }
+
+    // transforma as linhas do CSV em objetos com os nomes de coluna que o sistema espera
+    function mapearPlanilhaCatalogo(linhasCsv, catalogo) {
+      const cfg = IMPORT_COLUNAS[catalogo];
+      if (!cfg || linhasCsv.length < 2) return { erro: 'A planilha está vazia ou só tem o cabeçalho.', objetos: [] };
+      const alias = { descricao: catalogo === 'modelos' ? 'tipo' : 'nome', tipo_descricao: 'tipo', tipo_de_equipamento: 'tipo', registro: 'registro_anvisa', anvisa: 'registro_anvisa', validade: 'validade_anvisa', razao_social: 'nome', unidade_contrato: 'nome', cep: 'cep' };
+      if (catalogo === 'modelos') alias.nome = 'modelo';
+      const cab = linhasCsv[0].map(h => { const k = chaveCabecalho_(h); return alias[k] || k; });
+      const faltam = cfg.obrig.filter(c => !cab.includes(c));
+      if (faltam.length) return { erro: 'Faltam colunas obrigatórias: ' + faltam.join(', ') + '. Colunas encontradas: ' + (cab.filter(Boolean).join(', ') || 'nenhuma') + '.', objetos: [] };
+      const objetos = linhasCsv.slice(1).map(l => {
+        const o = {};
+        cab.forEach((k, i) => { if (cfg.todas.includes(k)) o[k] = str_(l[i]).trim(); });
+        if (o.validade_anvisa) o.validade_anvisa = dataParaISO_(o.validade_anvisa);
+        return o;
+      });
+      return { objetos, colunas: cab.filter(k => cfg.todas.includes(k)) };
+    }
+
+    async function decodificarArquivo_(arquivo) {
+      const buf = await arquivo.arrayBuffer();
+      try { return new TextDecoder('utf-8', { fatal: true }).decode(buf); }
+      catch (e) { return new TextDecoder('windows-1252').decode(buf); }   // CSV salvo pelo Excel "comum"
+    }
+
+    function abrirImportacaoCatalogo() {
+      if (!temPermissao('catalogo.gerenciar')) { showToast("Você não tem permissão para gerenciar os catálogos.", "error"); return; }
+      const cfg = IMPORT_COLUNAS[catAtual];
+      _impLinhas = [];
+      document.getElementById('impTitulo').textContent = 'Importar planilha — ' + CATALOGOS[catAtual].rotulo;
+      document.getElementById('impColunas').innerHTML = cfg.todas.map(c => `<code>${c}</code>${cfg.obrig.includes(c) ? '<b>*</b>' : ''}`).join(' · ');
+      document.getElementById('impArquivo').value = '';
+      document.getElementById('impPrevia').innerHTML = '';
+      document.getElementById('impResultado').innerHTML = '';
+      document.getElementById('impProgresso').textContent = '';
+      document.getElementById('impBtn').disabled = true;
+      document.getElementById('modalImportCat').classList.add('active');
+    }
+    function fecharImportacaoCatalogo() { if (_impEnviando) return; document.getElementById('modalImportCat')?.classList.remove('active'); }
+
+    async function lerArquivoImport(input) {
+      const arquivo = input.files && input.files[0];
+      const prev = document.getElementById('impPrevia');
+      document.getElementById('impResultado').innerHTML = '';
+      _impLinhas = []; document.getElementById('impBtn').disabled = true;
+      if (!arquivo) { prev.innerHTML = ''; return; }
+      let texto;
+      try { texto = await decodificarArquivo_(arquivo); } catch (e) { prev.innerHTML = '<div class="text-rose-400">Não consegui ler o arquivo.</div>'; return; }
+      processarTextoImport(texto);
+    }
+
+    function processarTextoImport(texto) {
+      const prev = document.getElementById('impPrevia'), e = escAttr_;
+      const r = mapearPlanilhaCatalogo(parseCSV(texto), catAtual);
+      if (r.erro) { prev.innerHTML = `<div class="text-rose-400">${e(r.erro)}</div>`; return; }
+      _impLinhas = r.objetos;
+      const amostra = r.objetos.slice(0, 5);
+      prev.innerHTML = `<div class="eq-k" style="margin-bottom:6px;"><b>${r.objetos.length}</b> linhas encontradas. Conferência das 5 primeiras:</div>
+        <div class="table-container" style="min-height:0;"><table><thead><tr>${r.colunas.map(c => `<th>${e(c)}</th>`).join('')}</tr></thead>
+        <tbody>${amostra.map(o => '<tr>' + r.colunas.map(c => `<td>${e(o[c]) || '-'}</td>`).join('') + '</tr>').join('')}</tbody></table></div>`;
+      document.getElementById('impBtn').disabled = !r.objetos.length;
+    }
+
+    async function executarImportacaoCatalogo() {
+      if (_impEnviando || !_impLinhas.length) return;
+      _impEnviando = true;
+      const btn = document.getElementById('impBtn'), prog = document.getElementById('impProgresso'), res = document.getElementById('impResultado');
+      btn.disabled = true; res.innerHTML = '';
+      const TAM = 300, total = { criados: 0, existentes: 0, completados: 0 }, erros = [];
+      let interrompido = '';
+      for (let i = 0; i < _impLinhas.length; i += TAM) {
+        prog.textContent = `Enviando ${Math.min(i + TAM, _impLinhas.length)} de ${_impLinhas.length}...`;
+        const r = await rpcPriv('importar_catalogo', { p_catalogo: catAtual, p_linhas: _impLinhas.slice(i, i + TAM), p_linha_inicial: i + 2 });
+        if (!r.ok) { interrompido = textoErroPriv(r); break; }
+        total.criados += r.criados; total.existentes += r.existentes; total.completados += r.completados;
+        (r.erros || []).forEach(x => erros.push(x));
+      }
+      _impEnviando = false;
+      prog.textContent = '';
+      const e = escAttr_;
+      res.innerHTML = (interrompido ? `<div class="text-rose-400" style="margin-bottom:8px;">⚠️ Importação interrompida: ${e(interrompido)}</div>` : '') +
+        `<div class="eq-k"><b style="color:#34d399;">${total.criados}</b> criados · <b>${total.existentes}</b> já existiam${total.completados ? ' (' + total.completados + ' completados com ANVISA/tipo)' : ''} · <b style="color:${erros.length ? '#fb7185' : 'inherit'};">${erros.length}</b> com erro</div>` +
+        (erros.length ? `<div class="eq-k" style="margin-top:8px;">Linhas com erro (as demais foram importadas):</div><ul style="font-size:12px;margin-top:4px;max-height:140px;overflow:auto;">${erros.slice(0, 30).map(x => `<li>Linha ${x.linha}: ${e(x.erro)}</li>`).join('')}${erros.length > 30 ? `<li>... e mais ${erros.length - 30}</li>` : ''}</ul>` : '');
+      btn.disabled = false;
+      if (!interrompido) showToast("Importação concluída: " + total.criados + " criados.", "success");
+      carregarCatalogoTela(0);
+    }
+
     // ----- Histórico de alterações (auditoria) -----
     async function carregarAuditoria() {
       const tb = document.getElementById('cfgCorpoAuditoria');
@@ -6248,6 +6402,14 @@ abaAgenda.appendRow([
       if (item) item.style.display = (temPermissao('config.tags') || temPermissao('config.usuarios') || temPermissao('auditoria.ver')) ? '' : 'none';
       const cat = document.getElementById('btnNavCatalogos');
       if (cat) cat.style.display = temPermissao('catalogo.gerenciar') ? '' : 'none';
+      const av = document.getElementById('avisoSessao');
+      if (av) {
+        const semToken = !!usuarioLogado && !usuarioLogado.token;
+        av.style.display = semToken ? 'flex' : 'none';
+        if (semToken) document.getElementById('avisoSessaoTxt').textContent = usuarioLogado.usuario === 'admin.dma'
+          ? 'Você está no modo de demonstração: configurações, TAG automática e cadastros protegidos ficam indisponíveis. Entre com o seu usuário e senha.'
+          : 'Sua sessão é antiga ou expirou: configurações, TAG automática e cadastros protegidos ficam indisponíveis até você entrar de novo.';
+      }
       aplicarModoTagUI();
     }
 
@@ -6367,42 +6529,44 @@ abaAgenda.appendRow([
     // ----- usuários e permissões -----
     async function carregarUsuariosAdmin() {
       const tb = document.getElementById('cfgCorpoUsuarios');
-      tb.innerHTML = '<tr><td colspan="11" class="td-center text-slate-500 py-6">Carregando...</td></tr>';
+      tb.innerHTML = '<div class="td-center text-slate-500 py-6">Carregando...</div>';
       const r = await rpcPriv('listar_usuarios_admin', {});
-      if (!r.ok) { tb.innerHTML = `<tr><td colspan="11" class="td-center text-rose-400 py-6">${escAttr_(textoErroPriv(r))}</td></tr>`; return; }
+      if (!r.ok) { tb.innerHTML = `<div class="td-center text-rose-400 py-6">${escAttr_(textoErroPriv(r))}</div>`; return; }
       _cfgUsuarios = r.usuarios || [];
       renderUsuariosAdmin();
     }
 
     function renderUsuariosAdmin() {
-      const tb = document.getElementById('cfgCorpoUsuarios');
+      const box = document.getElementById('cfgCorpoUsuarios');
       const e = escAttr_;
-      tb.innerHTML = _cfgUsuarios.map(u => {
+      if (!_cfgUsuarios.length) { box.innerHTML = '<div class="td-center text-slate-500 py-6">Nenhum usuário encontrado.</div>'; return; }
+      box.innerHTML = _cfgUsuarios.map(u => {
         const admin = u.perfil === 'ADMIN';
         const perms = PERMISSOES_SISTEMA.map(([chave, rot]) =>
-          `<td class="td-center"><input type="checkbox" class="cfg-perm" data-perm="${chave}" aria-label="${e(rot)}" style="width:auto;" ${(admin || (u.permissoes || []).includes(chave)) ? 'checked' : ''} ${admin ? 'disabled' : ''} /></td>`).join('');
-        return `<tr data-uid="${e(u.id)}">
-          <td><b>${e(u.nome)}</b></td>
-          <td>${e(u.usuario)}</td>
-          <td><select class="cfg-perfil" data-uid="${e(u.id)}" onchange="aoMudarPerfilUsuario(this)">${PERFIS_SISTEMA.map(p => `<option value="${p}" ${p === u.perfil ? 'selected' : ''}>${p}</option>`).join('')}</select></td>
-          ${perms}
-          <td class="td-center"><input type="checkbox" class="cfg-ativo" aria-label="Usuário ativo" style="width:auto;" ${u.ativo ? 'checked' : ''} /></td>
-          <td class="td-center"><button type="button" class="eq-btn" data-uid="${e(u.id)}" onclick="salvarUsuarioAdmin(this.dataset.uid)"><i class="fa-solid fa-floppy-disk"></i> Salvar</button></td>
-        </tr>`;
+          `<label><input type="checkbox" class="cfg-perm" data-perm="${chave}" style="width:auto;" ${(admin || (u.permissoes || []).includes(chave)) ? 'checked' : ''} ${admin ? 'disabled' : ''} /> ${e(rot)}</label>`).join('');
+        return `<div class="cfg-user" data-uid="${e(u.id)}">
+          <div class="cfg-user-topo">
+            <div class="cfg-user-nome"><b>${e(u.nome)}</b><div class="eq-k">${e(u.usuario)}</div></div>
+            <div><div class="eq-k">Perfil</div><select class="cfg-perfil" data-uid="${e(u.id)}" onchange="aoMudarPerfilUsuario(this)">${PERFIS_SISTEMA.map(p => `<option value="${p}" ${p === u.perfil ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" class="cfg-ativo" style="width:auto;" ${u.ativo ? 'checked' : ''} /> Ativo</label>
+            <button type="button" class="eq-btn" data-uid="${e(u.id)}" onclick="salvarUsuarioAdmin(this.dataset.uid)"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
+          </div>
+          <div class="cfg-user-perms">${perms}</div>
+        </div>`;
       }).join('');
     }
 
     function aoMudarPerfilUsuario(sel) {
-      const linha = sel.closest('tr');
+      const cartao = sel.closest('.cfg-user');
       const padrao = PERMISSOES_PADRAO_PERFIL[sel.value] || [];
-      linha.querySelectorAll('.cfg-perm').forEach(cb => {
+      cartao.querySelectorAll('.cfg-perm').forEach(cb => {
         cb.checked = padrao.includes(cb.dataset.perm);
         cb.disabled = sel.value === 'ADMIN';
       });
     }
 
     async function salvarUsuarioAdmin(uid) {
-      const linha = document.querySelector(`#cfgCorpoUsuarios tr[data-uid="${uid}"]`);
+      const linha = document.querySelector(`#cfgCorpoUsuarios .cfg-user[data-uid="${uid}"]`);
       if (!linha) return;
       const perfil = linha.querySelector('.cfg-perfil').value;
       const permissoes = perfil === 'ADMIN' ? [] : Array.from(linha.querySelectorAll('.cfg-perm')).filter(cb => cb.checked).map(cb => cb.dataset.perm);
