@@ -784,7 +784,37 @@
     html.light .topbar-btn:hover {
       background: #e2e8f0 !important;
     }
-  </style>
+  
+    /* ===== Equipamentos: lista e ficha ===== */
+    .eq-chip { display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700; white-space:nowrap; border:1px solid transparent; }
+    .eq-chip.azul { background:rgba(56,189,248,.12); color:#7dd3fc; border-color:rgba(56,189,248,.35); }
+    .eq-chip.verde { background:rgba(16,185,129,.12); color:#6ee7b7; border-color:rgba(16,185,129,.35); }
+    .eq-chip.ambar { background:rgba(245,158,11,.12); color:#fcd34d; border-color:rgba(245,158,11,.35); }
+    .eq-chip.vermelho { background:rgba(244,63,94,.12); color:#fda4af; border-color:rgba(244,63,94,.35); }
+    .eq-chip.cinza { background:rgba(148,163,184,.12); color:#cbd5e1; border-color:rgba(148,163,184,.3); }
+    html.light .eq-chip.azul { background:#e0f2fe; color:#0369a1; border-color:#7dd3fc; }
+    html.light .eq-chip.verde { background:#d1fae5; color:#047857; border-color:#6ee7b7; }
+    html.light .eq-chip.ambar { background:#fef3c7; color:#b45309; border-color:#fcd34d; }
+    html.light .eq-chip.vermelho { background:#ffe4e6; color:#be123c; border-color:#fda4af; }
+    html.light .eq-chip.cinza { background:#f1f5f9; color:#475569; border-color:#cbd5e1; }
+    .eq-grid { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:20px; align-items:start; }
+    .eq-tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; }
+    .eq-tile { background:#0f172a; border:1px solid #1e293b; border-radius:12px; padding:14px 16px; }
+    html.light .eq-tile { background:#fff; border-color:#e2e8f0; }
+    .eq-k { font-size:12px; color:#94a3b8; font-weight:500; }
+    .eq-big { font-size:18px; font-weight:700; margin:4px 0; }
+    .eq-tag { font-size:16px; font-weight:700; letter-spacing:.5px; color:#38bdf8; }
+    html.light .eq-tag { color:#0369a1; }
+    .eq-dl { display:flex; justify-content:space-between; gap:16px; padding:9px 0; border-bottom:1px solid #1e293b; font-size:13px; }
+    .eq-dl .k { color:#94a3b8; flex:none; }
+    .eq-dl .v { text-align:right; font-weight:600; word-break:break-word; }
+    html.light .eq-dl { border-color:#e2e8f0; }
+    .eq-btn { display:inline-flex; align-items:center; gap:8px; min-height:40px; padding:8px 14px; border-radius:10px; border:1px solid #334155; background:#0b1220; color:#e2e8f0; font-size:13px; font-weight:600; cursor:pointer; }
+    .eq-btn:hover { border-color:#38bdf8; color:#7dd3fc; }
+    html.light .eq-btn { background:#fff; color:#0f172a; border-color:#cbd5e1; }
+    html.light .eq-btn:hover { border-color:#0369a1; color:#0369a1; }
+    @media (max-width: 900px) { .eq-grid { grid-template-columns:1fr; } }
+</style>
 </head>
 <body class="bg-slate-950 text-slate-100 selection:bg-sky-500 selection:text-white">
 
@@ -957,7 +987,12 @@
             <i class="fa-solid fa-chevron-down nav-group-chevron"></i>
           </button>
           <div id="grpMenu_cadastros" class="nav-submenu">
-            <button type="button" id="btnNavCadEquipamento" onclick="mudarAba('cad_equipamento')" class="nav-tab">
+            <button type="button" id="btnNavEquipamentos" onclick="mudarAba('equipamentos')" class="nav-tab">
+              <i class="fa-solid fa-magnifying-glass w-4 text-center"></i>
+              <span class="flex-1 text-left">Equipamentos</span>
+            </button>
+
+            <button type="button" id="btnNavCadEquipamento" onclick="novoEquipamento()" class="nav-tab">
               <i class="fa-solid fa-truck-medical w-4 text-center"></i>
               <span class="flex-1 text-left">Cadastrar Equipamento</span>
             </button>
@@ -1044,6 +1079,10 @@
                   <span id="textoTemaMenu">Ativar Tema Claro</span>
                 </span>
                 <span id="badgeTemaAtual" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Escuro</span>
+              </div>
+              <div id="itemMenuConfig" onclick="abrirConfiguracoes()" style="display:none;" class="px-4 py-3 text-xs font-semibold text-slate-200 hover:bg-sky-500/15 hover:text-sky-400 cursor-pointer flex items-center gap-2.5 transition">
+                <i class="fa-solid fa-sliders text-sky-400 w-4 text-center"></i>
+                <span>Configurações do sistema</span>
               </div>
               <div onclick="abrirModalManual()" class="px-4 py-3 text-xs font-semibold text-slate-200 hover:bg-sky-500/15 hover:text-sky-400 cursor-pointer flex items-center gap-2.5 transition">
                 <i class="fa-solid fa-book-bookmark text-sky-400 w-4 text-center"></i>
@@ -1201,7 +1240,7 @@
                 </div>
                 <div class="form-group" style="flex: 2;">
                   <label>Pesquisar Equipamento (TAG / Nome / Série):</label>
-                  <input type="text" id="agBuscaEq" list="listEquipamentos" placeholder="Digite para buscar equipamento..." oninput="autoPreencherAgendaEq(); validarConflitoFormularioPrincipal();" required />
+                  <input type="text" id="agBuscaEq" list="listEquipamentos" placeholder="Digite para buscar equipamento..." oninput="autoPreencherAgendaEq(); validarConflitoFormularioPrincipal(); buscarEqDigitando(this, () => { autoPreencherAgendaEq(); validarConflitoFormularioPrincipal(); });" required />
                 </div>
               </div>
 
@@ -1658,7 +1697,7 @@
 
                 <div class="form-group mb-3">
                   <label>Pesquisar Equipamento (TAG, Série ou Patrimônio):</label>
-                  <input type="text" id="buscaEquipamento" list="listEquipamentos" placeholder="Ex: LMD-4654 ou 2329918..." oninput="autoPreencherEquipamento()" required />
+                  <input type="text" id="buscaEquipamento" list="listEquipamentos" placeholder="Ex: LMD-4654 ou 2329918..." oninput="autoPreencherEquipamento(); buscarEqDigitando(this, autoPreencherEquipamento);" required />
                 </div>
 
                 <div class="form-row">
@@ -1828,6 +1867,8 @@
                     <option value="CORRETIVA">CORRETIVA</option>
                     <option value="PREVENTIVA">PREVENTIVA</option>
                     <option value="CALIBRAÇÃO">CALIBRAÇÃO</option>
+                    <option value="SEGURANÇA ELÉTRICA">SEGURANÇA ELÉTRICA</option>
+                    <option value="QUALIFICAÇÃO TÉRMICA">QUALIFICAÇÃO TÉRMICA</option>
                     <option value="INSPEÇÃO">INSPEÇÃO / HIGIENIZAÇÃO</option>
                     <option value="OFICINA">OFICINA</option>
                   </select>
@@ -1841,12 +1882,19 @@
                     <option value="BAIXA">BAIXA</option>
                   </select>
                 </div>
+                <div class="form-group" style="flex: 1;">
+                  <label>Execução:</label>
+                  <select id="osExecucao">
+                    <option value="INTERNA" selected>INTERNA</option>
+                    <option value="EXTERNA">EXTERNA</option>
+                  </select>
+                </div>
               </div>
 
               <div class="form-row">
                 <div class="form-group" style="flex: 2;">
                   <label>Pesquisar Equipamento (TAG / Série / Patrimônio):</label>
-                  <input type="text" id="osBuscaEquip" list="listEquipamentos" placeholder="Digite para buscar..." oninput="autoPreencherOSEquipamento()" required />
+                  <input type="text" id="osBuscaEquip" list="listEquipamentos" placeholder="Digite para buscar..." oninput="autoPreencherOSEquipamento(); buscarEqDigitando(this, autoPreencherOSEquipamento);" required />
                 </div>
                 <div class="form-group" style="flex: 1;"><label>TAG:</label><input type="text" id="osTag" readonly placeholder="-" /></div>
                 <div class="form-group" style="flex: 1;"><label>Nº de Série:</label><input type="text" id="osSerie" readonly placeholder="-" /></div>
@@ -1874,29 +1922,115 @@
           </div>
         </div>
 
+        <!-- ABA: EQUIPAMENTOS (lista + ficha) -->
+        <div id="abaEquipamentos" class="tab-content">
+          <div id="eqVistaLista">
+            <div class="card">
+              <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <div class="card-title" style="margin:0;">Equipamentos</div>
+                <button type="button" class="btn-submit" onclick="novoEquipamento()"><i class="fa-solid fa-plus"></i> Novo equipamento</button>
+              </div>
+              <input type="text" id="eqBusca" placeholder="Buscar por TAG, nome, série, patrimônio ou cliente..." oninput="buscarListaEquipamentos()" autocomplete="off" />
+              <div id="eqListaInfo" class="text-xs text-slate-500" style="margin:8px 0;">Digite ao menos 2 caracteres para buscar.</div>
+              <div class="table-container">
+                <table>
+                  <thead><tr><th class="td-center">TAG</th><th>Equipamento</th><th>Fabricante / Modelo</th><th>Cliente / Setor</th><th class="td-center">Propriedade</th></tr></thead>
+                  <tbody id="corpoEquipamentos"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div id="eqVistaFicha" style="display:none;"></div>
+        </div>
+
         <!-- ABA 11: CADASTRAR EQUIPAMENTO -->
         <div id="abaCadEquipamento" class="tab-content">
           <div class="card">
-            <div class="card-title">Cadastrar Novo Equipamento (Aba EQUIP)</div>
+            <div class="card-title">Cadastrar Novo Equipamento</div>
             <form id="formNovoEquip" onsubmit="return salvarNovoEquipamento(event)">
+
+              <div class="text-xs font-bold uppercase tracking-wider text-sky-400" style="margin:20px 0 8px">1. Identificação</div>
               <div class="form-row">
-                <div class="form-group"><label>TAG do Equipamento:</label><input type="text" id="cadTag" placeholder="Ex: LMD-9999" required /></div>
-                <div class="form-group"><label>Nº de Série:</label><input type="text" id="cadSerie" placeholder="Ex: 849302" required /></div>
-                <div class="form-group"><label>Patrimônio:</label><input type="text" id="cadPatrimonio" placeholder="Ex: 00984" required /></div>
+                <div class="form-group" id="grpMascara" style="display:none; flex: 2;"><label>Máscara da TAG *</label><select id="cadMascara" onchange="atualizarPreviaTag()"></select></div>
+                <div class="form-group" style="flex: 1;"><label>TAG *</label><input type="text" id="cadTag" placeholder="Ex: LMD-9999" required /><div id="cadTagInfo" class="text-xs text-slate-500" style="margin-top:4px;"></div></div>
+                <label id="grpTagManual" style="display:none; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="cadTagManual" onchange="alternarTagManual()" style="width:auto;" /> Informar TAG manualmente</label>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Nº de Série</label><input type="text" id="cadSerie" placeholder="Ex: 849302" /></div>
+                <div class="form-group"><label>Patrimônio</label><input type="text" id="cadPatrimonio" placeholder="Ex: 00984" /></div>
+                <div class="form-group"><label>Código extra</label><input type="text" id="cadCodigoExtra" /></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group" style="flex: 2;"><label>Descrição do equipamento *</label><input type="text" id="cadNome" list="listDescricoesPadrao" required /></div>
+                <div class="form-group" style="flex: 1;"><label>Fabricante *</label><input type="text" id="cadFabricante" list="listFabricantesPadrao" onchange="preencherAnvisaDoModelo()" required /></div>
+                <div class="form-group" style="flex: 1;"><label>Modelo *</label><input type="text" id="cadModelo" list="listModelosPadrao" onchange="preencherAnvisaDoModelo()" required /></div>
               </div>
 
+              <div class="text-xs font-bold uppercase tracking-wider text-sky-400" style="margin:20px 0 8px">2. Propriedade e localização</div>
               <div class="form-row">
-                <div class="form-group" style="flex: 2;"><label>Descrição do Equipamento:</label><input type="text" id="cadNome" list="listDescricoesPadrao" required /></div>
-                <div class="form-group" style="flex: 1;"><label>Modelo:</label><input type="text" id="cadModelo" list="listModelosPadrao" required /></div>
-                <div class="form-group" style="flex: 1;"><label>Fabricante:</label><input type="text" id="cadFabricante" list="listFabricantesPadrao" required /></div>
+                <div class="form-group">
+                  <label>Propriedade *</label>
+                  <select id="cadPropriedade" onchange="alternarProprietario()" required>
+                    <option value="">Selecione...</option>
+                    <option value="PRÓPRIO">PRÓPRIO (da empresa)</option>
+                    <option value="CLIENTE">CLIENTE (do cliente)</option>
+                    <option value="COMODATO">COMODATO</option>
+                    <option value="LOCADO">LOCADO</option>
+                    <option value="EMPRESTADO">EMPRESTADO</option>
+                    <option value="TERCEIRO">TERCEIRO</option>
+                  </select>
+                </div>
+                <div class="form-group" id="grpProprietario" style="display:none;"><label>Proprietário *</label><input type="text" id="cadProprietario" placeholder="Quem é o dono do equipamento" /></div>
+                <div class="form-group"><label>Unidade / contrato *</label><input type="text" id="cadUnidade" list="listUnidadesEquip" placeholder="Ex: LINEMED (LMD)" onchange="sugerirMascaraPorUnidade()" required /></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group" style="flex: 2;"><label>Cliente <span class="text-slate-500">(obrigatório quando não for próprio)</span></label><input type="text" id="cadCliente" list="listClientes" /></div>
+                <div class="form-group" style="flex: 1;"><label>Setor</label><input type="text" id="cadSetor" /></div>
               </div>
 
+              <div class="text-xs font-bold uppercase tracking-wider text-sky-400" style="margin:20px 0 8px">3. Regulatório e criticidade</div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Criticidade</label>
+                  <select id="cadCriticidade">
+                    <option value="">Não definida</option>
+                    <option value="BAIXA">BAIXA</option><option value="MÉDIA">MÉDIA</option>
+                    <option value="ALTA">ALTA</option><option value="CRÍTICA">CRÍTICA</option>
+                  </select>
+                </div>
+                <div class="form-group"><label>Registro ANVISA</label><input type="text" id="cadAnvisa" /></div>
+                <div class="form-group"><label>Validade do registro</label><input type="date" id="cadAnvisaValidade" /></div>
+              </div>
+              <div class="text-xs text-slate-500" style="margin-top:-4px;">O registro ANVISA pertence ao modelo: vale para todos os equipamentos desse fabricante e modelo.</div>
+
+              <div class="text-xs font-bold uppercase tracking-wider text-sky-400" style="margin:20px 0 8px">4. Acessórios e observações</div>
               <div class="form-group mb-4">
-                <label>Acessórios Padrão (Separados por ;):</label>
+                <label>Acessórios padrão (separados por ;)</label>
                 <input type="text" id="cadAcessorios" placeholder="Ex: CABO DE FORÇA; CIRCUITO PACIENTE; SENSOR FLUXO" />
               </div>
+              <div class="form-group mb-4"><label>Observação</label><input type="text" id="cadObservacao" /></div>
 
-              <div class="text-right">
+              <details style="margin-bottom:16px;">
+                <summary class="text-xs font-bold uppercase tracking-wider text-sky-400" style="cursor:pointer;">5. Aquisição e garantia (opcional)</summary>
+                <div class="form-row" style="margin-top:12px;">
+                  <div class="form-group" style="flex: 2;"><label>Fornecedor</label><input type="text" id="cadFornecedor" /></div>
+                  <div class="form-group"><label>Nota fiscal</label><input type="text" id="cadNotaFiscal" /></div>
+                  <div class="form-group"><label>Valor de aquisição (R$)</label><input type="text" id="cadValorAquisicao" inputmode="decimal" /></div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group"><label>Data de fabricação</label><input type="date" id="cadDataFabricacao" /></div>
+                  <div class="form-group"><label>Data de aquisição</label><input type="date" id="cadDataAquisicao" /></div>
+                  <div class="form-group"><label>Data de instalação</label><input type="date" id="cadDataInstalacao" /></div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group"><label>Garantia original até</label><input type="date" id="cadGarantiaOriginal" /></div>
+                  <div class="form-group"><label>Garantia estendida até</label><input type="date" id="cadGarantiaEstendida" /></div>
+                </div>
+              </details>
+              <datalist id="listUnidadesEquip"></datalist>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                <label id="grpContinuar" style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="cadContinuar" style="width:auto;" /> Continuar incluindo (mantém fabricante, modelo, propriedade, unidade, cliente e setor)</label>
                 <button type="submit" id="btnSalvarCadEquip" class="btn-submit"><i class="fa-solid fa-server"></i> Salvar Equipamento</button>
               </div>
             </form>
@@ -2079,7 +2213,7 @@
               </div>
               <div>
                 <label class="!text-[10px] !mb-1">Equipamento (TAG)</label>
-                <input type="text" id="modalAgBuscaEq" list="listEquipamentos" oninput="checkModalRealtimeConflict()" placeholder="Ex: LMD-4654" class="!py-1.5 !text-xs" />
+                <input type="text" id="modalAgBuscaEq" list="listEquipamentos" oninput="checkModalRealtimeConflict(); buscarEqDigitando(this, checkModalRealtimeConflict);" placeholder="Ex: LMD-4654" class="!py-1.5 !text-xs" />
               </div>
             </div>
 
@@ -2311,6 +2445,59 @@ abaAgenda.appendRow([
   </div>
 
   <!-- MODAL MANUAL -->
+  <div id="modalConfig" class="modal-overlay">
+    <div class="modal-box" style="width: 980px;">
+      <div class="modal-title">
+        <span><i class="fa-solid fa-gear text-sky-400 mr-2"></i> Configurações do sistema</span>
+        <button type="button" onclick="fecharConfiguracoes()" aria-label="Fechar" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+        <button type="button" id="cfgBtnTags" class="eq-btn" onclick="mudarAbaConfig('tags')"><i class="fa-solid fa-tag"></i> Máscaras de TAG</button>
+        <button type="button" id="cfgBtnUsuarios" class="eq-btn" onclick="mudarAbaConfig('usuarios')"><i class="fa-solid fa-user-shield"></i> Usuários e permissões</button>
+      </div>
+
+      <div id="cfgPainelTags">
+        <div class="eq-k" style="margin-bottom:12px;">A TAG é montada como <b>prefixo + separador + sequência numérica</b> (ex.: LMD-0008). Cada cadastro novo usa a próxima da máscara escolhida, sem repetir. Ao escolher a unidade no cadastro, a máscara padrão dela é sugerida.</div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th class="td-center">Prefixo</th><th>Descrição</th><th>Unidade padrão</th><th class="td-center">Dígitos</th><th class="td-center">Próxima TAG</th><th class="td-center">Situação</th><th></th></tr></thead>
+            <tbody id="cfgCorpoMascaras"></tbody>
+          </table>
+        </div>
+        <div style="margin:12px 0;"><button type="button" class="btn-submit" onclick="novaMascaraConfig()"><i class="fa-solid fa-plus"></i> Nova máscara</button></div>
+        <form id="cfgFormMascara" onsubmit="return salvarMascaraConfig(event)" class="card" style="display:none;">
+          <div id="cfgMascTitulo" class="card-title">Nova máscara</div>
+          <input type="hidden" id="cfgMascId" />
+          <div class="form-row">
+            <div class="form-group"><label>Prefixo *</label><input type="text" id="cfgMascPrefixo" placeholder="Ex: LMD" maxlength="10" required /></div>
+            <div class="form-group" style="flex: 2;"><label>Descrição</label><input type="text" id="cfgMascDescricao" placeholder="Ex: Linemed (LMD)" /></div>
+            <div class="form-group" style="flex: 2;"><label>Unidade padrão</label><input type="text" id="cfgMascUnidade" list="listUnidadesEquip" placeholder="Sugerida no cadastro" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Separador</label><select id="cfgMascSeparador"><option value="-">Hífen ( - )</option><option value="_">Sublinhado ( _ )</option><option value="">Nenhum</option></select></div>
+            <div class="form-group"><label>Dígitos da sequência</label><input type="number" id="cfgMascDigitos" min="1" max="8" value="4" required /></div>
+            <div class="form-group"><label>Iniciar a sequência em (opcional)</label><input type="number" id="cfgMascProximo" min="1" placeholder="Em branco = mantém" /></div>
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="cfgMascAtiva" checked style="width:auto;" /> Máscara ativa</label>
+          </div>
+          <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <button type="button" class="eq-btn" onclick="cancelarMascaraConfig()">Cancelar</button>
+            <button type="submit" id="cfgBtnSalvarMasc" class="btn-submit"><i class="fa-solid fa-floppy-disk"></i> Salvar máscara</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="cfgPainelUsuarios" style="display:none;">
+        <div class="eq-k" style="margin-bottom:12px;"><b>ADMIN</b> tem todas as permissões. Nos outros perfis, marque o que cada pessoa pode fazer. O sistema exige pelo menos um administrador ativo.</div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>Nome</th><th>Usuário</th><th>Perfil</th><th class="td-center">Máscaras de TAG</th><th class="td-center">Usuários</th><th class="td-center">TAG manual</th><th class="td-center">Ativo</th><th></th></tr></thead>
+            <tbody id="cfgCorpoUsuarios"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="modalManualUso" class="modal-overlay">
     <div class="modal-box" style="width: 760px;">
       <div class="modal-title">
@@ -2403,10 +2590,10 @@ abaAgenda.appendRow([
 
     // ---------- Mapeadores: linha do banco (snake_case) -> objeto da interface ----------
     const mapa = {
-      equipamento: r => ({ tag: str_(r.tag).trim(), serie: str_(r.serie), patrimonio: str_(r.patrimonio), nome: str_(r.nome), modelo: str_(r.modelo), fabricante: str_(r.fabricante), acessorios: str_(r.acessorios) }),
+      equipamento: r => ({ id: str_(r.id), tag: str_(r.tag).trim(), serie: str_(r.serie), patrimonio: str_(r.patrimonio), codigoExtra: str_(r.codigo_extra), nome: str_(r.nome), modelo: str_(r.modelo), fabricante: str_(r.fabricante), acessorios: str_(r.acessorios), propriedade: str_(r.propriedade), proprietario: str_(r.proprietario), unidade: str_(r.unidade), cliente: str_(r.cliente), setor: str_(r.setor), criticidade: str_(r.criticidade), ativo: r.ativo !== false, registroAnvisa: str_(r.registro_anvisa), validadeAnvisa: str_(r.validade_anvisa), fornecedor: str_(r.fornecedor), notaFiscal: str_(r.nota_fiscal), valorAquisicao: (r.valor_aquisicao === null || r.valor_aquisicao === undefined) ? '' : r.valor_aquisicao, dataFabricacao: str_(r.data_fabricacao), dataAquisicao: str_(r.data_aquisicao), dataInstalacao: str_(r.data_instalacao), garantiaOriginalAte: str_(r.garantia_original_ate), garantiaEstendidaAte: str_(r.garantia_estendida_ate), observacao: str_(r.observacao) }),
       termo: r => ({ protocolo: str_(r.protocolo), dataHora: fmtBR(r.data_hora), cliente: str_(r.cliente), tag: str_(r.tag), equipamento: str_(r.equipamento), tipo: str_(r.tipo_operacao), tecnico: str_(r.tecnico), pdfUrl: str_(r.pdf_url), logErro: str_(r.log_erro) }),
       requisicao: r => ({ protocolo: str_(r.protocolo), dataHora: fmtBR(r.data_hora), cliente: str_(r.cliente), operacao: str_(r.operacao), equipamentoAntigo: str_(r.equipamento_antigo), equipamentoSolicitado: str_(r.equipamento_solicitado), motivo: str_(r.motivo), solicitante: str_(r.solicitante), status: up_(r.status) || "PENDENTE", protocoloTermo: str_(r.protocolo_termo), pdfUrlReq: str_(r.pdf_url) }),
-      os: r => ({ protocoloOS: str_(r.protocolo), dataAbertura: fmtBR(r.data_abertura), cliente: str_(r.cliente), tag: str_(r.tag), serie: str_(r.serie), patrimonio: str_(r.patrimonio), equipamento: str_(r.equipamento), tipoManutencao: str_(r.tipo_manutencao), prioridade: str_(r.prioridade), solicitante: str_(r.solicitante), tecnico: str_(r.tecnico), defeitoRelatado: str_(r.defeito_relatado), diagnosticoTecnico: str_(r.diagnostico_tecnico), servicoRealizado: str_(r.servico_realizado), status: str_(r.status) || "ABERTA", pdfUrlOS: str_(r.pdf_url), anexosUrl: str_(r.anexos_url) }),
+      os: r => ({ protocoloOS: str_(r.protocolo), dataAbertura: fmtBR(r.data_abertura), cliente: str_(r.cliente), tag: str_(r.tag), serie: str_(r.serie), patrimonio: str_(r.patrimonio), equipamento: str_(r.equipamento), tipoManutencao: str_(r.tipo_manutencao), execucao: str_(r.execucao), prioridade: str_(r.prioridade), solicitante: str_(r.solicitante), tecnico: str_(r.tecnico), defeitoRelatado: str_(r.defeito_relatado), diagnosticoTecnico: str_(r.diagnostico_tecnico), servicoRealizado: str_(r.servico_realizado), status: str_(r.status) || "ABERTA", pdfUrlOS: str_(r.pdf_url), anexosUrl: str_(r.anexos_url) }),
       aux: r => ({ descricao: str_(r.descricao), modelo: str_(r.modelo), fabricante: str_(r.fabricante) }),
       locacao: r => ({ id: str_(r.id), cliente: str_(r.cliente), contrato: str_(r.contrato), unidade: str_(r.unidade), localizacao: str_(r.localizacao), equipamento: str_(r.equipamento), qtdContratada: Number(r.qtd_contratada) || 0, qtdFisica: Number(r.qtd_fisica) || 0, saldo: Number(r.saldo) || 0, situacao: up_(r.situacao) || "ATIVO", valorUnitario: Number(r.valor_unitario) || 0, valorTotal: Number(r.valor_total) || 0, observacaoLog: str_(r.observacao_log) }),
       compra: r => ({ protocolo: str_(r.protocolo), dataHora: fmtBR(r.data_hora), osExterna: str_(r.os_externa), solicitante: str_(r.solicitante), produto: str_(r.produto), fornVencedor: str_(r.forn_vencedor), menorValor: Number(r.menor_valor) || 0, status: up_(r.status) || "PENDENTE", pdfUrlCompra: str_(r.pdf_url) }),
@@ -2415,11 +2602,17 @@ abaAgenda.appendRow([
     };
 
     async function lerTabela(nome, ordem, asc) {
-      let q = supabaseClient.from(nome).select('*');
-      if (ordem) q = q.order(ordem, { ascending: asc !== false });
-      const { data, error } = await q.range(0, 4999);
-      if (error) { console.error("Erro ao ler " + nome + ":", error); return { rows: [], erro: error }; }
-      return { rows: data || [], erro: null };
+      const TAM = 1000, MAX_PAGINAS = 20;
+      let rows = [];
+      for (let pg = 0; pg < MAX_PAGINAS; pg++) {
+        let q = supabaseClient.from(nome).select('*');
+        if (ordem) q = q.order(ordem, { ascending: asc !== false });
+        const { data, error } = await q.range(pg * TAM, pg * TAM + TAM - 1);
+        if (error) { console.error("Erro ao ler " + nome + ":", error); return { rows, erro: error }; }
+        rows = rows.concat(data || []);
+        if (!data || data.length < TAM) break;
+      }
+      return { rows, erro: null };
     }
 
     async function lerUsuarios() {
@@ -2428,6 +2621,39 @@ abaAgenda.appendRow([
       if (error) console.warn("listar_usuarios indisponível, tentando leitura direta:", error.message);
       const r = await supabaseClient.from('usuarios').select('nome,usuario,assinatura_url,ultimo_acesso,ativo');
       return r.data || [];
+    }
+
+
+    // ---------- Busca de equipamentos no servidor (a base tem milhares) ----------
+    let _eqTimer = null;
+    function escAttr_(v) { return str_(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+    function termoBuscaEq(v) {
+      const t = str_(v).trim();
+      const m = /^TAG:\s*([^|]+)\|/i.exec(t);
+      return (m ? m[1] : t).trim();
+    }
+    async function buscarEquipamentosServidor(termo, limite) {
+      const t = termoBuscaEq(termo);
+      if (t.length < 2) return [];
+      const { data, error } = await supabaseClient.rpc('buscar_equipamentos', { p_termo: t, p_limite: limite || 30 });
+      if (error) { console.error("Erro na busca de equipamentos:", error); return []; }
+      const lista = (data || []).map(mapa.equipamento);
+      bancoDados.equipamentos = bancoDados.equipamentos || [];
+      const cache = bancoDados.equipamentos;
+      lista.forEach(e => { const i = cache.findIndex(c => c.tag === e.tag); if (i >= 0) cache[i] = e; else cache.push(e); });
+      if (cache.length > 400) cache.splice(0, cache.length - 400);
+      return lista;
+    }
+    function buscarEqDigitando(el, aoConcluir) {
+      clearTimeout(_eqTimer);
+      _eqTimer = setTimeout(async () => {
+        const lista = await buscarEquipamentosServidor(el.value);
+        const dl = document.getElementById('listEquipamentos');
+        if (dl && lista.length) {
+          dl.innerHTML = lista.map(eq => `<option value="TAG: ${escAttr_(eq.tag)} | ${escAttr_(eq.nome)} | Série: ${escAttr_(eq.serie)}">`).join('');
+        }
+        if (typeof aoConcluir === 'function') aoConcluir();
+      }, 250);
     }
 
     // ---------- Protocolos sequenciais (REQ0001, PT0001, ...) ----------
@@ -2905,7 +3131,7 @@ abaAgenda.appendRow([
       const protocolo = await inserirComProtocolo('ordens_servico', 'protocolo', 'OS', 5, p => ({
         protocolo: p, data_abertura: new Date().toISOString(), cliente: d.cliente || "", tag: d.tag || "",
         serie: d.serie || "", patrimonio: d.patrimonio || "", equipamento: d.equipamento || "",
-        tipo_manutencao: d.tipoManutencao || "", prioridade: d.prioridade || "", solicitante: d.solicitante || "",
+        tipo_manutencao: d.tipoManutencao || "", execucao: d.execucao || "INTERNA", prioridade: d.prioridade || "", solicitante: d.solicitante || "",
         tecnico: d.tecnico || "", defeito_relatado: d.defeitoRelatado || "", diagnostico_tecnico: d.diagnosticoTecnico || "",
         servico_realizado: d.servicoRealizado || "", status: d.status || "CONCLUÍDA", pdf_url: "", anexos_url: ""
       }));
@@ -2921,16 +3147,57 @@ abaAgenda.appendRow([
       return error ? { status: "erro", mensagem: error.message } : { status: "sucesso" };
     }
 
-    async function acaoCriarEquipamento(d) {
-      const tag = str_(d.tag).trim();
-      if (!tag) return { status: "erro", mensagem: "Informe a TAG do equipamento." };
-      const { data: ja } = await supabaseClient.from('equipamentos').select('tag').eq('tag', tag).limit(1);
-      if (ja && ja.length) return { status: "erro", mensagem: "Já existe um equipamento com a TAG " + tag + "." };
-      const { error } = await supabaseClient.from('equipamentos').insert({
-        tag, serie: d.serie || "", patrimonio: d.patrimonio || "", nome: d.nome || "",
-        modelo: d.modelo || "", fabricante: d.fabricante || "", acessorios: d.acessorios || ""
+    function registroEquipamento_(d, modeloId) {
+      const nul = v => { const t = str_(v).trim(); return t === '' ? null : t; };
+      const valor = nul(d.valorAquisicao);
+      return {
+        nome: nul(d.nome), fabricante: nul(d.fabricante), modelo: nul(d.modelo), serie: nul(d.serie),
+        patrimonio: nul(d.patrimonio), codigo_extra: nul(d.codigoExtra), propriedade: nul(d.propriedade),
+        proprietario: nul(d.proprietario), unidade: nul(d.unidade), cliente: nul(d.cliente), setor: nul(d.setor),
+        criticidade: nul(d.criticidade), modelo_id: modeloId, acessorios: str_(d.acessorios),
+        observacao: nul(d.observacao), fornecedor: nul(d.fornecedor), nota_fiscal: nul(d.notaFiscal),
+        valor_aquisicao: valor === null ? null : (Number(valor.replace(/\./g, '').replace(',', '.')) || null),
+        data_fabricacao: nul(d.dataFabricacao), data_aquisicao: nul(d.dataAquisicao), data_instalacao: nul(d.dataInstalacao),
+        garantia_original_ate: nul(d.garantiaOriginalAte), garantia_estendida_ate: nul(d.garantiaEstendidaAte)
+      };
+    }
+
+    async function modeloDoEquipamento_(d) {
+      const nul = v => { const t = str_(v).trim(); return t === '' ? null : t; };
+      if (!(nul(d.fabricante) && nul(d.modelo))) return { id: null };
+      const m = await supabaseClient.rpc('garantir_modelo', {
+        p_fabricante: d.fabricante, p_modelo: d.modelo, p_anvisa: nul(d.registroAnvisa), p_validade: nul(d.validadeAnvisa)
       });
-      return error ? { status: "erro", mensagem: error.message } : { status: "sucesso" };
+      return m.error ? { erro: "Não foi possível registrar o modelo: " + m.error.message } : { id: m.data };
+    }
+
+    async function acaoCriarEquipamento(d) {
+      let tag = str_(d.tag).trim().toUpperCase();
+      if (tag) {
+        const { data: ja, error: e0 } = await supabaseClient.from('equipamentos').select('tag').eq('tag', tag).limit(1);
+        if (e0) return { status: "erro", mensagem: e0.message };
+        if (ja && ja.length) return { status: "erro", mensagem: "Já existe um equipamento com a TAG " + tag + "." };
+      } else if (!d.mascaraId) {
+        return { status: "erro", mensagem: "Informe a TAG do equipamento." };
+      }
+      const mod = await modeloDoEquipamento_(d);
+      if (mod.erro) return { status: "erro", mensagem: mod.erro };
+      if (!tag) {
+        const g = await rpcPriv('gerar_tag', { p_mascara_id: d.mascaraId });
+        if (!g.ok) return { status: "erro", mensagem: textoErroPriv(g) };
+        tag = g.tag;
+      }
+      const { error } = await supabaseClient.from('equipamentos').insert({ tag, ativo: true, ...registroEquipamento_(d, mod.id) });
+      return error ? { status: "erro", mensagem: error.message } : { status: "sucesso", tag };
+    }
+
+    async function acaoAtualizarEquipamento(d) {
+      const tag = str_(d.tag).trim().toUpperCase();
+      if (!tag) return { status: "erro", mensagem: "TAG não informada." };
+      const mod = await modeloDoEquipamento_(d);
+      if (mod.erro) return { status: "erro", mensagem: mod.erro };
+      const { error } = await supabaseClient.from('equipamentos').update(registroEquipamento_(d, mod.id)).eq('tag', tag);
+      return error ? { status: "erro", mensagem: error.message } : { status: "sucesso", tag };
     }
 
     async function acaoCriarAuxiliar(d) {
@@ -3011,6 +3278,7 @@ abaAgenda.appendRow([
           case "FECHAR_OS": res = await acaoAlterarStatusOS(d, "CONCLUÍDA"); break;
           case "REABRIR_OS": res = await acaoAlterarStatusOS(d, "ABERTA"); break;
           case "CRIAR_EQUIPAMENTO": res = await acaoCriarEquipamento(d); break;
+          case "ATUALIZAR_EQUIPAMENTO": res = await acaoAtualizarEquipamento(d); break;
           case "CRIAR_AUXILIAR_VINCULADO": res = await acaoCriarAuxiliar(d); break;
           case "ATUALIZAR_QTD_FISICA_LOCACAO": res = await acaoAtualizarLocacao(d); break;
           case "CRIAR_SOLICITACAO_COMPRA": res = await acaoCriarCompra(d); break;
@@ -3071,19 +3339,18 @@ abaAgenda.appendRow([
       if (estaBuscandoDados) return;
       estaBuscandoDados = true;
       try {
-        const [req, os, ag, loc, com, ter, eq, aux, usr] = await Promise.all([
+        const [req, os, ag, loc, com, ter, aux, usr] = await Promise.all([
           lerTabela('requisicoes', 'data_hora', false),
           lerTabela('ordens_servico', 'data_abertura', false),
           lerTabela('agenda', 'data_hora', false),
           lerTabela('locacoes'),
           lerTabela('compras', 'data_hora', false),
           lerTabela('termos_emitidos', 'data_hora', false),
-          lerTabela('equipamentos'),
           lerTabela('cad_auxiliares'),
           lerUsuarios()
         ]);
 
-        const comErro = [req, os, ag, loc, com, ter, eq, aux].filter(x => x.erro);
+        const comErro = [req, os, ag, loc, com, ter, aux].filter(x => x.erro);
 
         const clientesSet = new Set();
         [loc, req, ter, os, ag].forEach(t => t.rows.forEach(r => { const c = str_(r.cliente).trim(); if (c) clientesSet.add(c); }));
@@ -3095,7 +3362,7 @@ abaAgenda.appendRow([
           locacoes: loc.rows.map(mapa.locacao),
           compras: com.rows.map(mapa.compra),
           termosEmitidos: ter.rows.map(mapa.termo),
-          equipamentos: eq.rows.map(mapa.equipamento).filter(e => e.tag),
+          equipamentos: (bancoDados && bancoDados.equipamentos) || [],
           usuarios: (usr || []).filter(u => u.ativo !== false).map(mapa.usuario),
           relacoesAuxiliares: aux.rows.map(mapa.aux),
           clientes: Array.from(clientesSet).sort((a, b) => a.localeCompare(b, 'pt-BR'))
@@ -3115,6 +3382,7 @@ abaAgenda.appendRow([
         }
 
         atualizarTodasAsVisoes();
+        if (!window._unidadesEqCarregadas) { window._unidadesEqCarregadas = true; carregarListaUnidadesEq(); }
       } catch (err) {
         console.error("Erro ao sincronizar com Supabase:", err);
       } finally {
@@ -3285,6 +3553,7 @@ abaAgenda.appendRow([
           document.getElementById('appContainer').style.display = "flex";
           preencherSelectTecnicos();
           enviarHeartbeat();
+          renovarPermissoesSessao();
           return;
         }
       }
@@ -3323,7 +3592,10 @@ abaAgenda.appendRow([
           concluirAcessoLogin({
             nome: u.nome || u.usuario.toUpperCase(),
             usuario: u.usuario,
-            assinaturaUrl: u.assinatura_url || ""
+            assinaturaUrl: u.assinatura_url || "",
+            perfil: u.perfil || "",
+            permissoes: u.permissoes || [],
+            token: u.token || ""
           });
         } else {
           divErro.innerText = "Usuário ou senha incorretos.";
@@ -3352,11 +3624,18 @@ abaAgenda.appendRow([
       preencherSolicitantePadraoAgenda();
       enviarHeartbeat();
       buscarAtualizacoesSilenciosas();
+      _avisouSessao = false;
+      aplicarPermissoesUI();
+      carregarMascarasCadastro();
     }
 
     function efetuarLogout() {
+      const tokenAtual = usuarioLogado && usuarioLogado.token;
+      if (tokenAtual) { try { supabaseClient.rpc('encerrar_sessao', { p_token: tokenAtual }).then(() => {}); } catch (e) {} }
       localStorage.removeItem("dmasys_usuario");
       usuarioLogado = null;
+      mascarasTag = [];
+      aplicarPermissoesUI();
       document.getElementById('loginOverlay').style.display = "flex";
       document.getElementById('appContainer').style.display = "none";
     }
@@ -5181,7 +5460,8 @@ abaAgenda.appendRow([
         consulta: { btn: 'btnNavConsulta', tab: 'abaConsulta', group: 'qualidade', title: 'Módulo Qualidade — Consultar Termos Emitidos' },
         os_gestao: { btn: 'btnNavOsGestao', tab: 'abaOsGestao', group: 'manutencao', title: 'Manutenção — Central de Gestão de O.S.', fn: renderizarTabelaOS },
         os_abertura: { btn: 'btnNavOsAbertura', tab: 'abaOsAbertura', group: 'manutencao', title: 'Manutenção — Abrir / Registrar Nova O.S.' },
-        cad_equipamento: { btn: 'btnNavCadEquipamento', tab: 'abaCadEquipamento', group: 'cadastros', title: 'Cadastros — Novo Equipamento' },
+        equipamentos: { btn: 'btnNavEquipamentos', tab: 'abaEquipamentos', group: 'cadastros', title: 'Cadastros — Equipamentos', fn: () => { voltarListaEquipamentos(); } },
+        cad_equipamento: { btn: 'btnNavCadEquipamento', tab: 'abaCadEquipamento', group: 'cadastros', title: 'Cadastros — Novo Equipamento', fn: () => { carregarMascarasCadastro(); } },
         cad_auxiliares: { btn: 'btnNavCadAuxiliares', tab: 'abaCadAuxiliares', group: 'cadastros', title: 'Cadastros — Nomenclaturas Padrão', fn: renderizarListasAuxiliares }
       };
 
@@ -5437,7 +5717,7 @@ abaAgenda.appendRow([
       postAPI({
         acao: "CRIAR_OS",
         cliente: g('osCliente'), tag: g('osTag'), serie: g('osSerie'), patrimonio: g('osPatrimonio'),
-        equipamento: g('osNomeEquip'), tipoManutencao: g('osTipo'), prioridade: g('osPrioridade'),
+        equipamento: g('osNomeEquip'), tipoManutencao: g('osTipo'), execucao: g('osExecucao'), prioridade: g('osPrioridade'),
         solicitante: g('osSolicitante'), tecnico: g('osTecnico'),
         defeitoRelatado: g('osDefeito'), diagnosticoTecnico: g('osDiagnostico'), servicoRealizado: g('osServico')
       }).then(res => {
@@ -5453,24 +5733,571 @@ abaAgenda.appendRow([
     }
 
     // ---------- Cadastros ----------
+    const CAMPOS_CAD_EQ = [
+      ['cadTag', 'tag'], ['cadSerie', 'serie'], ['cadPatrimonio', 'patrimonio'], ['cadCodigoExtra', 'codigoExtra'],
+      ['cadNome', 'nome'], ['cadFabricante', 'fabricante'], ['cadModelo', 'modelo'],
+      ['cadPropriedade', 'propriedade'], ['cadProprietario', 'proprietario'], ['cadUnidade', 'unidade'],
+      ['cadCliente', 'cliente'], ['cadSetor', 'setor'], ['cadCriticidade', 'criticidade'],
+      ['cadAnvisa', 'registroAnvisa'], ['cadAnvisaValidade', 'validadeAnvisa'],
+      ['cadAcessorios', 'acessorios'], ['cadObservacao', 'observacao'],
+      ['cadFornecedor', 'fornecedor'], ['cadNotaFiscal', 'notaFiscal'], ['cadValorAquisicao', 'valorAquisicao'],
+      ['cadDataFabricacao', 'dataFabricacao'], ['cadDataAquisicao', 'dataAquisicao'], ['cadDataInstalacao', 'dataInstalacao'],
+      ['cadGarantiaOriginal', 'garantiaOriginalAte'], ['cadGarantiaEstendida', 'garantiaEstendidaAte']
+    ];
+    const PROPRIEDADES_COM_DONO = ['COMODATO', 'LOCADO', 'EMPRESTADO', 'TERCEIRO'];
+
+    function alternarProprietario() {
+      const v = document.getElementById('cadPropriedade').value;
+      const grp = document.getElementById('grpProprietario');
+      const mostrar = PROPRIEDADES_COM_DONO.includes(v);
+      if (grp) grp.style.display = mostrar ? '' : 'none';
+      if (!mostrar) document.getElementById('cadProprietario').value = '';
+    }
+
+    async function preencherAnvisaDoModelo() {
+      const fab = document.getElementById('cadFabricante').value.trim();
+      const mod = document.getElementById('cadModelo').value.trim();
+      if (!fab || !mod) return;
+      const { data, error } = await supabaseClient.rpc('obter_modelo', { p_fabricante: fab, p_modelo: mod });
+      if (error || !data) return;
+      const inp = document.getElementById('cadAnvisa'), val = document.getElementById('cadAnvisaValidade');
+      if (inp && !inp.value && data.registro_anvisa) inp.value = data.registro_anvisa;
+      if (val && !val.value && data.validade_anvisa) val.value = data.validade_anvisa;
+    }
+
+    async function carregarListaUnidadesEq() {
+      const { data, error } = await supabaseClient.rpc('listar_unidades_equipamento');
+      const dl = document.getElementById('listUnidadesEquip');
+      if (!error && Array.isArray(data) && dl) dl.innerHTML = data.map(u => `<option value="${escAttr_(u)}">`).join('');
+    }
+
     function salvarNovoEquipamento(e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
-      const g = id => document.getElementById(id).value.trim();
+      const v = id => (document.getElementById(id).value || '').trim();
+      const prop = v('cadPropriedade');
+      if (PROPRIEDADES_COM_DONO.includes(prop) && !v('cadProprietario')) {
+        showToast("Informe o proprietário do equipamento (" + prop + ").", "error"); return false;
+      }
+      if (prop && prop !== 'PRÓPRIO' && !v('cadCliente')) {
+        showToast("Informe o cliente (obrigatório quando o equipamento não é próprio).", "error"); return false;
+      }
+      const editando = !!equipEmEdicao;
+      const auto = modoTagAutomatico();
+      const payload = { acao: editando ? "ATUALIZAR_EQUIPAMENTO" : "CRIAR_EQUIPAMENTO" };
+      CAMPOS_CAD_EQ.forEach(([idCampo, chave]) => { payload[chave] = v(idCampo); });
+      if (editando) payload.tag = equipEmEdicao;
+      if (auto) { payload.tag = ''; payload.mascaraId = document.getElementById('cadMascara').value; }
       const btn = document.getElementById('btnSalvarCadEquip');
       btn.disabled = true;
-      postAPI({
-        acao: "CRIAR_EQUIPAMENTO",
-        tag: g('cadTag'), serie: g('cadSerie'), patrimonio: g('cadPatrimonio'),
-        nome: g('cadNome'), modelo: g('cadModelo'), fabricante: g('cadFabricante'), acessorios: g('cadAcessorios')
-      }).then(res => {
+      postAPI(payload).then(async res => {
         btn.disabled = false;
-        if (res.status === "sucesso") {
-          document.getElementById('formNovoEquip').reset();
-          showToast("Equipamento cadastrado!", "success");
-          buscarAtualizacoesSilenciosas();
-        } else showToast("Erro ao cadastrar equipamento.", "error");
+        if (res.status !== "sucesso") { showToast("⚠️ " + (res.mensagem || "Erro ao salvar o equipamento."), "error"); return; }
+        const tag = str_(res.tag || payload.tag).trim().toUpperCase();
+        const manter = !editando && document.getElementById('cadContinuar').checked;
+        const guardar = {};
+        if (manter) ['cadMascara', 'cadFabricante', 'cadModelo', 'cadNome', 'cadPropriedade', 'cadProprietario', 'cadUnidade', 'cadCliente', 'cadSetor', 'cadCriticidade', 'cadAnvisa', 'cadAnvisaValidade']
+          .forEach(i => { guardar[i] = document.getElementById(i).value; });
+        document.getElementById('formNovoEquip').reset();
+        Object.keys(guardar).forEach(i => { document.getElementById(i).value = guardar[i]; });
+        document.getElementById('cadContinuar').checked = manter;
+        tagManual = false;
+        if (document.getElementById('cadTagManual')) document.getElementById('cadTagManual').checked = false;
+        alternarProprietario();
+        carregarListaUnidadesEq();
+        await carregarMascarasCadastro();
+        showToast("Equipamento " + tag + (editando ? " atualizado!" : " cadastrado!"), "success");
+        if (editando) sairModoEdicaoEquip();
+        if (!manter) {
+          await buscarEquipamentosServidor(tag, 5);
+          mudarAba('equipamentos');
+          abrirFichaEquipamento(tag);
+        }
       }).catch(() => { btn.disabled = false; showToast("Falha de conexão.", "error"); });
       return false;
+    }
+
+    // ---------- Permissões e configurações (engrenagem) ----------
+    const PERMISSOES_SISTEMA = [
+      ['config.tags', 'Configurar máscaras de TAG'],
+      ['config.usuarios', 'Gerenciar usuários e permissões'],
+      ['equipamento.tag_manual', 'Informar a TAG manualmente no cadastro']
+    ];
+    const PERFIS_SISTEMA = ['ADMIN', 'GESTOR', 'OPERADOR', 'CONSULTA'];
+    const PERMISSOES_PADRAO_PERFIL = { ADMIN: PERMISSOES_SISTEMA.map(p => p[0]), GESTOR: ['config.tags'], OPERADOR: [], CONSULTA: [] };
+    let mascarasTag = [];
+    let tagManual = false;
+    let _avisouSessao = false;
+    let _cfgMascaras = [];
+    let _cfgUsuarios = [];
+
+    function temPermissao(perm) {
+      const u = usuarioLogado;
+      if (!u || !u.token) return false;
+      return u.perfil === 'ADMIN' || (Array.isArray(u.permissoes) && u.permissoes.includes(perm));
+    }
+
+    function avisarSessaoExpirada() {
+      if (_avisouSessao) return;
+      _avisouSessao = true;
+      showToast("Sua sessão expirou. Saia e entre novamente para usar as configurações.", "warning");
+    }
+
+    function textoErroPriv(r) {
+      if (!r) return "Erro inesperado.";
+      if (r.erro === 'sessao_invalida' || r.erro === 'sem_sessao') return "Sua sessão expirou. Saia e entre novamente.";
+      if (r.erro === 'sem_permissao') return "Você não tem permissão para esta ação.";
+      return r.erro || "Erro inesperado.";
+    }
+
+    // chama uma função protegida do banco enviando o token da sessão
+    async function rpcPriv(nome, args) {
+      const token = usuarioLogado && usuarioLogado.token;
+      if (!token) return { erro: 'sem_sessao' };
+      const { data, error } = await supabaseClient.rpc(nome, { p_token: token, ...(args || {}) });
+      if (error) return { erro: error.message };
+      if (data && data.erro === 'sessao_invalida') avisarSessaoExpirada();
+      return data || { erro: 'Resposta vazia do servidor.' };
+    }
+
+    function aplicarPermissoesUI() {
+      const item = document.getElementById('itemMenuConfig');
+      if (item) item.style.display = (temPermissao('config.tags') || temPermissao('config.usuarios')) ? '' : 'none';
+      aplicarModoTagUI();
+    }
+
+    async function renovarPermissoesSessao() {
+      if (!usuarioLogado || !usuarioLogado.token) { aplicarPermissoesUI(); return; }
+      const { data, error } = await supabaseClient.rpc('sessao_info', { p_token: usuarioLogado.token });
+      if (!error) {
+        if (!data) {
+          usuarioLogado.token = ''; usuarioLogado.perfil = ''; usuarioLogado.permissoes = [];
+        } else {
+          usuarioLogado.perfil = data.perfil || ''; usuarioLogado.permissoes = data.permissoes || [];
+        }
+        try { localStorage.setItem("dmasys_usuario", JSON.stringify(usuarioLogado)); } catch (e) {}
+      }
+      aplicarPermissoesUI();
+      if (usuarioLogado.token) carregarMascarasCadastro();
+    }
+
+    // ----- janela de configurações -----
+    function abrirConfiguracoes() {
+      document.getElementById("menuAjudaDropdown")?.classList.add("hidden");
+      if (!(temPermissao('config.tags') || temPermissao('config.usuarios'))) {
+        showToast("Você não tem permissão para acessar as configurações.", "error"); return;
+      }
+      document.getElementById('cfgBtnTags').style.display = temPermissao('config.tags') ? '' : 'none';
+      document.getElementById('cfgBtnUsuarios').style.display = temPermissao('config.usuarios') ? '' : 'none';
+      document.getElementById('modalConfig').classList.add('active');
+      mudarAbaConfig(temPermissao('config.tags') ? 'tags' : 'usuarios');
+    }
+    function fecharConfiguracoes() { document.getElementById('modalConfig')?.classList.remove('active'); }
+
+    function mudarAbaConfig(aba) {
+      document.getElementById('cfgPainelTags').style.display = aba === 'tags' ? '' : 'none';
+      document.getElementById('cfgPainelUsuarios').style.display = aba === 'usuarios' ? '' : 'none';
+      document.getElementById('cfgBtnTags').style.borderColor = aba === 'tags' ? '#38bdf8' : '';
+      document.getElementById('cfgBtnUsuarios').style.borderColor = aba === 'usuarios' ? '#38bdf8' : '';
+      if (aba === 'tags') carregarMascarasConfig(); else carregarUsuariosAdmin();
+    }
+
+    // ----- máscaras de TAG (configuração) -----
+    async function carregarMascarasConfig() {
+      const tb = document.getElementById('cfgCorpoMascaras');
+      tb.innerHTML = '<tr><td colspan="7" class="td-center text-slate-500 py-6">Carregando...</td></tr>';
+      const r = await rpcPriv('listar_mascaras', {});
+      if (!r.ok) { tb.innerHTML = `<tr><td colspan="7" class="td-center text-rose-400 py-6">${escAttr_(textoErroPriv(r))}</td></tr>`; return; }
+      _cfgMascaras = r.mascaras || [];
+      renderMascarasConfig();
+    }
+
+    function renderMascarasConfig() {
+      const tb = document.getElementById('cfgCorpoMascaras');
+      const e = escAttr_;
+      const podeEditar = temPermissao('config.tags');
+      if (!_cfgMascaras.length) { tb.innerHTML = '<tr><td colspan="7" class="td-center text-slate-500 py-6">Nenhuma máscara cadastrada.</td></tr>'; return; }
+      tb.innerHTML = _cfgMascaras.map(m => `<tr>
+        <td class="td-center"><b>${e(m.prefixo)}</b></td>
+        <td>${e(m.descricao) || '-'}</td>
+        <td>${e(m.unidade_padrao) || '-'}</td>
+        <td class="td-center">${m.digitos}</td>
+        <td class="td-center"><b>${e(m.proxima_tag)}</b></td>
+        <td class="td-center"><span class="eq-chip ${m.ativo ? 'verde' : 'cinza'}">${m.ativo ? 'Ativa' : 'Inativa'}</span></td>
+        <td class="td-center">${podeEditar ? `<button type="button" class="eq-btn" data-id="${e(m.id)}" onclick="editarMascaraConfig(this.dataset.id)"><i class="fa-solid fa-pen"></i> Editar</button>` : ''}</td>
+      </tr>`).join('');
+    }
+
+    function novaMascaraConfig() {
+      const f = document.getElementById('cfgFormMascara');
+      f.reset();
+      document.getElementById('cfgMascId').value = '';
+      document.getElementById('cfgMascAtiva').checked = true;
+      document.getElementById('cfgMascDigitos').value = 4;
+      document.getElementById('cfgMascTitulo').textContent = 'Nova máscara';
+      f.style.display = '';
+      document.getElementById('cfgMascPrefixo').focus();
+    }
+
+    function editarMascaraConfig(id) {
+      const m = _cfgMascaras.find(x => x.id === id);
+      if (!m) return;
+      const f = document.getElementById('cfgFormMascara');
+      f.style.display = '';
+      document.getElementById('cfgMascTitulo').textContent = 'Editar máscara ' + m.prefixo;
+      document.getElementById('cfgMascId').value = m.id;
+      document.getElementById('cfgMascPrefixo').value = m.prefixo;
+      document.getElementById('cfgMascDescricao').value = m.descricao || '';
+      document.getElementById('cfgMascUnidade').value = m.unidade_padrao || '';
+      document.getElementById('cfgMascSeparador').value = m.separador;
+      document.getElementById('cfgMascDigitos').value = m.digitos;
+      document.getElementById('cfgMascProximo').value = '';
+      document.getElementById('cfgMascAtiva').checked = !!m.ativo;
+    }
+
+    function cancelarMascaraConfig() { document.getElementById('cfgFormMascara').style.display = 'none'; }
+
+    async function salvarMascaraConfig(ev) {
+      if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+      const v = id => (document.getElementById(id).value || '').trim();
+      const prox = v('cfgMascProximo');
+      const btn = document.getElementById('cfgBtnSalvarMasc');
+      btn.disabled = true;
+      const r = await rpcPriv('salvar_mascara', {
+        p_id: v('cfgMascId') || null, p_prefixo: v('cfgMascPrefixo'), p_descricao: v('cfgMascDescricao'),
+        p_separador: document.getElementById('cfgMascSeparador').value, p_digitos: parseInt(v('cfgMascDigitos'), 10),
+        p_unidade_padrao: v('cfgMascUnidade'), p_ativo: document.getElementById('cfgMascAtiva').checked,
+        p_proximo: prox ? parseInt(prox, 10) : null
+      });
+      btn.disabled = false;
+      if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); return false; }
+      showToast("Máscara salva!", "success");
+      cancelarMascaraConfig();
+      carregarMascarasConfig();
+      carregarMascarasCadastro();
+      return false;
+    }
+
+    // ----- usuários e permissões -----
+    async function carregarUsuariosAdmin() {
+      const tb = document.getElementById('cfgCorpoUsuarios');
+      tb.innerHTML = '<tr><td colspan="8" class="td-center text-slate-500 py-6">Carregando...</td></tr>';
+      const r = await rpcPriv('listar_usuarios_admin', {});
+      if (!r.ok) { tb.innerHTML = `<tr><td colspan="8" class="td-center text-rose-400 py-6">${escAttr_(textoErroPriv(r))}</td></tr>`; return; }
+      _cfgUsuarios = r.usuarios || [];
+      renderUsuariosAdmin();
+    }
+
+    function renderUsuariosAdmin() {
+      const tb = document.getElementById('cfgCorpoUsuarios');
+      const e = escAttr_;
+      tb.innerHTML = _cfgUsuarios.map(u => {
+        const admin = u.perfil === 'ADMIN';
+        const perms = PERMISSOES_SISTEMA.map(([chave, rot]) =>
+          `<td class="td-center"><input type="checkbox" class="cfg-perm" data-perm="${chave}" aria-label="${e(rot)}" style="width:auto;" ${(admin || (u.permissoes || []).includes(chave)) ? 'checked' : ''} ${admin ? 'disabled' : ''} /></td>`).join('');
+        return `<tr data-uid="${e(u.id)}">
+          <td><b>${e(u.nome)}</b></td>
+          <td>${e(u.usuario)}</td>
+          <td><select class="cfg-perfil" data-uid="${e(u.id)}" onchange="aoMudarPerfilUsuario(this)">${PERFIS_SISTEMA.map(p => `<option value="${p}" ${p === u.perfil ? 'selected' : ''}>${p}</option>`).join('')}</select></td>
+          ${perms}
+          <td class="td-center"><input type="checkbox" class="cfg-ativo" aria-label="Usuário ativo" style="width:auto;" ${u.ativo ? 'checked' : ''} /></td>
+          <td class="td-center"><button type="button" class="eq-btn" data-uid="${e(u.id)}" onclick="salvarUsuarioAdmin(this.dataset.uid)"><i class="fa-solid fa-floppy-disk"></i> Salvar</button></td>
+        </tr>`;
+      }).join('');
+    }
+
+    function aoMudarPerfilUsuario(sel) {
+      const linha = sel.closest('tr');
+      const padrao = PERMISSOES_PADRAO_PERFIL[sel.value] || [];
+      linha.querySelectorAll('.cfg-perm').forEach(cb => {
+        cb.checked = padrao.includes(cb.dataset.perm);
+        cb.disabled = sel.value === 'ADMIN';
+      });
+    }
+
+    async function salvarUsuarioAdmin(uid) {
+      const linha = document.querySelector(`#cfgCorpoUsuarios tr[data-uid="${uid}"]`);
+      if (!linha) return;
+      const perfil = linha.querySelector('.cfg-perfil').value;
+      const permissoes = perfil === 'ADMIN' ? [] : Array.from(linha.querySelectorAll('.cfg-perm')).filter(cb => cb.checked).map(cb => cb.dataset.perm);
+      const r = await rpcPriv('definir_permissoes_usuario', {
+        p_usuario_id: uid, p_perfil: perfil, p_permissoes: permissoes, p_ativo: linha.querySelector('.cfg-ativo').checked
+      });
+      if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); carregarUsuariosAdmin(); return; }
+      showToast("Permissões salvas! Valem na próxima vez que a pessoa abrir o sistema.", "success");
+      carregarUsuariosAdmin();
+      renovarPermissoesSessao();
+    }
+
+    // ----- TAG automática no cadastro de equipamento -----
+    async function carregarMascarasCadastro() {
+      if (!usuarioLogado || !usuarioLogado.token) { mascarasTag = []; aplicarModoTagUI(); return; }
+      const r = await rpcPriv('listar_mascaras', {});
+      mascarasTag = (r && r.ok) ? (r.mascaras || []).filter(m => m.ativo) : [];
+      preencherSelectMascaras();
+      aplicarModoTagUI();
+    }
+
+    function preencherSelectMascaras() {
+      const sel = document.getElementById('cadMascara');
+      if (!sel) return;
+      const atual = sel.value;
+      sel.innerHTML = mascarasTag.map(m =>
+        `<option value="${escAttr_(m.id)}">${escAttr_(m.prefixo)}${m.descricao ? ' — ' + escAttr_(m.descricao) : ''}</option>`).join('');
+      if (atual && mascarasTag.some(m => m.id === atual)) sel.value = atual;
+      else { sel.value = mascarasTag.length ? mascarasTag[0].id : ''; sugerirMascaraPorUnidade(); }
+    }
+
+    function sugerirMascaraPorUnidade() {
+      const sel = document.getElementById('cadMascara'), un = document.getElementById('cadUnidade');
+      if (!sel || !un || !mascarasTag.length) return;
+      const alvo = semAcento_(un.value);
+      const m = alvo && mascarasTag.find(x => x.unidade_padrao && semAcento_(x.unidade_padrao) === alvo);
+      if (m) sel.value = m.id;
+      atualizarPreviaTag();
+    }
+
+    function atualizarPreviaTag() {
+      const sel = document.getElementById('cadMascara'), tag = document.getElementById('cadTag');
+      if (!sel || !tag || equipEmEdicao || tagManual || !mascarasTag.length) return;
+      const m = mascarasTag.find(x => x.id === sel.value);
+      tag.value = m ? m.proxima_tag : '';
+    }
+
+    function alternarTagManual() {
+      tagManual = !!document.getElementById('cadTagManual')?.checked;
+      const tag = document.getElementById('cadTag');
+      if (tag) tag.value = '';
+      aplicarModoTagUI();
+    }
+
+    // true quando a TAG será gerada pelo sistema ao salvar
+    function modoTagAutomatico() { return !equipEmEdicao && !tagManual && mascarasTag.length > 0; }
+
+    function aplicarModoTagUI() {
+      const grp = document.getElementById('grpMascara'), tag = document.getElementById('cadTag');
+      if (!grp || !tag) return;
+      const editando = !!equipEmEdicao, temMasc = mascarasTag.length > 0, auto = modoTagAutomatico();
+      grp.style.display = (!editando && temMasc) ? '' : 'none';
+      tag.readOnly = editando || auto;
+      tag.placeholder = auto ? 'Gerada ao salvar' : 'Ex: LMD-9999';
+      const man = document.getElementById('grpTagManual');
+      if (man) man.style.display = (!editando && temMasc && temPermissao('equipamento.tag_manual')) ? 'flex' : 'none';
+      if (!temMasc && !editando) tagManual = false;
+      const info = document.getElementById('cadTagInfo');
+      if (info) info.textContent = editando ? 'A TAG não pode ser alterada.'
+        : (auto ? 'Prévia: o número é reservado quando você salvar.'
+        : (temMasc ? 'Modo manual: digite a TAG completa.' : 'Para TAG automática, entre novamente no sistema (e configure as máscaras na engrenagem).'));
+      if (auto) atualizarPreviaTag();
+    }
+
+    // ---------- Equipamentos: consulta e ficha ----------
+    const TIPOS_OS_FICHA = [
+      ['CORRETIVA', 'Corretiva', 'fa-wrench'],
+      ['PREVENTIVA', 'Preventiva', 'fa-clipboard-check'],
+      ['CALIBRAÇÃO', 'Calibração', 'fa-gauge-high'],
+      ['SEGURANÇA ELÉTRICA', 'Segurança elétrica', 'fa-bolt'],
+      ['QUALIFICAÇÃO TÉRMICA', 'Qualificação térmica', 'fa-temperature-half']
+    ];
+    const TIPOS_TILE_FICHA = ['CALIBRAÇÃO', 'SEGURANÇA ELÉTRICA', 'QUALIFICAÇÃO TÉRMICA', 'PREVENTIVA'];
+    let _eqListaTimer = null;
+    let equipEmEdicao = null;
+
+    function fmtDataISO_(v) {
+      const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(str_(v));
+      return m ? `${m[3]}/${m[2]}/${m[1]}` : str_(v);
+    }
+    function semAcento_(v) { return str_(v).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().trim(); }
+
+    function chipPropriedade_(eq) {
+      const p = eq.propriedade;
+      if (!p) return '<span class="eq-chip cinza">Propriedade não definida</span>';
+      const cor = p === 'PRÓPRIO' ? 'azul' : (p === 'CLIENTE' ? 'cinza' : 'ambar');
+      const dono = eq.proprietario ? ' · ' + escAttr_(eq.proprietario) : '';
+      return `<span class="eq-chip ${cor}">${escAttr_(p)}${dono}</span>`;
+    }
+
+    function renderListaEquipamentos(lista, termo) {
+      const tb = document.getElementById('corpoEquipamentos');
+      const info = document.getElementById('eqListaInfo');
+      if (!tb || !info) return;
+      if (!termo || termo.length < 2) { tb.innerHTML = ''; info.textContent = 'Digite ao menos 2 caracteres para buscar.'; return; }
+      if (!lista.length) {
+        tb.innerHTML = '<tr><td colspan="5" class="td-center text-slate-500 py-6">Nenhum equipamento encontrado.</td></tr>';
+        info.textContent = '';
+        return;
+      }
+      info.textContent = lista.length >= 50 ? 'Mostrando os 50 primeiros resultados. Refine a busca.' : lista.length + ' equipamento(s) encontrado(s).';
+      const e = escAttr_;
+      tb.innerHTML = lista.map(eq => `
+        <tr style="cursor:pointer" data-tag="${e(eq.tag)}" onclick="abrirFichaEquipamento(this.dataset.tag)">
+          <td class="td-center"><b>${e(eq.tag)}</b></td>
+          <td>${e(eq.nome) || '-'}</td>
+          <td>${e([eq.fabricante, eq.modelo].filter(Boolean).join(' · ')) || '-'}</td>
+          <td>${e([eq.cliente, eq.setor].filter(Boolean).join(' / ')) || '-'}</td>
+          <td class="td-center">${chipPropriedade_(eq)}</td>
+        </tr>`).join('');
+    }
+
+    function buscarListaEquipamentos() {
+      clearTimeout(_eqListaTimer);
+      _eqListaTimer = setTimeout(async () => {
+        const termo = (document.getElementById('eqBusca')?.value || '').trim();
+        const lista = termo.length >= 2 ? await buscarEquipamentosServidor(termo, 50) : [];
+        renderListaEquipamentos(lista, termo);
+      }, 300);
+    }
+
+    function voltarListaEquipamentos() {
+      const l = document.getElementById('eqVistaLista'), f = document.getElementById('eqVistaFicha');
+      if (l) l.style.display = '';
+      if (f) { f.style.display = 'none'; f.innerHTML = ''; }
+    }
+
+    function htmlFichaEquipamento(eq, os, erroHist) {
+      const e = escAttr_;
+      const rotulos = {};
+      TIPOS_OS_FICHA.forEach(([tipo, rot]) => { rotulos[tipo] = rot; });
+      const critCor = { 'BAIXA': 'verde', 'MÉDIA': 'azul', 'ALTA': 'ambar', 'CRÍTICA': 'vermelho' };
+      const chipCrit = eq.criticidade
+        ? `<span class="eq-chip ${critCor[eq.criticidade] || 'cinza'}">Criticidade ${e(eq.criticidade)}</span>`
+        : '<span class="eq-chip cinza">Criticidade não definida</span>';
+      const sub = [eq.fabricante, eq.modelo, eq.patrimonio ? 'Patrimônio ' + eq.patrimonio : '', eq.serie ? 'Série ' + eq.serie : '']
+        .filter(Boolean).map(e).join(' · ');
+
+      const botoes = TIPOS_OS_FICHA.map(([tipo, rot, ic]) =>
+        `<button type="button" class="eq-btn" data-tag="${e(eq.tag)}" data-tipo="${e(tipo)}" onclick="novaOSDoEquipamento(this.dataset.tag, this.dataset.tipo)"><i class="fa-solid ${ic}"></i> ${rot}</button>`).join('');
+
+      const tiles = TIPOS_TILE_FICHA.map(tipo => {
+        const doTipo = os.filter(o => semAcento_(o.tipoManutencao).startsWith(semAcento_(tipo)));
+        const ultima = doTipo[0];
+        return `<div class="eq-tile"><div class="eq-k">Última ${e(rotulos[tipo].toLowerCase())}</div>
+          <div class="eq-big">${ultima ? e((ultima.dataAbertura || '').split(' ')[0]) : '—'}</div>
+          <div class="eq-k">${doTipo.length ? doTipo.length + ' O.S. no histórico' : 'Sem registro'}</div></div>`;
+      }).join('');
+
+      const linhas = os.length ? os.map(o => {
+        const s = (o.status || 'ABERTA').toUpperCase();
+        const aberta = s === 'ABERTA';
+        return `<tr>
+          <td class="td-center"><b>${e(o.protocoloOS)}</b></td>
+          <td>${e(o.tipoManutencao) || '-'}</td>
+          <td class="td-center">${e(o.execucao) || '-'}</td>
+          <td class="td-center">${e((o.dataAbertura || '').split(' ')[0]) || '-'}</td>
+          <td>${e(o.tecnico) || '-'}</td>
+          <td class="td-center"><span class="badge-status ${aberta ? 'badge-pendente' : 'badge-atendido'}">${e(s)}</span></td>
+        </tr>`;
+      }).join('') : `<tr><td colspan="6" class="td-center text-slate-500 py-6">${erroHist ? 'Não foi possível carregar o histórico.' : 'Nenhuma O.S. registrada para este equipamento.'}</td></tr>`;
+
+      const anvisa = eq.registroAnvisa ? eq.registroAnvisa + (eq.validadeAnvisa ? ' (válido até ' + fmtDataISO_(eq.validadeAnvisa) + ')' : '') : '';
+      const dados = [
+        ['Cliente', eq.cliente], ['Setor', eq.setor], ['Unidade / contrato', eq.unidade],
+        ['Fabricante', eq.fabricante], ['Modelo', eq.modelo], ['Registro ANVISA', anvisa],
+        ['Código extra', eq.codigoExtra], ['Fornecedor', eq.fornecedor], ['Nota fiscal', eq.notaFiscal],
+        ['Aquisição', fmtDataISO_(eq.dataAquisicao)], ['Garantia até', fmtDataISO_(eq.garantiaOriginalAte)],
+        ['Acessórios', eq.acessorios], ['Observação', eq.observacao]
+      ].map(([k, v]) => `<div class="eq-dl"><span class="k">${k}</span><span class="v">${e(v) || '—'}</span></div>`).join('');
+
+      return `
+        <div style="margin-bottom:12px"><button type="button" class="eq-btn" onclick="voltarListaEquipamentos()"><i class="fa-solid fa-arrow-left"></i> Voltar à lista</button></div>
+        <div class="card" style="display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center">
+          <div style="min-width:0">
+            <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:baseline">
+              <h2 style="margin:0;font-size:22px;font-weight:700">${e(eq.nome) || 'Equipamento'}</h2>
+              <span class="eq-tag">${e(eq.tag)}</span>
+            </div>
+            <div class="eq-k" style="margin-top:4px">${sub}</div>
+            <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px">${chipPropriedade_(eq)}${chipCrit}${eq.unidade ? '<span class="eq-chip cinza">' + e(eq.unidade) + '</span>' : ''}</div>
+          </div>
+          <button type="button" class="eq-btn" data-tag="${e(eq.tag)}" onclick="editarEquipamento(this.dataset.tag)"><i class="fa-solid fa-pen"></i> Editar</button>
+        </div>
+        <div class="eq-grid">
+          <div style="min-width:0">
+            <div class="card">
+              <div class="card-title">Abrir nova O.S. neste equipamento</div>
+              <div class="eq-k" style="margin-bottom:10px">Equipamento, série e cliente já vêm preenchidos.</div>
+              <div style="display:flex;flex-wrap:wrap;gap:10px">${botoes}</div>
+            </div>
+            <div class="eq-tiles" style="margin-bottom:20px">${tiles}</div>
+            <div class="card">
+              <div class="card-title">Histórico de O.S. <span class="eq-chip azul" style="margin-left:8px">${os.length}</span></div>
+              <div class="table-container"><table>
+                <thead><tr><th class="td-center">Nº O.S.</th><th>Tipo</th><th class="td-center">Execução</th><th class="td-center">Abertura</th><th>Técnico</th><th class="td-center">Situação</th></tr></thead>
+                <tbody>${linhas}</tbody>
+              </table></div>
+            </div>
+          </div>
+          <aside class="card"><div class="card-title">Dados do equipamento</div>${dados}</aside>
+        </div>`;
+    }
+
+    async function abrirFichaEquipamento(tag) {
+      const ficha = document.getElementById('eqVistaFicha'), lista = document.getElementById('eqVistaLista');
+      if (!ficha || !lista) return;
+      const tagUp = str_(tag).trim().toUpperCase();
+      let eq = (bancoDados.equipamentos || []).find(x => x.tag === tagUp);
+      if (!eq) { const r = await buscarEquipamentosServidor(tagUp, 5); eq = r.find(x => x.tag === tagUp); }
+      if (!eq) { showToast("Equipamento não encontrado.", "error"); return; }
+      lista.style.display = 'none';
+      ficha.style.display = '';
+      ficha.innerHTML = '<div class="card text-slate-500">Carregando histórico...</div>';
+      const { data, error } = await supabaseClient.from('ordens_servico').select('*')
+        .eq('tag', eq.tag).order('data_abertura', { ascending: false }).limit(200);
+      if (error) console.error("Erro ao carregar histórico de O.S.:", error);
+      ficha.innerHTML = htmlFichaEquipamento(eq, (data || []).map(mapa.os), !!error);
+    }
+
+    function novaOSDoEquipamento(tag, tipo) {
+      const eq = (bancoDados.equipamentos || []).find(x => x.tag === tag);
+      if (!eq) { showToast("Equipamento não encontrado.", "error"); return; }
+      mudarAba('os_abertura');
+      const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+      document.getElementById('formNovaOS').reset();
+      set('osBuscaEquip', `TAG: ${eq.tag} | ${eq.nome} | Série: ${eq.serie}`);
+      set('osCliente', eq.cliente || eq.unidade || '');
+      set('osTag', eq.tag);
+      set('osSerie', eq.serie || '-');
+      set('osPatrimonio', eq.patrimonio || '-');
+      set('osNomeEquip', `${eq.nome || ''} ${eq.modelo ? '(' + eq.modelo + ')' : ''}`.trim() || '-');
+      set('osTipo', tipo);
+    }
+
+    function sairModoEdicaoEquip() {
+      equipEmEdicao = null;
+      const t = document.getElementById('cadTag'); if (t) t.readOnly = false;
+      const c = document.querySelector('#abaCadEquipamento .card-title'); if (c) c.textContent = 'Cadastrar Novo Equipamento';
+      const b = document.getElementById('btnSalvarCadEquip'); if (b) b.innerHTML = '<i class="fa-solid fa-server"></i> Salvar Equipamento';
+      const k = document.getElementById('grpContinuar'); if (k) k.style.display = '';
+      aplicarModoTagUI();
+    }
+
+    function novoEquipamento() {
+      sairModoEdicaoEquip();
+      document.getElementById('formNovoEquip').reset();
+      tagManual = false;
+      alternarProprietario();
+      mudarAba('cad_equipamento');
+      aplicarModoTagUI();
+    }
+
+    function editarEquipamento(tag) {
+      const eq = (bancoDados.equipamentos || []).find(x => x.tag === tag);
+      if (!eq) { showToast("Equipamento não encontrado.", "error"); return; }
+      mudarAba('cad_equipamento');
+      document.getElementById('formNovoEquip').reset();
+      CAMPOS_CAD_EQ.forEach(([idCampo, chave]) => {
+        let v = eq[chave];
+        if (v === null || v === undefined) v = '';
+        if (chave === 'valorAquisicao' && v !== '') v = String(v).replace('.', ',');
+        document.getElementById(idCampo).value = v;
+      });
+      alternarProprietario();
+      equipEmEdicao = eq.tag;
+      document.getElementById('cadTag').readOnly = true;
+      const c = document.querySelector('#abaCadEquipamento .card-title'); if (c) c.textContent = 'Editar Equipamento ' + eq.tag;
+      const b = document.getElementById('btnSalvarCadEquip'); if (b) b.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar alterações';
+      const k = document.getElementById('grpContinuar'); if (k) k.style.display = 'none';
+      document.getElementById('headerPageTitle').textContent = 'Cadastros — Editar Equipamento';
+      aplicarModoTagUI();
     }
 
     function salvarAuxiliarVinculado(e) {
