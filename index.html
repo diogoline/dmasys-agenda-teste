@@ -994,6 +994,48 @@ html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdow
     .bg-emerald-600 { background-color: #047857; }
     .hover\:bg-emerald-500:hover { background-color: #059669; }
     html.light #chatBoxWhatsApp :is(.text-slate-200, .text-slate-300, .text-slate-400, .text-slate-500) { color: #334155 !important; }
+
+    /* ficha da O.S. */
+    .eq-g > .c12 { grid-column: span 12; min-width: 0; }
+    .os-cols { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+    @media (max-width: 1000px) { .os-cols { grid-template-columns: minmax(0, 1fr); } }
+    /* mão de obra / cronômetro */
+    .os-col-dir { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+    .os-crono { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 1px solid #334155; background: #0b1220; }
+    .os-crono.rodando { border-color: rgba(16, 185, 129, .55); }
+    .os-crono-relogio { font-size: 28px; font-weight: 800; letter-spacing: .5px; font-variant-numeric: tabular-nums; color: #e2e8f0; line-height: 1.15; }
+    .os-crono-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 10px 18px; border-radius: 12px; border: 0; font-size: 14px; font-weight: 700; color: #fff; cursor: pointer; background: #047857; }
+    .os-crono-btn.pausar { background: #b45309; }
+    .os-crono-btn:disabled { opacity: .6; cursor: wait; }
+    .os-pulso { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981; margin-right: 6px; animation: osPulso 1.4s infinite; }
+    @keyframes osPulso { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, .6); } 70% { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+    .os-tempo-linha { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(148, 163, 184, .22); font-size: 13px; }
+    .os-tempo-linha:last-child { border-bottom: 0; }
+    .os-tempo-linha .nome { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .os-tempo-linha .dur { font-weight: 700; font-variant-numeric: tabular-nums; }
+    .os-trecho { padding: 8px 0; border-bottom: 1px dashed rgba(148, 163, 184, .3); font-size: 12.5px; }
+    .os-trecho:last-child { border-bottom: 0; }
+    .os-trecho.cancelado .os-trecho-per { text-decoration: line-through; }
+    .os-tempo-acoes { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+    html.light .os-crono { background: #f8fafc; border-color: #cbd5e1; }
+    html.light .os-crono.rodando { border-color: #059669; background: #ecfdf5; }
+    html.light .os-crono-relogio { color: #0f172a; }
+    html.light .os-tempo-linha { border-bottom-color: #d5dfec; }
+    html.light .os-trecho { border-bottom-color: #cbd5e1; }
+    .eq-aviso { background: rgba(245, 158, 11, .12); border: 1px solid rgba(245, 158, 11, .45); color: #fcd34d; border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 14px; }
+    html.light .eq-aviso { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
+    .os-ev { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(148, 163, 184, .22); }
+    .os-ev:last-child { border-bottom: 0; }
+    .os-ev-ponto { width: 10px; height: 10px; border-radius: 50%; background: #38bdf8; margin-top: 6px; flex: none; box-shadow: 0 0 0 3px rgba(56, 189, 248, .22); }
+    .os-ev.auto .os-ev-ponto { background: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, .22); }
+    html.light .os-ev-ponto { background: #0b5ed7; box-shadow: 0 0 0 3px rgba(11, 94, 215, .18); }
+    html.light .os-ev.auto .os-ev-ponto { background: #d97706; box-shadow: 0 0 0 3px rgba(217, 119, 6, .2); }
+    html.light .os-ev { border-bottom-color: #d5dfec; }
+    .os-ev-corpo { flex: 1; min-width: 0; }
+    .os-ev-topo { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .os-ev-obs { margin: 4px 0; font-size: 13px; white-space: pre-wrap; word-break: break-word; }
+    .eq-link { background: none; border: 0; padding: 0 4px; color: #38bdf8; cursor: pointer; font-weight: 700; text-decoration: underline; font-size: inherit; text-transform: none; letter-spacing: 0; }
+    html.light .eq-link { color: #0b5ed7; }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 selection:bg-sky-500 selection:text-white">
@@ -2004,7 +2046,7 @@ html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdow
                 <select id="filtroStatusOS" onchange="renderizarTabelaOS()">
                   <option value="TODOS">Todos os Status</option>
                   <option value="ABERTA">Apenas Abertas</option>
-                  <option value="CONCLUÍDA">Apenas Concluídas</option>
+                  <option value="FECHADA">Apenas Fechadas</option>
                 </select>
               </div>
               <div class="form-group" style="flex: 2;">
@@ -2665,6 +2707,112 @@ abaAgenda.appendRow([
     <button type="button" class="eq-btn" onclick="efetuarLogout()" style="background:#fff7ed; color:#7c2d12; border-color:#fdba74;"><i class="fa-solid fa-right-to-bracket"></i> Entrar com meu usuário</button>
   </div>
 
+  <div id="modalConfirmar" class="modal-overlay" style="z-index: 1150;">
+    <div class="modal-box" style="width: 480px;">
+      <div class="modal-title"><span id="confTitulo">Confirmar</span></div>
+      <form onsubmit="return responderConfirmar(true, event)" autocomplete="off">
+        <div id="confTexto" class="eq-k" style="margin-bottom:14px;"></div>
+        <div id="confMotivoGrp" class="form-group" style="display:none; margin-bottom:12px;">
+          <label>Motivo *</label><textarea id="confMotivo" rows="3" placeholder="Descreva o motivo"></textarea>
+          <div id="confErro" class="text-xs text-rose-400" style="min-height:16px; margin-top:4px;"></div>
+        </div>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button type="button" class="eq-btn" onclick="responderConfirmar(false)">Cancelar</button>
+          <button type="submit" id="confBtn" class="btn-submit">Confirmar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modalOS" class="modal-overlay">
+    <div class="modal-box" style="width: 1140px;">
+      <div class="modal-title" style="flex-wrap:wrap; gap:10px;">
+        <span style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"><i class="fa-solid fa-screwdriver-wrench text-sky-400"></i> <span id="osFichaPrefixo">O.S.</span> <b id="osFichaNumero"></b>
+          <span id="osFichaStatus" class="eq-chip ambar">Aberta</span><span id="osFichaReab" class="eq-chip cinza" style="display:none;"></span></span>
+        <span style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <button type="button" id="osBtnFechar" class="btn-submit" onclick="fecharOS()"><i class="fa-solid fa-lock"></i> Fechar O.S.</button>
+          <button type="button" id="osBtnReabrir" class="eq-btn" onclick="reabrirOS()" style="display:none;"><i class="fa-solid fa-lock-open"></i> Reabrir O.S.</button>
+          <button type="button" onclick="fecharFichaOS()" aria-label="Fechar janela" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+        </span>
+      </div>
+      <div id="osAvisoFechada" class="eq-aviso" style="display:none;"></div>
+      <div class="os-cols">
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-title">Dados da O.S.</div>
+          <div class="eq-g">
+            <div class="form-group c6"><label>Abertura</label><input type="text" id="osfAbertura" readonly /></div>
+            <div class="form-group c6"><label>Fechamento</label><input type="text" id="osfFechamento" readonly /></div>
+            <div class="form-group c12"><label>Cliente / unidade</label><input type="text" id="osfCliente" readonly /></div>
+            <div class="form-group c12"><label>Equipamento <button type="button" id="osfVerEquip" class="eq-link" onclick="abrirEquipamentoDaOS()">ver ficha do equipamento</button></label><input type="text" id="osfEquipamento" readonly /></div>
+            <div class="form-group c4"><label>TAG</label><input type="text" id="osfTag" readonly /></div>
+            <div class="form-group c4"><label>Nº de série</label><input type="text" id="osfSerie" readonly /></div>
+            <div class="form-group c4"><label>Patrimônio</label><input type="text" id="osfPatrimonio" readonly /></div>
+            <div class="form-group c4"><label>Tipo de manutenção</label>
+              <select id="osfTipo"><option>CORRETIVA</option><option>PREVENTIVA</option><option>CALIBRAÇÃO</option><option>SEGURANÇA ELÉTRICA</option><option>QUALIFICAÇÃO TÉRMICA</option><option>INSPEÇÃO</option><option>OFICINA</option></select></div>
+            <div class="form-group c4"><label>Execução</label><select id="osfExecucao"><option>INTERNA</option><option>EXTERNA</option></select></div>
+            <div class="form-group c4"><label>Prioridade</label><select id="osfPrioridade"><option>BAIXA</option><option>MÉDIA</option><option>ALTA</option><option>CRÍTICA</option></select></div>
+            <div class="form-group c6"><label>Técnico responsável</label><select id="osfTecnico"></select></div>
+            <div class="form-group c6"><label>Solicitante</label><input type="text" id="osfSolicitante" /></div>
+            <div class="form-group c12"><label>Defeito relatado</label><textarea id="osfDefeito" rows="2"></textarea></div>
+            <div class="form-group c12"><label>Diagnóstico técnico</label><textarea id="osfDiagnostico" rows="2"></textarea></div>
+            <div class="form-group c12"><label>Serviço realizado <span class="text-slate-500">(obrigatório para fechar)</span></label><textarea id="osfServico" rows="3"></textarea></div>
+          </div>
+          <div style="display:flex; justify-content:flex-end; margin-top:14px;">
+            <button type="button" id="osBtnSalvar" class="btn-submit" onclick="salvarAlteracoesOS()"><i class="fa-solid fa-floppy-disk"></i> Salvar alterações</button>
+          </div>
+        </div>
+
+        <div class="os-col-dir">
+        <div class="card" style="margin-bottom:0;" id="osTempoCard">
+          <div class="card-title" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">Mão de obra <span id="osTempoTotal" class="eq-chip cinza">Total 0h00</span></div>
+          <div id="osCrono" class="os-crono">
+            <div style="min-width:0;">
+              <div class="eq-k">Meu tempo nesta O.S.</div>
+              <div id="osCronoRelogio" class="os-crono-relogio">00:00:00</div>
+              <div id="osCronoInfo" class="eq-k"></div>
+            </div>
+            <button type="button" id="osCronoBtn" class="os-crono-btn" onclick="alternarCronometroOS()"><i class="fa-solid fa-play"></i> Iniciar</button>
+          </div>
+          <div id="osTempoResumo" style="margin-top:10px;"></div>
+          <div class="os-tempo-acoes">
+            <button type="button" id="osTempoBtnTrechos" class="eq-link" onclick="alternarTrechosOS()">Ver trechos</button>
+            <button type="button" id="osTempoBtnManual" class="eq-link" onclick="abrirLancamentoManualOS()" style="display:none;">Lançar tempo manual</button>
+          </div>
+          <div id="osTempoForm" style="display:none; margin-top:12px; padding-top:12px; border-top:1px dashed rgba(148,163,184,.35);">
+            <div id="osTempoFormTitulo" class="eq-k" style="margin-bottom:8px; font-weight:700;">Lançar tempo manual</div>
+            <div class="eq-g">
+              <div class="form-group c12"><label>Técnico *</label><select id="osTempoTec"></select></div>
+              <div class="form-group c6"><label>Início *</label><input type="datetime-local" id="osTempoIni" /></div>
+              <div class="form-group c6"><label>Fim *</label><input type="datetime-local" id="osTempoFim" /></div>
+              <div class="form-group c12"><label>Justificativa *</label><input type="text" id="osTempoJust" placeholder="Ex: atendimento feito sem acesso ao sistema" /></div>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
+              <button type="button" class="eq-btn" onclick="fecharLancamentoManualOS()">Cancelar</button>
+              <button type="button" id="osTempoBtnSalvar" class="btn-submit" onclick="salvarLancamentoManualOS()"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
+            </div>
+          </div>
+          <div id="osTrechos" style="display:none; margin-top:10px;"></div>
+        </div>
+
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-title">Ocorrências</div>
+          <div id="osOcForm" style="margin-bottom:16px; padding-bottom:16px; border-bottom:1px dashed rgba(148,163,184,.35);">
+            <div class="form-group combo" id="cmbOcTipo" style="margin-bottom:12px;"><label>Tipo de ocorrência * <span class="text-slate-500">(do tipo deste equipamento + gerais)</span></label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite para buscar..." /><div class="combo-lista" role="listbox"></div></div>
+            <div class="form-group combo" id="cmbOcCausa" style="margin-bottom:12px;"><label>Causa *</label><input type="text" class="combo-input" autocomplete="off" placeholder="Ex: Falha intrínseca, Erro operacional..." /><div class="combo-lista" role="listbox"></div></div>
+            <div class="form-group" style="margin-bottom:8px;"><label>Observação</label><textarea id="osOcObs" rows="3" placeholder="O que foi feito ou encontrado"></textarea></div>
+            <div class="eq-k" style="margin-bottom:10px;"><i class="fa-regular fa-clock"></i> Data e hora são registradas automaticamente.</div>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+              <button type="button" id="osOcCancelar" class="eq-btn" style="display:none;" onclick="limparFormOcorrenciaOS_()">Cancelar correção</button>
+              <button type="button" id="osOcBtn" class="btn-submit" onclick="registrarOcorrenciaOS()"><i class="fa-solid fa-plus"></i> Registrar ocorrência</button>
+            </div>
+          </div>
+          <div id="osTimeline"></div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="modalAutorizacao" class="modal-overlay" style="z-index: 1100;">
     <div class="modal-box" style="width: 420px;">
       <div class="modal-title"><span><i class="fa-solid fa-user-shield text-sky-400 mr-2"></i> Autorização de administrador</span></div>
@@ -2884,7 +3032,7 @@ abaAgenda.appendRow([
       equipamento: r => ({ id: str_(r.id), tag: str_(r.tag).trim(), serie: str_(r.serie), patrimonio: str_(r.patrimonio), codigoExtra: str_(r.codigo_extra), nome: str_(r.nome), modelo: str_(r.modelo), fabricante: str_(r.fabricante), acessorios: str_(r.acessorios), propriedade: str_(r.propriedade), proprietario: str_(r.proprietario), unidade: str_(r.unidade), cliente: str_(r.cliente), setor: str_(r.setor), criticidade: str_(r.criticidade), ativo: r.ativo !== false, registroAnvisa: str_(r.registro_anvisa), validadeAnvisa: str_(r.validade_anvisa), tipoId: str_(r.tipo_id), fabricanteId: str_(r.fabricante_id), modeloId: str_(r.modelo_id), fornecedorId: str_(r.fornecedor_id), clienteId: str_(r.cliente_id), setorId: str_(r.setor_id), unidadeId: str_(r.unidade_id), ehPadrao: !!r.eh_padrao, fornecedor: str_(r.fornecedor), notaFiscal: str_(r.nota_fiscal), valorAquisicao: (r.valor_aquisicao === null || r.valor_aquisicao === undefined) ? '' : r.valor_aquisicao, dataFabricacao: str_(r.data_fabricacao), dataAquisicao: str_(r.data_aquisicao), dataInstalacao: str_(r.data_instalacao), garantiaOriginalAte: str_(r.garantia_original_ate), garantiaEstendidaAte: str_(r.garantia_estendida_ate), observacao: str_(r.observacao) }),
       termo: r => ({ protocolo: str_(r.protocolo), dataHora: fmtBR(r.data_hora), cliente: str_(r.cliente), tag: str_(r.tag), equipamento: str_(r.equipamento), tipo: str_(r.tipo_operacao), tecnico: str_(r.tecnico), pdfUrl: str_(r.pdf_url), logErro: str_(r.log_erro) }),
       requisicao: r => ({ protocolo: str_(r.protocolo), dataHora: fmtBR(r.data_hora), cliente: str_(r.cliente), operacao: str_(r.operacao), equipamentoAntigo: str_(r.equipamento_antigo), equipamentoSolicitado: str_(r.equipamento_solicitado), motivo: str_(r.motivo), solicitante: str_(r.solicitante), status: up_(r.status) || "PENDENTE", protocoloTermo: str_(r.protocolo_termo), pdfUrlReq: str_(r.pdf_url) }),
-      os: r => ({ protocoloOS: str_(r.protocolo), dataAbertura: fmtBR(r.data_abertura), cliente: str_(r.cliente), tag: str_(r.tag), serie: str_(r.serie), patrimonio: str_(r.patrimonio), equipamento: str_(r.equipamento), tipoManutencao: str_(r.tipo_manutencao), execucao: str_(r.execucao), prioridade: str_(r.prioridade), solicitante: str_(r.solicitante), tecnico: str_(r.tecnico), defeitoRelatado: str_(r.defeito_relatado), diagnosticoTecnico: str_(r.diagnostico_tecnico), servicoRealizado: str_(r.servico_realizado), status: str_(r.status) || "ABERTA", pdfUrlOS: str_(r.pdf_url), anexosUrl: str_(r.anexos_url) }),
+      os: r => ({ protocoloOS: str_(r.protocolo), dataAbertura: fmtBR(r.data_abertura), cliente: str_(r.cliente), tag: str_(r.tag), serie: str_(r.serie), patrimonio: str_(r.patrimonio), equipamento: str_(r.equipamento), tipoManutencao: str_(r.tipo_manutencao), execucao: str_(r.execucao), prioridade: str_(r.prioridade), solicitante: str_(r.solicitante), tecnico: str_(r.tecnico), defeitoRelatado: str_(r.defeito_relatado), diagnosticoTecnico: str_(r.diagnostico_tecnico), servicoRealizado: str_(r.servico_realizado), status: str_(r.status) || "ABERTA", id: str_(r.id), equipamentoId: str_(r.equipamento_id), dataFechamento: fmtBR(r.data_fechamento), reaberturas: Number(r.reaberturas) || 0, pdfUrlOS: str_(r.pdf_url), anexosUrl: str_(r.anexos_url) }),
       aux: r => ({ descricao: str_(r.descricao), modelo: str_(r.modelo), fabricante: str_(r.fabricante) }),
       locacao: r => ({ id: str_(r.id), cliente: str_(r.cliente), contrato: str_(r.contrato), unidade: str_(r.unidade), localizacao: str_(r.localizacao), equipamento: str_(r.equipamento), qtdContratada: Number(r.qtd_contratada) || 0, qtdFisica: Number(r.qtd_fisica) || 0, saldo: Number(r.saldo) || 0, situacao: up_(r.situacao) || "ATIVO", valorUnitario: Number(r.valor_unitario) || 0, valorTotal: Number(r.valor_total) || 0, observacaoLog: str_(r.observacao_log) }),
       compra: r => ({ protocolo: str_(r.protocolo), dataHora: fmtBR(r.data_hora), osExterna: str_(r.os_externa), solicitante: str_(r.solicitante), produto: str_(r.produto), fornVencedor: str_(r.forn_vencedor), menorValor: Number(r.menor_valor) || 0, status: up_(r.status) || "PENDENTE", pdfUrlCompra: str_(r.pdf_url) }),
@@ -3419,23 +3567,11 @@ abaAgenda.appendRow([
     }
 
     async function acaoCriarOS(d) {
-      const protocolo = await inserirComProtocolo('ordens_servico', 'protocolo', 'OS', 5, p => ({
-        protocolo: p, data_abertura: new Date().toISOString(), cliente: d.cliente || "", tag: d.tag || "",
-        serie: d.serie || "", patrimonio: d.patrimonio || "", equipamento: d.equipamento || "",
-        tipo_manutencao: d.tipoManutencao || "", execucao: d.execucao || "INTERNA", prioridade: d.prioridade || "", solicitante: d.solicitante || "",
-        tecnico: d.tecnico || "", defeito_relatado: d.defeitoRelatado || "", diagnostico_tecnico: d.diagnosticoTecnico || "",
-        servico_realizado: d.servicoRealizado || "", status: d.status || "CONCLUÍDA", pdf_url: "", anexos_url: ""
-      }));
-      return { status: "sucesso", protocoloOS: protocolo, pdfUrlOS: "" };
-    }
-
-    async function acaoAlterarStatusOS(d, novoStatus) {
-      const campos = { status: novoStatus };
-      if (d.novoTipo) campos.tipo_manutencao = d.novoTipo;
-      if (d.novoDiagnostico) campos.diagnostico_tecnico = d.novoDiagnostico;
-      if (d.novoServico) campos.servico_realizado = d.novoServico;
-      const { error } = await supabaseClient.from('ordens_servico').update(campos).eq('protocolo', d.protocoloOS);
-      return error ? { status: "erro", mensagem: error.message } : { status: "sucesso" };
+      const r = await rpcPriv('criar_os', { p_dados: {
+        cliente: d.cliente, tag: d.tag, serie: d.serie, patrimonio: d.patrimonio, equipamento: d.equipamento, tipo_manutencao: d.tipoManutencao,
+        execucao: d.execucao, prioridade: d.prioridade, solicitante: d.solicitante, tecnico: d.tecnico,
+        defeito_relatado: d.defeitoRelatado, diagnostico_tecnico: d.diagnosticoTecnico, servico_realizado: d.servicoRealizado } });
+      return r.ok ? { status: "sucesso", protocoloOS: r.protocolo, id: r.id } : { status: "erro", mensagem: textoErroPriv(r) };
     }
 
     function registroEquipamento_(d) {
@@ -3527,7 +3663,7 @@ abaAgenda.appendRow([
       return { status: "sucesso", mensagens: msgs };
     }
 
-    const ACOES_AVISAR_ERRO = ["ATUALIZAR_QTD_FISICA_LOCACAO", "VINCULAR_TERMO_REQUISICAO", "FECHAR_OS", "REABRIR_OS", "RECUSAR_REQUISICAO", "ATUALIZAR_AGENDA"];
+    const ACOES_AVISAR_ERRO = ["ATUALIZAR_QTD_FISICA_LOCACAO", "VINCULAR_TERMO_REQUISICAO", "RECUSAR_REQUISICAO", "ATUALIZAR_AGENDA"];
 
     async function enviarAcao(d) {
       let res;
@@ -3541,8 +3677,6 @@ abaAgenda.appendRow([
           case "VINCULAR_TERMO_REQUISICAO": res = await acaoVincularTermo(d); break;
           case "CRIAR_TERMO": res = await acaoCriarTermo(d); break;
           case "CRIAR_OS": res = await acaoCriarOS(d); break;
-          case "FECHAR_OS": res = await acaoAlterarStatusOS(d, "CONCLUÍDA"); break;
-          case "REABRIR_OS": res = await acaoAlterarStatusOS(d, "ABERTA"); break;
           case "CRIAR_EQUIPAMENTO": res = await acaoCriarEquipamento(d); break;
           case "ATUALIZAR_EQUIPAMENTO": res = await acaoAtualizarEquipamento(d); break;
           case "CRIAR_AUXILIAR_VINCULADO": res = await acaoCriarAuxiliar(d); break;
@@ -5950,34 +6084,406 @@ abaAgenda.appendRow([
         tbody.innerHTML = '<tr><td colspan="9" class="td-center text-slate-500 py-6">Nenhuma O.S. encontrada.</td></tr>';
         return;
       }
+      const e = escAttr_;
       tbody.innerHTML = lista.map(o => {
         const s = (o.status || "ABERTA").toUpperCase();
         const aberta = s === "ABERTA";
         return `
-        <tr>
-          <td class="td-center"><b>${o.protocoloOS}</b></td>
-          <td>${o.dataAbertura || '-'}</td>
-          <td>${o.cliente || '-'}</td>
-          <td class="td-center">${o.tag || '-'}</td>
-          <td>${o.equipamento || '-'}</td>
-          <td class="td-center">${o.tipoManutencao || '-'}</td>
-          <td class="td-center">${o.prioridade || '-'}</td>
-          <td class="td-center"><span class="badge-status ${aberta ? 'badge-pendente' : 'badge-atendido'}">${s}</span></td>
+        <tr style="cursor:pointer" data-p="${e(o.protocoloOS)}" onclick="abrirFichaOS(this.dataset.p)">
+          <td class="td-center"><b>${e(o.protocoloOS)}</b></td>
+          <td>${e(o.dataAbertura) || '-'}</td>
+          <td>${e(o.cliente) || '-'}</td>
+          <td class="td-center">${e(o.tag) || '-'}</td>
+          <td>${e(o.equipamento) || '-'}</td>
+          <td class="td-center">${e(o.tipoManutencao) || '-'}</td>
+          <td class="td-center">${e(o.prioridade) || '-'}</td>
+          <td class="td-center"><span class="badge-status ${aberta ? 'badge-pendente' : 'badge-atendido'}">${e(s)}</span>${o.reaberturas ? `<div class="eq-k" style="margin-top:2px;">reaberta ${o.reaberturas}x</div>` : ''}</td>
           <td class="td-center"><div class="btn-action-container">
-            ${o.pdfUrlOS ? `<a href="${o.pdfUrlOS}" target="_blank" class="btn-pdf"><i class="fa-solid fa-file-pdf"></i></a>` : ''}
-            <button type="button" class="${aberta ? 'btn-atender' : 'btn-vincular'}" onclick="alterarStatusOS('${o.protocoloOS}', ${aberta})">${aberta ? 'Concluir' : 'Reabrir'}</button>
+            ${o.pdfUrlOS ? `<a href="${e(o.pdfUrlOS)}" target="_blank" class="btn-pdf" onclick="event.stopPropagation()"><i class="fa-solid fa-file-pdf"></i></a>` : ''}
+            <button type="button" class="btn-atender" data-p="${e(o.protocoloOS)}" onclick="event.stopPropagation(); abrirFichaOS(this.dataset.p)">Abrir</button>
           </div></td>
         </tr>`;
       }).join('');
     }
 
-    function alterarStatusOS(protocoloOS, concluir) {
-      const o = (bancoDados.ordensServico || []).find(x => x && x.protocoloOS === protocoloOS);
-      if (o) o.status = concluir ? "CONCLUÍDA" : "ABERTA";
-      renderizarTabelaOS();
-      postAPI({ acao: concluir ? "FECHAR_OS" : "REABRIR_OS", protocoloOS })
-        .then(() => buscarAtualizacoesSilenciosas()).catch(() => {});
-      showToast(`O.S. ${protocoloOS} ${concluir ? 'concluída' : 'reaberta'}.`, "success");
+    // ---------- Ficha da O.S.: dados, ocorrências, fechar e reabrir ----------
+    let osAtual = null, osOcEditando = null, _confResolver = null, _confMinimo = 0;
+
+    function novoUuid_() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+    }
+
+    // janela de confirmação reutilizável (com motivo opcional)
+    function confirmarAcao(cfg) {
+      return new Promise(resolve => {
+        _confResolver = resolve; _confMinimo = cfg.motivo ? (cfg.minimo || 5) : 0;
+        document.getElementById('confTitulo').textContent = cfg.titulo || 'Confirmar';
+        document.getElementById('confTexto').textContent = cfg.texto || '';
+        document.getElementById('confBtn').textContent = cfg.rotuloBotao || 'Confirmar';
+        document.getElementById('confMotivoGrp').style.display = cfg.motivo ? '' : 'none';
+        document.getElementById('confMotivo').value = ''; document.getElementById('confErro').textContent = '';
+        document.getElementById('modalConfirmar').classList.add('active');
+        if (cfg.motivo) document.getElementById('confMotivo').focus();
+      });
+    }
+    function responderConfirmar(sim, ev) {
+      if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+      const motivo = (document.getElementById('confMotivo').value || '').trim();
+      if (sim && _confMinimo && motivo.length < _confMinimo) {
+        document.getElementById('confErro').textContent = 'Informe o motivo (mínimo de ' + _confMinimo + ' letras).'; return false;
+      }
+      document.getElementById('modalConfirmar').classList.remove('active');
+      const f = _confResolver; _confResolver = null;
+      if (f) f({ ok: !!sim, motivo });
+      return false;
+    }
+
+    function garantirCombosOS() {
+      if (combos.cmbOcTipo) return;
+      const SEM_TIPO = '00000000-0000-0000-0000-000000000000';
+      combos.cmbOcTipo = new Combo('cmbOcTipo', {
+        catalogo: 'tipos_ocorrencia', tipo: () => (osAtual && osAtual.equipamento && osAtual.equipamento.tipo_id) || SEM_TIPO,
+        subItem: it => it.tipo_nome ? 'só para ' + it.tipo_nome : 'geral',
+        dicaVazio: 'Peça a quem gerencia os catálogos para cadastrar os tipos de ocorrência deste equipamento.'
+      });
+      combos.cmbOcCausa = new Combo('cmbOcCausa', { catalogo: 'causas' });
+    }
+
+    async function abrirFichaOS(protocolo) {
+      garantirCombosOS();
+      document.getElementById('modalOS').classList.add('active');
+      document.getElementById('osFichaNumero').textContent = protocolo;
+      document.getElementById('osTimeline').innerHTML = '<div class="eq-k">Carregando...</div>';
+      const r = await rpcPriv('os_obter', { p_protocolo: protocolo });
+      if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); fecharFichaOS(); return; }
+      osAtual = r; osOcEditando = null;
+      renderFichaOS();
+      carregarTemposOS();
+    }
+
+    function fecharFichaOS() {
+      document.getElementById('modalOS')?.classList.remove('active');
+      osAtual = null; osOcEditando = null;
+      pararRelogioOS_(); osTempos = null; osTrechosAbertos = false;
+      buscarAtualizacoesSilenciosas();
+    }
+
+    async function recarregarFichaOS() {
+      if (!osAtual) return;
+      const r = await rpcPriv('os_obter', { p_protocolo: osAtual.os.protocolo });
+      if (r.ok) { osAtual = r; renderFichaOS(); carregarTemposOS(); } else showToast("⚠️ " + textoErroPriv(r), "error");
+    }
+
+    function renderFichaOS() {
+      if (!osAtual) return;
+      const o = osAtual.os, eq = osAtual.equipamento, fechada = o.status === 'FECHADA', e = escAttr_;
+      const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v === null || v === undefined ? '' : v; };
+      document.getElementById('osFichaNumero').textContent = o.protocolo;
+      document.getElementById('osFichaPrefixo').style.display = /^OS/i.test(o.protocolo) ? 'none' : '';
+      const st = document.getElementById('osFichaStatus');
+      st.className = 'eq-chip ' + (fechada ? 'verde' : 'ambar'); st.textContent = fechada ? 'Fechada' : 'Aberta';
+      const rb = document.getElementById('osFichaReab');
+      rb.style.display = o.reaberturas > 0 ? '' : 'none'; rb.textContent = 'Reaberta ' + o.reaberturas + 'x';
+      const podeReabrir = temPermissao('os.reabrir');
+      document.getElementById('osBtnFechar').style.display = fechada ? 'none' : '';
+      const br = document.getElementById('osBtnReabrir');
+      br.style.display = fechada ? '' : 'none'; br.disabled = !podeReabrir;
+      br.title = podeReabrir ? '' : "Reabrir exige a permissão 'Reabrir O.S. fechada'";
+      const av = document.getElementById('osAvisoFechada');
+      av.style.display = fechada ? '' : 'none';
+      av.textContent = fechada ? `O.S. fechada em ${fmtBR(o.data_fechamento)}${o.fechada_por ? ' por ' + o.fechada_por : ''}. Para editar ou registrar ocorrências, reabra a O.S.${podeReabrir ? '' : ' (reabrir exige a permissão "Reabrir O.S. fechada")'}` : '';
+
+      set('osfAbertura', fmtBR(o.data_abertura)); set('osfFechamento', fechada ? fmtBR(o.data_fechamento) : '—');
+      set('osfCliente', o.cliente); set('osfEquipamento', o.equipamento);
+      set('osfTag', o.tag); set('osfSerie', o.serie); set('osfPatrimonio', o.patrimonio);
+      document.getElementById('osfVerEquip').style.display = o.tag ? '' : 'none';
+      set('osfTipo', o.tipo_manutencao); set('osfExecucao', o.execucao || 'INTERNA'); set('osfPrioridade', o.prioridade || 'MÉDIA');
+      set('osfSolicitante', o.solicitante); set('osfDefeito', o.defeito_relatado); set('osfDiagnostico', o.diagnostico_tecnico); set('osfServico', o.servico_realizado);
+      const nomes = (bancoDados.usuarios || []).map(u => u.nome).filter(Boolean);
+      if (o.tecnico && !nomes.includes(o.tecnico)) nomes.unshift(o.tecnico);
+      const sel = document.getElementById('osfTecnico');
+      sel.innerHTML = '<option value="">—</option>' + nomes.map(n => `<option value="${e(n)}">${e(n)}</option>`).join('');
+      set('osfTecnico', o.tecnico);
+      ['osfTipo', 'osfExecucao', 'osfPrioridade', 'osfTecnico', 'osfSolicitante', 'osfDefeito', 'osfDiagnostico', 'osfServico'].forEach(id => { document.getElementById(id).disabled = fechada; });
+      document.getElementById('osBtnSalvar').style.display = fechada ? 'none' : '';
+      document.getElementById('osOcForm').style.display = fechada ? 'none' : '';
+      limparFormOcorrenciaOS_();
+      renderTimelineOS();
+    }
+
+    function coletarDadosOS_() {
+      const v = id => (document.getElementById(id).value || '').trim();
+      return { tipo_manutencao: v('osfTipo'), execucao: v('osfExecucao'), prioridade: v('osfPrioridade'), tecnico: v('osfTecnico'),
+               solicitante: v('osfSolicitante'), defeito_relatado: v('osfDefeito'), diagnostico_tecnico: v('osfDiagnostico'), servico_realizado: v('osfServico') };
+    }
+
+    async function salvarAlteracoesOS() {
+      if (!osAtual) return;
+      const btn = document.getElementById('osBtnSalvar'); btn.disabled = true;
+      const r = await rpcPriv('os_atualizar', { p_protocolo: osAtual.os.protocolo, p_dados: coletarDadosOS_() });
+      btn.disabled = false;
+      if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); return; }
+      showToast("Alterações da O.S. salvas.", "success");
+      recarregarFichaOS();
+    }
+
+    async function fecharOS() {
+      if (!osAtual) return;
+      const d = coletarDadosOS_();
+      if (!d.servico_realizado) { showToast('Preencha o "Serviço realizado" antes de fechar a O.S.', 'warning'); document.getElementById('osfServico').focus(); return; }
+      const rodando = trechosRodandoOS_();
+      if (rodando.length) { showToast('Há cronômetro rodando (' + rodando.map(a => a.tecnico_nome).join(', ') + '). Pause antes de fechar a O.S.', 'warning'); return; }
+      const c = await confirmarAcao({ titulo: 'Fechar O.S. ' + osAtual.os.protocolo, rotuloBotao: 'Fechar O.S.',
+        texto: 'Depois de fechada, a O.S. não pode mais ser editada. Para alterar será preciso reabri-la (a reabertura exige permissão e motivo, e fica registrada).' });
+      if (!c.ok) return;
+      let r = await rpcPriv('os_atualizar', { p_protocolo: osAtual.os.protocolo, p_dados: d });
+      if (r.ok) r = await rpcPriv('os_fechar', { p_protocolo: osAtual.os.protocolo });
+      if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); recarregarFichaOS(); return; }
+      showToast("O.S. " + osAtual.os.protocolo + " fechada.", "success");
+      recarregarFichaOS();
+    }
+
+    async function reabrirOS() {
+      if (!osAtual) return;
+      if (!temPermissao('os.reabrir')) { showToast("Você não tem permissão para reabrir O.S. fechada.", "error"); return; }
+      const c = await confirmarAcao({ titulo: 'Reabrir O.S. ' + osAtual.os.protocolo, rotuloBotao: 'Reabrir O.S.', motivo: true, minimo: 5,
+        texto: 'A O.S. volta a ficar aberta para edição e novas ocorrências. O motivo fica registrado na linha do tempo e na auditoria.' });
+      if (!c.ok) return;
+      const r = await rpcPriv('os_reabrir', { p_protocolo: osAtual.os.protocolo, p_motivo: c.motivo });
+      if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); return; }
+      showToast("O.S. " + osAtual.os.protocolo + " reaberta.", "success");
+      recarregarFichaOS();
+    }
+
+    function abrirEquipamentoDaOS() {
+      if (!osAtual || !osAtual.os.tag) return;
+      const tag = osAtual.os.tag;
+      fecharFichaOS(); mudarAba('equipamentos'); abrirFichaEquipamento(tag);
+    }
+
+    // ----- ocorrências -----
+    function limparFormOcorrenciaOS_() {
+      osOcEditando = null;
+      if (combos.cmbOcTipo) combos.cmbOcTipo.limpar();
+      if (combos.cmbOcCausa) combos.cmbOcCausa.limpar();
+      const obs = document.getElementById('osOcObs'); if (obs) obs.value = '';
+      const b = document.getElementById('osOcBtn'); if (b) b.innerHTML = '<i class="fa-solid fa-plus"></i> Registrar ocorrência';
+      const c = document.getElementById('osOcCancelar'); if (c) c.style.display = 'none';
+    }
+
+    async function registrarOcorrenciaOS() {
+      if (!osAtual) return;
+      const tipo = combos.cmbOcTipo.valor, causa = combos.cmbOcCausa.valor, obs = (document.getElementById('osOcObs').value || '').trim();
+      if (!tipo) { showToast("Selecione o tipo de ocorrência.", "error"); return; }
+      if (!causa) { showToast("Selecione a causa.", "error"); return; }
+      const btn = document.getElementById('osOcBtn'); btn.disabled = true;
+      const r = await rpcPriv('os_ocorrencia_salvar', { p_protocolo: osAtual.os.protocolo, p_id: osOcEditando || novoUuid_(), p_dados: { tipo_ocorrencia_id: tipo, causa_id: causa, observacao: obs } });
+      btn.disabled = false;
+      if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); return; }
+      showToast(osOcEditando ? "Ocorrência corrigida." : "Ocorrência registrada.", "success");
+      await recarregarFichaOS();
+    }
+
+    function editarOcorrenciaOS(id) {
+      const ev = osAtual && osAtual.ocorrencias.find(x => x.id === id);
+      if (!ev) return;
+      osOcEditando = id;
+      combos.cmbOcTipo.definir({ id: ev.tipo_ocorrencia_id, nome: ev.tipo });
+      combos.cmbOcCausa.definir({ id: ev.causa_id, nome: ev.causa });
+      document.getElementById('osOcObs').value = ev.observacao || '';
+      document.getElementById('osOcBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar correção';
+      document.getElementById('osOcCancelar').style.display = '';
+      document.getElementById('osOcObs').focus();
+    }
+
+    function renderTimelineOS() {
+      const box = document.getElementById('osTimeline'), e = escAttr_;
+      const lista = (osAtual && osAtual.ocorrencias) || [];
+      const fechada = osAtual && osAtual.os.status === 'FECHADA';
+      if (!lista.length) { box.innerHTML = '<div class="eq-k" style="padding:8px 0;">Nenhuma ocorrência registrada ainda.</div>'; return; }
+      const eu = usuarioLogado && usuarioLogado.nome;
+      box.innerHTML = lista.map(x => {
+        const editavel = !fechada && !x.automatica && (x.criado_por_nome === eu || temPermissao('os.reabrir'));
+        return `<div class="os-ev${x.automatica ? ' auto' : ''}">
+          <div class="os-ev-ponto"></div>
+          <div class="os-ev-corpo">
+            <div class="os-ev-topo"><b>${e(x.tipo) || (x.automatica ? 'Registro do sistema' : 'Ocorrência')}</b>${x.causa ? ` <span class="eq-chip cinza">${e(x.causa)}</span>` : ''}<span class="eq-k" style="margin-left:auto;">${e(fmtBR(x.ocorrido_em))}</span></div>
+            ${x.observacao ? `<div class="os-ev-obs">${e(x.observacao)}</div>` : ''}
+            <div class="eq-k">${e(x.criado_por_nome) || ''}${x.atualizado_em ? ` · corrigido por ${e(x.atualizado_por_nome)} em ${e(fmtBR(x.atualizado_em))}` : ''}
+              ${editavel ? ` <button type="button" class="eq-link" data-id="${e(x.id)}" onclick="editarOcorrenciaOS(this.dataset.id)">Corrigir</button>` : ''}</div>
+          </div></div>`;
+      }).join('');
+    }
+
+    // ----- mão de obra (cronômetro) -----
+    // A hora vem do servidor: o aparelho só exibe. Cada play/pausa vira um trecho no banco.
+    let osTempos = null, osTempoDelta = 0, osRelogioTimer = null, osTrechosAbertos = false, osTempoSubstitui = null;
+
+    function agoraServidor_() { return Date.now() + osTempoDelta; }
+    function duracaoMs_(a) { return Math.max(0, (a.fim ? new Date(a.fim).getTime() : agoraServidor_()) - new Date(a.inicio).getTime()); }
+    function fmtRelogio_(ms) { const t = Math.floor(ms / 1000), p = n => String(n).padStart(2, '0'); return `${p(Math.floor(t / 3600))}:${p(Math.floor(t % 3600 / 60))}:${p(t % 60)}`; }
+    function fmtHoras_(ms) { const m = Math.round(ms / 60000); return Math.floor(m / 60) + 'h' + String(m % 60).padStart(2, '0'); }
+    function paraInputLocal_(v) { const d = new Date(v), p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; }
+    function trechosValidosOS_() { return ((osTempos && osTempos.apontamentos) || []).filter(a => !a.cancelado); }
+    function trechosRodandoOS_() { return trechosValidosOS_().filter(a => !a.fim); }
+
+    async function carregarTemposOS() {
+      if (!osAtual) return;
+      const protocolo = osAtual.os.protocolo;
+      const r = await rpcPriv('os_tempos', { p_protocolo: protocolo });
+      if (!osAtual || osAtual.os.protocolo !== protocolo) return;   // usuário já trocou de O.S.
+      if (!r.ok) { document.getElementById('osTempoResumo').innerHTML = `<div class="eq-k">${escAttr_(textoErroPriv(r))}</div>`; return; }
+      osTempos = r; osTempoDelta = new Date(r.agora).getTime() - Date.now();
+      renderTemposOS();
+    }
+
+    function renderTemposOS() {
+      if (!osAtual || !osTempos) return;
+      const e = escAttr_, fechada = osAtual.os.status === 'FECHADA', pode = !!osTempos.pode_ajustar, euId = osTempos.eu_id;
+      const consulta = usuarioLogado && usuarioLogado.perfil === 'CONSULTA';
+      const validos = trechosValidosOS_();
+      const meuRodando = validos.find(a => a.tecnico_id === euId && !a.fim);
+
+      // meu cronômetro
+      const box = document.getElementById('osCrono'), btn = document.getElementById('osCronoBtn');
+      box.style.display = consulta ? 'none' : '';
+      box.classList.toggle('rodando', !!meuRodando);
+      btn.style.display = fechada ? 'none' : '';
+      btn.className = 'os-crono-btn' + (meuRodando ? ' pausar' : '');
+      btn.innerHTML = meuRodando ? '<i class="fa-solid fa-pause"></i> Pausar' : `<i class="fa-solid fa-play"></i> ${validos.some(a => a.tecnico_id === euId) ? 'Retomar' : 'Iniciar'}`;
+      const info = document.getElementById('osCronoInfo');
+      if (meuRodando) info.innerHTML = `<span class="os-pulso"></span>Rodando desde ${e(fmtBR(meuRodando.inicio).slice(-5))}`;
+      else if (fechada) info.textContent = 'O.S. fechada.';
+      else if (osTempos.meu_em_outra_os) info.textContent = `Seu cronômetro está rodando na ${osTempos.meu_em_outra_os.protocolo}.`;
+      else info.textContent = 'Pausado. O tempo é registrado a cada pausa.';
+
+      // total por técnico
+      const porTec = {};
+      validos.forEach(a => { const t = porTec[a.tecnico_id] || (porTec[a.tecnico_id] = { nome: a.tecnico_nome, rodando: false, n: 0 }); t.n++; if (!a.fim) t.rodando = true; });
+      const ids = Object.keys(porTec).sort((x, y) => porTec[x].nome.localeCompare(porTec[y].nome));
+      document.getElementById('osTempoResumo').innerHTML = ids.length ? ids.map(id => {
+        const t = porTec[id];
+        const pausarOutro = t.rodando && pode && id !== euId && !fechada
+          ? ` <button type="button" class="eq-link" data-tec="${e(id)}" onclick="pausarCronometroDeOutroOS(this.dataset.tec)">Pausar</button>` : '';
+        return `<div class="os-tempo-linha"><span class="nome">${t.rodando ? '<span class="os-pulso"></span>' : ''}${e(t.nome)}</span>
+          <span class="eq-k">${t.n} trecho${t.n > 1 ? 's' : ''}</span><span class="dur" data-tec-total="${e(id)}"></span>${pausarOutro}</div>`;
+      }).join('') : '<div class="eq-k" style="padding:4px 0;">Nenhum tempo registrado ainda.</div>';
+
+      document.getElementById('osTempoBtnManual').style.display = pode && !fechada ? '' : 'none';
+      if (fechada || !pode) fecharLancamentoManualOS();
+      document.getElementById('osTempoBtnTrechos').style.display = (osTempos.apontamentos || []).length ? '' : 'none';
+      renderTrechosOS_();
+      atualizarRelogiosOS_();
+      pararRelogioOS_();
+      if (validos.some(a => !a.fim)) osRelogioTimer = setInterval(atualizarRelogiosOS_, 1000);
+    }
+
+    function atualizarRelogiosOS_() {
+      if (!osTempos) return;
+      const validos = trechosValidosOS_(), soma = f => validos.filter(f).reduce((s, a) => s + duracaoMs_(a), 0);
+      document.getElementById('osCronoRelogio').textContent = fmtRelogio_(soma(a => a.tecnico_id === osTempos.eu_id));
+      document.getElementById('osTempoTotal').textContent = 'Total ' + fmtHoras_(soma(() => true));
+      document.querySelectorAll('#osTempoResumo [data-tec-total]').forEach(el => { el.textContent = fmtHoras_(soma(a => a.tecnico_id === el.dataset.tecTotal)); });
+    }
+    function pararRelogioOS_() { if (osRelogioTimer) { clearInterval(osRelogioTimer); osRelogioTimer = null; } }
+
+    async function alternarCronometroOS() {
+      if (!osAtual || !osTempos) return;
+      const rodando = trechosValidosOS_().find(a => a.tecnico_id === osTempos.eu_id && !a.fim);
+      if (!rodando && osTempos.meu_em_outra_os) {
+        const c = await confirmarAcao({ titulo: 'Trocar de O.S.', rotuloBotao: 'Iniciar aqui',
+          texto: `Seu cronômetro está rodando na ${osTempos.meu_em_outra_os.protocolo}. Ao iniciar nesta O.S., ele será pausado lá (um técnico só tem um cronômetro rodando por vez).` });
+        if (!c.ok) return;
+      }
+      const btn = document.getElementById('osCronoBtn'); btn.disabled = true;
+      const r = await rpcPriv('os_cronometro', { p_protocolo: osAtual.os.protocolo, p_acao: rodando ? 'pausar' : 'iniciar', p_id: rodando ? null : novoUuid_() });
+      btn.disabled = false;
+      if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); return; }
+      if (r.pausou_os) showToast(`Cronômetro da ${r.pausou_os} pausado. Iniciado nesta O.S.`, "success");
+      else showToast(rodando ? "Cronômetro pausado. Tempo registrado." : "Cronômetro iniciado.", "success");
+      carregarTemposOS();
+    }
+
+    async function pausarCronometroDeOutroOS(tecnicoId) {
+      if (!osAtual) return;
+      const t = trechosRodandoOS_().find(a => a.tecnico_id === tecnicoId);
+      const c = await confirmarAcao({ titulo: 'Pausar cronômetro', rotuloBotao: 'Pausar',
+        texto: `Pausar o cronômetro de ${t ? t.tecnico_nome : 'outro técnico'} agora? A pausa fica registrada com o seu nome.` });
+      if (!c.ok) return;
+      const r = await rpcPriv('os_cronometro', { p_protocolo: osAtual.os.protocolo, p_acao: 'pausar', p_tecnico_id: tecnicoId });
+      if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); return; }
+      showToast("Cronômetro pausado.", "success");
+      carregarTemposOS();
+    }
+
+    function alternarTrechosOS() { osTrechosAbertos = !osTrechosAbertos; renderTrechosOS_(); }
+
+    function renderTrechosOS_() {
+      const box = document.getElementById('osTrechos'), b = document.getElementById('osTempoBtnTrechos'), e = escAttr_;
+      b.textContent = osTrechosAbertos ? 'Ocultar trechos' : 'Ver trechos';
+      box.style.display = osTrechosAbertos ? '' : 'none';
+      if (!osTrechosAbertos || !osTempos) return;
+      const podeMexer = osTempos.pode_ajustar && osAtual.os.status !== 'FECHADA';
+      box.innerHTML = (osTempos.apontamentos || []).map(a => {
+        const per = `${fmtBR(a.inicio)} → ${a.fim ? fmtBR(a.fim).slice(-5) : 'rodando'}`;
+        const chips = (a.origem === 'MANUAL' ? ' <span class="eq-chip ambar">Manual</span>' : '') + (a.cancelado ? ' <span class="eq-chip vermelho">Excluído</span>' : '');
+        const obs = [a.justificativa ? 'Justificativa: ' + a.justificativa : '', a.encerrado_por_nome ? 'Pausado por ' + a.encerrado_por_nome : '',
+          a.cancelado ? `${a.cancelado_por_nome || ''}: ${a.motivo_cancelamento || ''}` : '', a.origem === 'MANUAL' ? 'Lançado por ' + (a.criado_por_nome || '') : ''].filter(Boolean);
+        const acoes = podeMexer && !a.cancelado ? ` <button type="button" class="eq-link" data-id="${e(a.id)}" onclick="corrigirTrechoOS(this.dataset.id)">Corrigir</button>
+          <button type="button" class="eq-link" data-id="${e(a.id)}" onclick="excluirTrechoOS(this.dataset.id)">Excluir</button>` : '';
+        return `<div class="os-trecho${a.cancelado ? ' cancelado' : ''}">
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;"><b>${e(a.tecnico_nome)}</b>${chips}<span class="dur" style="margin-left:auto; font-weight:700;">${a.cancelado ? '' : fmtHoras_(duracaoMs_(a))}</span></div>
+          <div class="os-trecho-per">${e(per)}</div>
+          ${obs.length ? `<div class="eq-k">${obs.map(e).join(' · ')}</div>` : ''}${acoes ? `<div>${acoes}</div>` : ''}</div>`;
+      }).join('');
+    }
+
+    function abrirLancamentoManualOS(trecho) {
+      if (!osTempos || !osTempos.pode_ajustar) return;
+      osTempoSubstitui = trecho ? trecho.id : null;
+      const sel = document.getElementById('osTempoTec'), e = escAttr_;
+      sel.innerHTML = '<option value="">Selecione...</option>' + (osTempos.tecnicos || []).map(t => `<option value="${e(t.id)}">${e(t.nome)}</option>`).join('');
+      sel.value = trecho ? trecho.tecnico_id : '';
+      sel.disabled = !!trecho;
+      document.getElementById('osTempoIni').value = trecho ? paraInputLocal_(trecho.inicio) : '';
+      document.getElementById('osTempoFim').value = trecho ? paraInputLocal_(trecho.fim || agoraServidor_()) : paraInputLocal_(agoraServidor_());
+      document.getElementById('osTempoJust').value = '';
+      document.getElementById('osTempoFormTitulo').textContent = trecho ? `Corrigir trecho de ${trecho.tecnico_nome} (o original fica registrado como corrigido)` : 'Lançar tempo manual';
+      document.getElementById('osTempoForm').style.display = '';
+      (trecho ? document.getElementById('osTempoIni') : sel).focus();
+    }
+    function fecharLancamentoManualOS() { osTempoSubstitui = null; const f = document.getElementById('osTempoForm'); if (f) f.style.display = 'none'; }
+    function corrigirTrechoOS(id) { const t = osTempos && osTempos.apontamentos.find(a => a.id === id); if (t) abrirLancamentoManualOS(t); }
+
+    async function salvarLancamentoManualOS() {
+      if (!osAtual) return;
+      const v = id => (document.getElementById(id).value || '').trim();
+      const tec = v('osTempoTec'), ini = v('osTempoIni'), fim = v('osTempoFim'), just = v('osTempoJust');
+      if (!tec) { showToast("Selecione o técnico.", "error"); return; }
+      if (!ini || !fim) { showToast("Informe início e fim.", "error"); return; }
+      if (new Date(fim) <= new Date(ini)) { showToast("O fim precisa ser depois do início.", "error"); return; }
+      if (just.length < 5) { showToast("Informe a justificativa (mínimo de 5 letras).", "error"); document.getElementById('osTempoJust').focus(); return; }
+      const btn = document.getElementById('osTempoBtnSalvar'); btn.disabled = true;
+      const r = await rpcPriv('os_tempo_ajustar', { p_protocolo: osAtual.os.protocolo, p_id: novoUuid_(),
+        p_dados: { tecnico_id: tec, inicio: new Date(ini).toISOString(), fim: new Date(fim).toISOString(), justificativa: just, substitui_id: osTempoSubstitui } });
+      btn.disabled = false;
+      if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); return; }
+      showToast(osTempoSubstitui ? "Trecho corrigido." : "Tempo lançado.", "success");
+      fecharLancamentoManualOS();
+      carregarTemposOS();
+    }
+
+    async function excluirTrechoOS(id) {
+      const t = osTempos && osTempos.apontamentos.find(a => a.id === id);
+      if (!t || !osAtual) return;
+      const c = await confirmarAcao({ titulo: 'Excluir trecho', rotuloBotao: 'Excluir', motivo: true, minimo: 5,
+        texto: `Excluir o trecho de ${t.tecnico_nome} (${fmtBR(t.inicio)})? Ele deixa de contar na mão de obra, mas continua registrado como excluído, com o seu nome e o motivo.` });
+      if (!c.ok) return;
+      const r = await rpcPriv('os_tempo_ajustar', { p_protocolo: osAtual.os.protocolo, p_id: novoUuid_(), p_dados: { excluir: true, substitui_id: id, justificativa: c.motivo } });
+      if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); return; }
+      showToast("Trecho excluído.", "success");
+      carregarTemposOS();
     }
 
     function salvarNovaOS(e) {
@@ -5995,10 +6501,11 @@ abaAgenda.appendRow([
         btn.disabled = false;
         if (res.status === "sucesso") {
           document.getElementById('formNovaOS').reset();
-          showToast(`O.S. ${res.protocoloOS} registrada!`, "success");
+          showToast(`O.S. ${res.protocoloOS} aberta!`, "success");
           buscarAtualizacoesSilenciosas();
           mudarAba('os_gestao');
-        } else showToast("Erro ao registrar O.S.", "error");
+          abrirFichaOS(res.protocoloOS);
+        } else showToast("⚠️ " + (res.mensagem || "Erro ao abrir a O.S."), "error");
       }).catch(() => { btn.disabled = false; showToast("Falha de conexão.", "error"); });
       return false;
     }
@@ -6239,7 +6746,13 @@ abaAgenda.appendRow([
       unidades: {
         rotulo: 'Unidades / contratos', singular: 'unidade', colunas: [['nome', 'Unidade'], ['cnpj', 'CNPJ'], ['telefone', 'Telefone'], ['endereco', 'Endereço']],
         campos: [{ k: 'nome', r: 'Nome', t: 'texto', obrig: true }, { k: 'cnpj', r: 'CNPJ', t: 'texto' }, { k: 'telefone', r: 'Telefone', t: 'texto' }, { k: 'email', r: 'E-mail', t: 'texto' }, { k: 'endereco', r: 'Endereço', t: 'texto' }]
-      }
+      },
+      tipos_ocorrencia: {
+        rotulo: 'Tipos de ocorrência', singular: 'tipo de ocorrência', colunas: [['nome', 'Tipo de ocorrência'], ['tipo_nome', 'Vale para', 'todos']],
+        campos: [{ k: 'nome', r: 'Nome', t: 'texto', obrig: true },
+                 { k: 'tipo_equipamento_id', r: 'Tipo de equipamento', t: 'combo', catalogo: 'tipos_equipamento', nomeKey: 'tipo_nome', dica: 'Deixe em branco para valer para todos os equipamentos.' }]
+      },
+      causas: { rotulo: 'Causas', singular: 'causa', colunas: [['nome', 'Causa']], campos: [{ k: 'nome', r: 'Nome', t: 'texto', obrig: true }] }
     };
     let catAtual = 'fabricantes', catItens = [], catTotal = 0, _catTimer = null, _catEditando = null, _unirOrigem = null;
 
@@ -6282,7 +6795,7 @@ abaAgenda.appendRow([
       document.getElementById('catCabecalho').innerHTML = '<tr>' + cfg.colunas.map(c => `<th>${c[1]}</th>`).join('') + '<th class="td-center">Situação</th><th></th></tr>';
       const total = cfg.colunas.length + 2;
       document.getElementById('catCorpo').innerHTML = catItens.length ? catItens.map(it => '<tr>' +
-        cfg.colunas.map(c => `<td>${e(c[2] === 'data' ? fmtDataISO_(it[c[0]]) : it[c[0]]) || '-'}</td>`).join('') +
+        cfg.colunas.map(c => `<td>${e(c[2] === 'data' ? fmtDataISO_(it[c[0]]) : it[c[0]]) || (c[2] === 'todos' ? 'Todos os equipamentos' : '-')}</td>`).join('') +
         `<td class="td-center"><span class="eq-chip ${it.ativo ? 'verde' : 'cinza'}">${it.ativo ? 'Ativo' : 'Inativo'}</span></td>` +
         `<td class="td-center" style="white-space:nowrap;"><button type="button" class="eq-btn" data-id="${e(it.id)}" onclick="abrirFormCatalogo(this.dataset.id)"><i class="fa-solid fa-pen"></i> Editar</button> ` +
         `<button type="button" class="eq-btn" data-id="${e(it.id)}" onclick="abrirUnirCatalogo(this.dataset.id)" title="Unir com outro cadastro (duplicado)"><i class="fa-solid fa-code-merge"></i> Unir</button></td></tr>`).join('')
@@ -6299,7 +6812,7 @@ abaAgenda.appendRow([
       document.getElementById('catFormTitulo').textContent = (it ? 'Editar ' : 'Novo ') + cfg.singular;
       const e = escAttr_;
       document.getElementById('catFormCampos').innerHTML = cfg.campos.map(c => {
-        if (c.t === 'combo') return `<div class="form-group combo" id="catc_${c.k}" style="margin-bottom:12px;"><label>${c.r}${c.obrig ? ' *' : ''}</label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite para buscar..." /><div class="combo-lista" role="listbox"></div></div>`;
+        if (c.t === 'combo') return `<div class="form-group combo" id="catc_${c.k}" style="margin-bottom:12px;"><label>${c.r}${c.obrig ? ' *' : ''}</label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite para buscar..." /><div class="combo-lista" role="listbox"></div>${c.dica ? `<div class="eq-k" style="margin-top:4px;">${c.dica}</div>` : ''}</div>`;
         return `<div class="form-group" style="margin-bottom:12px;"><label>${c.r}${c.obrig ? ' *' : ''}</label><input type="${c.t === 'data' ? 'date' : 'text'}" id="catf_${c.k}" value="${e(it ? (it[c.k] || '') : '')}" ${c.k === 'nome' ? 'maxlength="200"' : ''} /></div>`;
       }).join('');
       cfg.campos.filter(c => c.t === 'combo').forEach(c => {
@@ -6337,11 +6850,11 @@ abaAgenda.appendRow([
       const it = catItens.find(x => x.id === id); if (!it) return;
       _unirOrigem = it;
       const cfg = CATALOGOS[catAtual];
-      document.getElementById('unirTexto').innerHTML = `Todos os equipamentos e cadastros que usam <b>${escAttr_(it.fabricante_nome ? it.fabricante_nome + ' — ' + it.nome : (it.cliente_nome ? it.cliente_nome + ' — ' + it.nome : it.nome))}</b> passarão a usar o item escolhido abaixo, e este ficará inativo. <b>Não dá para desfazer.</b>`;
+      document.getElementById('unirTexto').innerHTML = `Todos os equipamentos e cadastros que usam <b>${escAttr_(it.fabricante_nome ? it.fabricante_nome + ' — ' + it.nome : (it.cliente_nome ? it.cliente_nome + ' — ' + it.nome : (it.tipo_nome && catAtual === 'tipos_ocorrencia' ? it.nome + ' — ' + it.tipo_nome : it.nome)))}</b> passarão a usar o item escolhido abaixo, e este ficará inativo. <b>Não dá para desfazer.</b>`;
       document.getElementById('unirTitulo').textContent = 'Unir ' + cfg.singular + ' duplicado';
       combos.cmbUnirDestino = new Combo('cmbUnirDestino', {
         catalogo: catAtual, pai: catAtual === 'setores' ? () => it.cliente_id : null,
-        rotuloItem: x => x.fabricante_nome ? x.fabricante_nome + ' — ' + x.nome : (x.cliente_nome ? x.cliente_nome + ' — ' + x.nome : x.nome)
+        rotuloItem: x => x.fabricante_nome ? x.fabricante_nome + ' — ' + x.nome : (x.cliente_nome ? x.cliente_nome + ' — ' + x.nome : (x.tipo_nome && catAtual === 'tipos_ocorrencia' ? x.nome + ' — ' + x.tipo_nome : x.nome))
       });
       combos.cmbUnirDestino.limpar();
       document.getElementById('modalUnir').classList.add('active');
@@ -6368,7 +6881,9 @@ abaAgenda.appendRow([
       clientes: { obrig: ['nome'], todas: ['nome', 'cnpj', 'telefone', 'email', 'endereco'] },
       unidades: { obrig: ['nome'], todas: ['nome', 'cnpj', 'telefone', 'email', 'endereco'] },
       setores: { obrig: ['cliente', 'nome'], todas: ['cliente', 'nome'] },
-      modelos: { obrig: ['fabricante', 'modelo'], todas: ['fabricante', 'modelo', 'tipo', 'registro_anvisa', 'validade_anvisa'] }
+      modelos: { obrig: ['fabricante', 'modelo'], todas: ['fabricante', 'modelo', 'tipo', 'registro_anvisa', 'validade_anvisa'] },
+      causas: { obrig: ['nome'], todas: ['nome'] },
+      tipos_ocorrencia: { obrig: ['nome'], todas: ['tipo_equipamento', 'nome'] }
     };
     let _impLinhas = [], _impEnviando = false;
 
@@ -6405,6 +6920,7 @@ abaAgenda.appendRow([
       if (!cfg || linhasCsv.length < 2) return { erro: 'A planilha está vazia ou só tem o cabeçalho.', objetos: [] };
       const alias = { descricao: catalogo === 'modelos' ? 'tipo' : 'nome', tipo_descricao: 'tipo', tipo_de_equipamento: 'tipo', registro: 'registro_anvisa', anvisa: 'registro_anvisa', validade: 'validade_anvisa', razao_social: 'nome', unidade_contrato: 'nome', cep: 'cep' };
       if (catalogo === 'modelos') alias.nome = 'modelo';
+      if (catalogo === 'tipos_ocorrencia') { alias.tipo = 'tipo_equipamento'; alias.tipo_de_equipamento = 'tipo_equipamento'; alias.equipamento = 'tipo_equipamento'; alias.descricao = 'nome'; alias.ocorrencia = 'nome'; }
       const cab = linhasCsv[0].map(h => { const k = chaveCabecalho_(h); return alias[k] || k; });
       const faltam = cfg.obrig.filter(c => !cab.includes(c));
       if (faltam.length) return { erro: 'Faltam colunas obrigatórias: ' + faltam.join(', ') + '. Colunas encontradas: ' + (cab.filter(Boolean).join(', ') || 'nenhuma') + '.', objetos: [] };
@@ -6515,10 +7031,12 @@ abaAgenda.appendRow([
       ['equipamento.tag_manual', 'Informar a TAG manualmente no cadastro'],
       ['equipamento.situacao', 'Alterar a situação do equipamento (próprio/cliente/locado...)'],
       ['catalogo.gerenciar', 'Gerenciar catálogos (fabricantes, modelos, clientes...)'],
-      ['auditoria.ver', 'Ver o histórico de alterações']
+      ['auditoria.ver', 'Ver o histórico de alterações'],
+      ['os.reabrir', 'Reabrir O.S. fechada'],
+      ['os.ajustar_tempo', 'Ajustar tempo de mão de obra (lançar, corrigir, excluir e pausar cronômetro de outro técnico)']
     ];
     const PERFIS_SISTEMA = ['ADMIN', 'GESTOR', 'OPERADOR', 'CONSULTA'];
-    const PERMISSOES_PADRAO_PERFIL = { ADMIN: PERMISSOES_SISTEMA.map(p => p[0]), GESTOR: ['config.tags', 'catalogo.gerenciar'], OPERADOR: [], CONSULTA: [] };
+    const PERMISSOES_PADRAO_PERFIL = { ADMIN: PERMISSOES_SISTEMA.map(p => p[0]), GESTOR: ['config.tags', 'catalogo.gerenciar', 'os.reabrir', 'os.ajustar_tempo'], OPERADOR: [], CONSULTA: [] };
     let mascarasTag = [];
     let tagManual = false;
     let _avisouSessao = false;
@@ -6985,7 +7503,7 @@ abaAgenda.appendRow([
         const s = (o.status || 'ABERTA').toUpperCase();
         const aberta = s === 'ABERTA';
         return `<tr>
-          <td class="td-center"><b>${e(o.protocoloOS)}</b></td>
+          <td class="td-center"><button type="button" class="eq-link" data-p="${e(o.protocoloOS)}" onclick="abrirFichaOS(this.dataset.p)">${e(o.protocoloOS)}</button></td>
           <td>${e(o.tipoManutencao) || '-'}</td>
           <td class="td-center">${e(o.execucao) || '-'}</td>
           <td class="td-center">${e((o.dataAbertura || '').split(' ')[0]) || '-'}</td>
