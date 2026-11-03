@@ -1036,6 +1036,67 @@ html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdow
     .os-ev-obs { margin: 4px 0; font-size: 13px; white-space: pre-wrap; word-break: break-word; }
     .eq-link { background: none; border: 0; padding: 0 4px; color: #38bdf8; cursor: pointer; font-weight: 700; text-decoration: underline; font-size: inherit; text-transform: none; letter-spacing: 0; }
     html.light .eq-link { color: #0b5ed7; }
+    /* ficha da O.S. em etapas (passo a passo) */
+    .os-box { width: 900px; }
+    .os-resumo { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; padding: 10px 14px; margin-bottom: 14px; border-radius: 12px; border: 1px solid #334155; background: #0b1220; font-size: 13px; }
+    .os-resumo .eqn { font-size: 15px; font-weight: 800; }
+    .os-passos { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0 0 16px; padding: 0; }
+    .os-passo { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; padding: 8px 12px; border-radius: 12px; border: 1px solid #334155; background: transparent; color: #94a3b8; font-size: 13px; font-weight: 700; text-align: left; cursor: pointer; }
+    .os-passo .n { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; border: 2px solid currentColor; font-size: 12px; font-weight: 800; }
+    .os-passo .t { min-width: 0; line-height: 1.2; }
+    .os-passo .s { display: block; font-size: 11px; font-weight: 600; opacity: .8; }
+    .os-passo.feito { color: #34d399; border-color: rgba(16, 185, 129, .5); }
+    .os-passo.feito .n { background: #10b981; border-color: #10b981; color: #fff; }
+    .os-passo.atual { color: #38bdf8; border-color: #38bdf8; }
+    .os-passo.atual .n { background: #0ea5e9; border-color: #0ea5e9; color: #fff; }
+    .os-passo.vendo { box-shadow: 0 0 0 3px rgba(56, 189, 248, .28); background: rgba(56, 189, 248, .08); }
+    .os-passo:disabled { cursor: not-allowed; opacity: .5; }
+    .os-passo:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }
+    .os-etapa { display: none; padding: 18px; border-radius: 14px; border: 1px solid #334155; }
+    .os-etapa.ativa { display: block; }
+    .os-box.leitura .os-etapa { margin-bottom: 14px; }
+    .os-box.leitura .os-etapa-pe { display: none; }
+    .os-etapa-tit { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .os-etapa-tit > .n { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: #0ea5e9; color: #fff; font-weight: 800; font-size: 15px; }
+    .os-etapa-tit b { font-size: 16px; }
+    .os-sub { margin: 18px 0 10px; padding-top: 14px; border-top: 1px dashed rgba(148, 163, 184, .35); font-size: 13px; font-weight: 800; }
+    .os-etapa-pe { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, .22); }
+    .os-mo-reg { margin-top: 14px; padding: 14px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, .5); background: rgba(56, 189, 248, .06); }
+    .os-mo-reg-pe { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .os-lanc { padding: 10px 0; border-bottom: 1px solid rgba(148, 163, 184, .22); font-size: 13px; }
+    .os-lanc:last-child { border-bottom: 0; }
+    .os-lanc .topo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .os-lanc .dur { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .os-lanc .desc { margin-top: 3px; white-space: pre-wrap; word-break: break-word; }
+    .os-conf { list-style: none; display: grid; gap: 8px; margin: 0; padding: 0; }
+    .os-conf li { display: flex; align-items: center; gap: 10px; font-size: 13.5px; }
+    .os-conf .ic { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #10b981; color: #fff; font-size: 11px; }
+    .os-conf li.falta .ic { background: #f43f5e; }
+    .os-conf li.falta { color: #fda4af; }
+    .os-conf .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    .os-previa { min-height: 44px; padding: 12px 14px; border-radius: 10px; border: 1px solid #334155; font-size: 13px; white-space: pre-wrap; word-break: break-word; }
+    .os-vp-op { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 4px; }
+    .os-vp-op label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; text-transform: none; letter-spacing: 0; }
+    .os-vp-chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 22px; }
+    .os-vp-x { background: none; border: 0; padding: 0 2px; color: inherit; font-size: 14px; line-height: 1; cursor: pointer; }
+    html.light .os-resumo { background: #f8fafc; border-color: #cbd5e1; }
+    html.light .os-passo { border-color: #cbd5e1; color: #64748b; }
+    html.light .os-passo.feito { color: #047857; border-color: #6ee7b7; background: #f0fdf4; }
+    html.light .os-passo.atual { color: #0b5ed7; border-color: #0b5ed7; }
+    html.light .os-passo.atual .n { background: #0b5ed7; border-color: #0b5ed7; }
+    html.light .os-passo.vendo { box-shadow: 0 0 0 3px rgba(11, 94, 215, .2); background: #eff6ff; }
+    html.light .os-etapa { border-color: #cbd5e1; background: #fff; }
+    html.light .os-etapa-tit > .n { background: #0b5ed7; }
+    html.light .os-mo-reg { background: #eff6ff; border-color: #93c5fd; }
+    html.light .os-lanc { border-bottom-color: #d5dfec; }
+    html.light .os-conf li.falta { color: #be123c; }
+    html.light .os-previa { border-color: #cbd5e1; background: #f8fafc; }
+    @media (max-width: 720px) {
+      .os-passos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .os-passo .s { display: none; }
+      .os-etapa { padding: 14px; }
+      .os-etapa-pe > * { flex: 1 1 auto; }
+    }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 selection:bg-sky-500 selection:text-white">
@@ -2138,9 +2199,11 @@ html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdow
                 <div class="form-group"><label>Técnico Responsável:</label><input type="text" id="osTecnico" placeholder="Nome do técnico executante" required /></div>
               </div>
 
-              <div class="form-group mb-3"><label>Defeito Relatado:</label><textarea id="osDefeito" style="height: 64px;" required></textarea></div>
-              <div class="form-group mb-3"><label>Diagnóstico Técnico:</label><textarea id="osDiagnostico" style="height: 64px;" required></textarea></div>
-              <div class="form-group mb-4"><label>Serviço Realizado:</label><textarea id="osServico" style="height: 64px;" required></textarea></div>
+              <div class="form-row">
+                <div class="form-group combo" id="cmbNovaOsOc" style="flex: 1;" onfocusin="garantirCombosNovaOS(this.id)"><label>Ocorrência (motivo do chamado): *</label><input type="text" class="combo-input" autocomplete="off" placeholder="Escolha o equipamento e digite para buscar..." /><div class="combo-lista" role="listbox"></div></div>
+                <div class="form-group combo" id="cmbNovaOsCausa" style="flex: 1;" onfocusin="garantirCombosNovaOS(this.id)"><label>Causa:</label><input type="text" class="combo-input" autocomplete="off" placeholder="Ex: Falha intrínseca, Erro operacional..." /><div class="combo-lista" role="listbox"></div></div>
+              </div>
+              <div class="form-group mb-4"><label>Observação (defeito relatado):</label><textarea id="osDefeito" style="height: 64px;" placeholder="O que o cliente informou"></textarea></div>
 
               <div class="text-right">
                 <button type="submit" id="btnSalvarOS" class="btn-submit"><i class="fa-solid fa-floppy-disk"></i> Registrar O.S.</button>
@@ -2725,91 +2788,119 @@ abaAgenda.appendRow([
   </div>
 
   <div id="modalOS" class="modal-overlay">
-    <div class="modal-box" style="width: 1140px;">
+    <div class="modal-box os-box" id="osBox">
       <div class="modal-title" style="flex-wrap:wrap; gap:10px;">
         <span style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"><i class="fa-solid fa-screwdriver-wrench text-sky-400"></i> <span id="osFichaPrefixo">O.S.</span> <b id="osFichaNumero"></b>
           <span id="osFichaStatus" class="eq-chip ambar">Aberta</span><span id="osFichaReab" class="eq-chip cinza" style="display:none;"></span></span>
         <span style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-          <button type="button" id="osBtnFechar" class="btn-submit" onclick="fecharOS()"><i class="fa-solid fa-lock"></i> Fechar O.S.</button>
           <button type="button" id="osBtnReabrir" class="eq-btn" onclick="reabrirOS()" style="display:none;"><i class="fa-solid fa-lock-open"></i> Reabrir O.S.</button>
           <button type="button" onclick="fecharFichaOS()" aria-label="Fechar janela" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
         </span>
       </div>
       <div id="osAvisoFechada" class="eq-aviso" style="display:none;"></div>
-      <div class="os-cols">
-        <div class="card" style="margin-bottom:0;">
-          <div class="card-title">Dados da O.S.</div>
+      <div id="osResumo" class="os-resumo"></div>
+      <ol id="osPassos" class="os-passos" aria-label="Etapas da O.S."></ol>
+
+      <!-- ETAPA 1: REQUISIÇÃO -->
+      <section class="os-etapa" id="osEtapa1">
+        <div class="os-etapa-tit"><span class="n">1</span><div><b>Requisição</b><div class="eq-k">Dados do chamado e o que o cliente relatou</div></div></div>
+        <div class="eq-g">
+          <div class="form-group c4"><label>Abertura</label><input type="text" id="osfAbertura" readonly /></div>
+          <div class="form-group c4"><label>Fechamento</label><input type="text" id="osfFechamento" readonly /></div>
+          <div class="form-group c4"><label>Solicitante</label><input type="text" id="osfSolicitante" oninput="marcarSujoOS()" /></div>
+          <div class="form-group c6"><label>Cliente / unidade</label><input type="text" id="osfCliente" readonly /></div>
+          <div class="form-group c6"><label>Equipamento</label><input type="text" id="osfEquipamento" readonly /></div>
+          <div class="form-group c4"><label>TAG</label><input type="text" id="osfTag" readonly /></div>
+          <div class="form-group c4"><label>Nº de série</label><input type="text" id="osfSerie" readonly /></div>
+          <div class="form-group c4"><label>Patrimônio</label><input type="text" id="osfPatrimonio" readonly /></div>
+          <div class="form-group c3"><label>Tipo de manutenção</label>
+            <select id="osfTipo" onchange="marcarSujoOS()"><option>CORRETIVA</option><option>PREVENTIVA</option><option>CALIBRAÇÃO</option><option>SEGURANÇA ELÉTRICA</option><option>QUALIFICAÇÃO TÉRMICA</option><option>INSPEÇÃO</option><option>OFICINA</option></select></div>
+          <div class="form-group c3"><label>Execução</label><select id="osfExecucao" onchange="marcarSujoOS()"><option>INTERNA</option><option>EXTERNA</option></select></div>
+          <div class="form-group c3"><label>Prioridade</label><select id="osfPrioridade" onchange="marcarSujoOS()"><option>BAIXA</option><option>MÉDIA</option><option>ALTA</option><option>CRÍTICA</option></select></div>
+          <div class="form-group c3"><label>Técnico responsável</label><select id="osfTecnico" onchange="marcarSujoOS()"></select></div>
+        </div>
+        <div class="os-sub">Motivo do chamado</div>
+        <div class="eq-g">
+          <div class="form-group combo c6" id="cmbOcTipo"><label>Ocorrência *</label><input type="text" class="combo-input" autocomplete="off" placeholder="Ex: Não liga, Não está gelando..." /><div class="combo-lista" role="listbox"></div></div>
+          <div class="form-group combo c6" id="cmbOcCausa"><label>Causa *</label><input type="text" class="combo-input" autocomplete="off" placeholder="Ex: Falha intrínseca, Erro operacional..." /><div class="combo-lista" role="listbox"></div></div>
+          <div class="form-group c12"><label>Observação <span class="text-slate-500">(defeito relatado)</span></label><textarea id="osfDefeito" rows="3" oninput="marcarSujoOS()" placeholder="O que o cliente informou"></textarea></div>
+        </div>
+        <div class="os-etapa-pe"><span></span>
+          <button type="button" id="osBtnEtapa1" class="btn-submit" onclick="salvarEtapaOS(1)"><i class="fa-solid fa-floppy-disk"></i> Salvar e continuar</button></div>
+      </section>
+
+      <!-- ETAPA 2: DIAGNÓSTICO -->
+      <section class="os-etapa" id="osEtapa2">
+        <div class="os-etapa-tit"><span class="n">2</span><div><b>Diagnóstico</b><div class="eq-k">O que o técnico analisou e encontrou</div></div></div>
+        <div class="eq-g">
+          <div class="form-group combo c12" id="cmbOsAnalise"><label>Análise realizada *</label><input type="text" class="combo-input" autocomplete="off" placeholder="Ex: Inspeção visual, Teste funcional..." /><div class="combo-lista" role="listbox"></div></div>
+          <div class="form-group c12"><label>Complemento do diagnóstico <span class="text-slate-500">(opcional)</span></label><textarea id="osfDiagnostico" rows="3" oninput="marcarSujoOS()" placeholder="Detalhes do que foi encontrado"></textarea></div>
+        </div>
+        <div class="os-etapa-pe">
+          <button type="button" class="eq-btn" onclick="irEtapaOS(0)">Voltar</button>
+          <button type="button" id="osBtnEtapa2" class="btn-submit" onclick="salvarEtapaOS(2)"><i class="fa-solid fa-floppy-disk"></i> Salvar e continuar</button></div>
+      </section>
+
+      <!-- ETAPA 3: MÃO DE OBRA -->
+      <section class="os-etapa" id="osEtapa3">
+        <div class="os-etapa-tit"><span class="n">3</span><div><b>Mão de obra</b><div class="eq-k">Inicie o cronômetro ao começar e registre o que foi feito ao terminar</div></div>
+          <span id="osTempoTotal" class="eq-chip cinza" style="margin-left:auto;">Total 0h00</span></div>
+        <div id="osCrono" class="os-crono">
+          <div style="min-width:0;">
+            <div class="eq-k">Meu tempo nesta O.S.</div>
+            <div id="osCronoRelogio" class="os-crono-relogio">00:00:00</div>
+            <div id="osCronoInfo" class="eq-k"></div>
+          </div>
+          <button type="button" id="osCronoBtn" class="os-crono-btn" onclick="alternarCronometroOS()"><i class="fa-solid fa-play"></i> Iniciar</button>
+        </div>
+        <div id="osMoReg" class="os-mo-reg">
+          <div class="form-group" style="margin-bottom:8px;"><label for="osMoDesc">O que foi feito *</label>
+            <textarea id="osMoDesc" rows="3" maxlength="2000" placeholder="Ex: Substituição do cabo de força, que estava rompido. Teste funcional aprovado."></textarea></div>
+          <div class="os-mo-reg-pe"><span id="osMoDica" class="eq-k"></span>
+            <button type="button" id="osMoBtn" class="btn-submit" onclick="registrarMaoDeObraOS()"><i class="fa-solid fa-clipboard-check"></i> Registrar mão de obra</button></div>
+        </div>
+        <div id="osMoPend" class="eq-aviso" style="display:none; margin:12px 0 0;"></div>
+        <div class="os-sub">Serviços registrados</div>
+        <div id="osMoLista"></div>
+        <div class="os-sub">Tempo por técnico</div>
+        <div id="osTempoResumo"></div>
+        <div class="os-tempo-acoes">
+          <button type="button" id="osTempoBtnTrechos" class="eq-link" onclick="alternarTrechosOS()">Ver trechos</button>
+          <button type="button" id="osTempoBtnManual" class="eq-link" onclick="abrirLancamentoManualOS()" style="display:none;">Lançar tempo manual</button>
+        </div>
+        <div id="osTempoForm" style="display:none; margin-top:12px; padding-top:12px; border-top:1px dashed rgba(148,163,184,.35);">
+          <div id="osTempoFormTitulo" class="eq-k" style="margin-bottom:8px; font-weight:700;">Lançar tempo manual</div>
           <div class="eq-g">
-            <div class="form-group c6"><label>Abertura</label><input type="text" id="osfAbertura" readonly /></div>
-            <div class="form-group c6"><label>Fechamento</label><input type="text" id="osfFechamento" readonly /></div>
-            <div class="form-group c12"><label>Cliente / unidade</label><input type="text" id="osfCliente" readonly /></div>
-            <div class="form-group c12"><label>Equipamento <button type="button" id="osfVerEquip" class="eq-link" onclick="abrirEquipamentoDaOS()">ver ficha do equipamento</button></label><input type="text" id="osfEquipamento" readonly /></div>
-            <div class="form-group c4"><label>TAG</label><input type="text" id="osfTag" readonly /></div>
-            <div class="form-group c4"><label>Nº de série</label><input type="text" id="osfSerie" readonly /></div>
-            <div class="form-group c4"><label>Patrimônio</label><input type="text" id="osfPatrimonio" readonly /></div>
-            <div class="form-group c4"><label>Tipo de manutenção</label>
-              <select id="osfTipo"><option>CORRETIVA</option><option>PREVENTIVA</option><option>CALIBRAÇÃO</option><option>SEGURANÇA ELÉTRICA</option><option>QUALIFICAÇÃO TÉRMICA</option><option>INSPEÇÃO</option><option>OFICINA</option></select></div>
-            <div class="form-group c4"><label>Execução</label><select id="osfExecucao"><option>INTERNA</option><option>EXTERNA</option></select></div>
-            <div class="form-group c4"><label>Prioridade</label><select id="osfPrioridade"><option>BAIXA</option><option>MÉDIA</option><option>ALTA</option><option>CRÍTICA</option></select></div>
-            <div class="form-group c6"><label>Técnico responsável</label><select id="osfTecnico"></select></div>
-            <div class="form-group c6"><label>Solicitante</label><input type="text" id="osfSolicitante" /></div>
-            <div class="form-group c12"><label>Defeito relatado</label><textarea id="osfDefeito" rows="2"></textarea></div>
-            <div class="form-group c12"><label>Diagnóstico técnico</label><textarea id="osfDiagnostico" rows="2"></textarea></div>
-            <div class="form-group c12"><label>Serviço realizado <span class="text-slate-500">(obrigatório para fechar)</span></label><textarea id="osfServico" rows="3"></textarea></div>
+            <div class="form-group c12"><label>Técnico *</label><select id="osTempoTec"></select></div>
+            <div class="form-group c6"><label>Início *</label><input type="datetime-local" id="osTempoIni" /></div>
+            <div class="form-group c6"><label>Fim *</label><input type="datetime-local" id="osTempoFim" /></div>
+            <div class="form-group c12"><label>O que foi feito *</label><textarea id="osTempoDesc" rows="2" maxlength="2000" placeholder="Serviço realizado nesse período"></textarea></div>
+            <div class="form-group c12"><label>Justificativa do lançamento manual *</label><input type="text" id="osTempoJust" placeholder="Ex: atendimento feito sem acesso ao sistema" /></div>
           </div>
-          <div style="display:flex; justify-content:flex-end; margin-top:14px;">
-            <button type="button" id="osBtnSalvar" class="btn-submit" onclick="salvarAlteracoesOS()"><i class="fa-solid fa-floppy-disk"></i> Salvar alterações</button>
+          <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
+            <button type="button" class="eq-btn" onclick="fecharLancamentoManualOS()">Cancelar</button>
+            <button type="button" id="osTempoBtnSalvar" class="btn-submit" onclick="salvarLancamentoManualOS()"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
           </div>
         </div>
+        <div id="osTrechos" style="display:none; margin-top:10px;"></div>
+        <div class="os-etapa-pe">
+          <button type="button" class="eq-btn" onclick="irEtapaOS(1)">Voltar</button>
+          <button type="button" id="osBtnEtapa3" class="btn-submit" onclick="continuarMaoDeObraOS()"><i class="fa-solid fa-list-check"></i> Continuar para o fechamento</button></div>
+      </section>
 
-        <div class="os-col-dir">
-        <div class="card" style="margin-bottom:0;" id="osTempoCard">
-          <div class="card-title" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">Mão de obra <span id="osTempoTotal" class="eq-chip cinza">Total 0h00</span></div>
-          <div id="osCrono" class="os-crono">
-            <div style="min-width:0;">
-              <div class="eq-k">Meu tempo nesta O.S.</div>
-              <div id="osCronoRelogio" class="os-crono-relogio">00:00:00</div>
-              <div id="osCronoInfo" class="eq-k"></div>
-            </div>
-            <button type="button" id="osCronoBtn" class="os-crono-btn" onclick="alternarCronometroOS()"><i class="fa-solid fa-play"></i> Iniciar</button>
-          </div>
-          <div id="osTempoResumo" style="margin-top:10px;"></div>
-          <div class="os-tempo-acoes">
-            <button type="button" id="osTempoBtnTrechos" class="eq-link" onclick="alternarTrechosOS()">Ver trechos</button>
-            <button type="button" id="osTempoBtnManual" class="eq-link" onclick="abrirLancamentoManualOS()" style="display:none;">Lançar tempo manual</button>
-          </div>
-          <div id="osTempoForm" style="display:none; margin-top:12px; padding-top:12px; border-top:1px dashed rgba(148,163,184,.35);">
-            <div id="osTempoFormTitulo" class="eq-k" style="margin-bottom:8px; font-weight:700;">Lançar tempo manual</div>
-            <div class="eq-g">
-              <div class="form-group c12"><label>Técnico *</label><select id="osTempoTec"></select></div>
-              <div class="form-group c6"><label>Início *</label><input type="datetime-local" id="osTempoIni" /></div>
-              <div class="form-group c6"><label>Fim *</label><input type="datetime-local" id="osTempoFim" /></div>
-              <div class="form-group c12"><label>Justificativa *</label><input type="text" id="osTempoJust" placeholder="Ex: atendimento feito sem acesso ao sistema" /></div>
-            </div>
-            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
-              <button type="button" class="eq-btn" onclick="fecharLancamentoManualOS()">Cancelar</button>
-              <button type="button" id="osTempoBtnSalvar" class="btn-submit" onclick="salvarLancamentoManualOS()"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
-            </div>
-          </div>
-          <div id="osTrechos" style="display:none; margin-top:10px;"></div>
-        </div>
-
-        <div class="card" style="margin-bottom:0;">
-          <div class="card-title">Ocorrências</div>
-          <div id="osOcForm" style="margin-bottom:16px; padding-bottom:16px; border-bottom:1px dashed rgba(148,163,184,.35);">
-            <div class="form-group combo" id="cmbOcTipo" style="margin-bottom:12px;"><label>Tipo de ocorrência * <span class="text-slate-500">(do tipo deste equipamento + gerais)</span></label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite para buscar..." /><div class="combo-lista" role="listbox"></div></div>
-            <div class="form-group combo" id="cmbOcCausa" style="margin-bottom:12px;"><label>Causa *</label><input type="text" class="combo-input" autocomplete="off" placeholder="Ex: Falha intrínseca, Erro operacional..." /><div class="combo-lista" role="listbox"></div></div>
-            <div class="form-group" style="margin-bottom:8px;"><label>Observação</label><textarea id="osOcObs" rows="3" placeholder="O que foi feito ou encontrado"></textarea></div>
-            <div class="eq-k" style="margin-bottom:10px;"><i class="fa-regular fa-clock"></i> Data e hora são registradas automaticamente.</div>
-            <div style="display:flex; gap:10px; justify-content:flex-end;">
-              <button type="button" id="osOcCancelar" class="eq-btn" style="display:none;" onclick="limparFormOcorrenciaOS_()">Cancelar correção</button>
-              <button type="button" id="osOcBtn" class="btn-submit" onclick="registrarOcorrenciaOS()"><i class="fa-solid fa-plus"></i> Registrar ocorrência</button>
-            </div>
-          </div>
-          <div id="osTimeline"></div>
-        </div>
-        </div>
-      </div>
+      <!-- ETAPA 4: FECHAMENTO -->
+      <section class="os-etapa" id="osEtapa4">
+        <div class="os-etapa-tit"><span class="n">4</span><div><b>Fechamento</b><div class="eq-k">Confira e feche a O.S.</div></div></div>
+        <ul id="osConf" class="os-conf"></ul>
+        <div class="os-sub">Serviço realizado <span class="eq-k" style="font-weight:500;">(montado a partir da mão de obra)</span></div>
+        <div id="osServicoPrevia" class="os-previa"></div>
+        <div class="os-etapa-pe">
+          <button type="button" class="eq-btn" onclick="irEtapaOS(2)">Voltar</button>
+          <span style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:flex-end;"><span id="osConfDica" class="eq-k"></span>
+            <button type="button" id="osBtnFechar" class="btn-submit" onclick="fecharOS()"><i class="fa-solid fa-lock"></i> Fechar O.S.</button></span></div>
+        <div class="os-sub">Histórico</div>
+        <div id="osTimeline"></div>
+      </section>
     </div>
   </div>
 
@@ -3570,7 +3661,8 @@ abaAgenda.appendRow([
       const r = await rpcPriv('criar_os', { p_dados: {
         cliente: d.cliente, tag: d.tag, serie: d.serie, patrimonio: d.patrimonio, equipamento: d.equipamento, tipo_manutencao: d.tipoManutencao,
         execucao: d.execucao, prioridade: d.prioridade, solicitante: d.solicitante, tecnico: d.tecnico,
-        defeito_relatado: d.defeitoRelatado, diagnostico_tecnico: d.diagnosticoTecnico, servico_realizado: d.servicoRealizado } });
+        defeito_relatado: d.defeitoRelatado, diagnostico_tecnico: d.diagnosticoTecnico, servico_realizado: d.servicoRealizado,
+        ocorrencia_id: d.ocorrenciaId || null, causa_id: d.causaId || null } });
       return r.ok ? { status: "sucesso", protocoloOS: r.protocolo, id: r.id } : { status: "erro", mensagem: textoErroPriv(r) };
     }
 
@@ -5953,6 +6045,7 @@ abaAgenda.appendRow([
         (i.tag || '').toLowerCase() === val
       );
       if (eq) {
+        if (document.getElementById('osTag').value !== (eq.tag || "-")) limparOcorrenciaNovaOS_();   // outro equipamento: outra lista
         document.getElementById('osTag').value = eq.tag || "-";
         document.getElementById('osSerie').value = eq.serie || "-";
         document.getElementById('osPatrimonio').value = eq.patrimonio || "-";
@@ -6107,7 +6200,7 @@ abaAgenda.appendRow([
     }
 
     // ---------- Ficha da O.S.: dados, ocorrências, fechar e reabrir ----------
-    let osAtual = null, osOcEditando = null, _confResolver = null, _confMinimo = 0;
+    let osAtual = null, _confResolver = null, _confMinimo = 0;
 
     function novoUuid_() {
       if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
@@ -6139,34 +6232,62 @@ abaAgenda.appendRow([
       return false;
     }
 
+    // ----- ficha em etapas (passo a passo) -----
+    // 1 Requisição -> 2 Diagnóstico -> 3 Mão de obra -> 4 Fechamento.
+    // Só avança com a etapa atual completa; pode voltar enquanto a O.S. estiver aberta.
+    const OS_ETAPAS = [
+      { n: 1, nome: 'Requisição', sub: 'Chamado e motivo' },
+      { n: 2, nome: 'Diagnóstico', sub: 'Análise do técnico' },
+      { n: 3, nome: 'Mão de obra', sub: 'Tempo e serviço' },
+      { n: 4, nome: 'Fechamento', sub: 'Conferência' }
+    ];
+    const OS_SEM_TIPO = '00000000-0000-0000-0000-000000000000';
+    let osEtapaVendo = -1, osSujo = false;
+
+    function marcarSujoOS() { osSujo = true; }
+    function subValePara_(it) { return it.aplica_todos ? 'Todos os equipamentos' : ((it.vale_para && it.vale_para.texto) || ''); }
+
     function garantirCombosOS() {
       if (combos.cmbOcTipo) return;
-      const SEM_TIPO = '00000000-0000-0000-0000-000000000000';
+      const tipoEq = () => (osAtual && osAtual.equipamento && osAtual.equipamento.tipo_id) || OS_SEM_TIPO;
       combos.cmbOcTipo = new Combo('cmbOcTipo', {
-        catalogo: 'tipos_ocorrencia', tipo: () => (osAtual && osAtual.equipamento && osAtual.equipamento.tipo_id) || SEM_TIPO,
-        subItem: it => it.tipo_nome ? 'só para ' + it.tipo_nome : 'geral',
-        dicaVazio: 'Peça a quem gerencia os catálogos para cadastrar os tipos de ocorrência deste equipamento.'
+        catalogo: 'tipos_ocorrencia', tipo: tipoEq, subItem: subValePara_, aoMudar: marcarSujoOS,
+        dicaVazio: 'Peça a quem gerencia os catálogos para cadastrar as ocorrências deste tipo ou grupo de equipamento.'
       });
-      combos.cmbOcCausa = new Combo('cmbOcCausa', { catalogo: 'causas' });
+      combos.cmbOcCausa = new Combo('cmbOcCausa', { catalogo: 'causas', aoMudar: marcarSujoOS });
+      combos.cmbOsAnalise = new Combo('cmbOsAnalise', {
+        catalogo: 'analises', tipo: tipoEq, subItem: subValePara_, aoMudar: marcarSujoOS,
+        dicaVazio: 'Peça a quem gerencia os catálogos para cadastrar as análises deste tipo ou grupo de equipamento.'
+      });
     }
 
     async function abrirFichaOS(protocolo) {
       garantirCombosOS();
+      osTempos = null; osTrechosAbertos = false; osEtapaVendo = -1; osSujo = false;
       document.getElementById('modalOS').classList.add('active');
       document.getElementById('osFichaNumero').textContent = protocolo;
-      document.getElementById('osTimeline').innerHTML = '<div class="eq-k">Carregando...</div>';
+      document.getElementById('osResumo').innerHTML = '<span class="eq-k">Carregando...</span>';
+      document.getElementById('osPassos').innerHTML = '';
+      document.querySelectorAll('#modalOS .os-etapa').forEach(s => s.classList.remove('ativa'));
+      document.getElementById('osTimeline').innerHTML = '';
       const r = await rpcPriv('os_obter', { p_protocolo: protocolo });
-      if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); fecharFichaOS(); return; }
-      osAtual = r; osOcEditando = null;
+      if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); fecharFichaOS(true); return; }
+      osAtual = r;
       renderFichaOS();
       carregarTemposOS();
     }
 
-    function fecharFichaOS() {
+    async function fecharFichaOS(forcar) {
+      if (!forcar && osSujo && osAtual && osAtual.os.status !== 'FECHADA') {
+        const c = await confirmarAcao({ titulo: 'Sair sem salvar?', rotuloBotao: 'Sair sem salvar',
+          texto: 'Há alterações nesta etapa que ainda não foram salvas. Se sair agora, elas serão descartadas.' });
+        if (!c.ok) return false;
+      }
       document.getElementById('modalOS')?.classList.remove('active');
-      osAtual = null; osOcEditando = null;
+      osAtual = null; osSujo = false; osEtapaVendo = -1;
       pararRelogioOS_(); osTempos = null; osTrechosAbertos = false;
       buscarAtualizacoesSilenciosas();
+      return true;
     }
 
     async function recarregarFichaOS() {
@@ -6177,7 +6298,7 @@ abaAgenda.appendRow([
 
     function renderFichaOS() {
       if (!osAtual) return;
-      const o = osAtual.os, eq = osAtual.equipamento, fechada = o.status === 'FECHADA', e = escAttr_;
+      const o = osAtual.os, fechada = o.status === 'FECHADA', e = escAttr_;
       const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v === null || v === undefined ? '' : v; };
       document.getElementById('osFichaNumero').textContent = o.protocolo;
       document.getElementById('osFichaPrefixo').style.display = /^OS/i.test(o.protocolo) ? 'none' : '';
@@ -6186,59 +6307,176 @@ abaAgenda.appendRow([
       const rb = document.getElementById('osFichaReab');
       rb.style.display = o.reaberturas > 0 ? '' : 'none'; rb.textContent = 'Reaberta ' + o.reaberturas + 'x';
       const podeReabrir = temPermissao('os.reabrir');
-      document.getElementById('osBtnFechar').style.display = fechada ? 'none' : '';
       const br = document.getElementById('osBtnReabrir');
       br.style.display = fechada ? '' : 'none'; br.disabled = !podeReabrir;
       br.title = podeReabrir ? '' : "Reabrir exige a permissão 'Reabrir O.S. fechada'";
       const av = document.getElementById('osAvisoFechada');
       av.style.display = fechada ? '' : 'none';
-      av.textContent = fechada ? `O.S. fechada em ${fmtBR(o.data_fechamento)}${o.fechada_por ? ' por ' + o.fechada_por : ''}. Para editar ou registrar ocorrências, reabra a O.S.${podeReabrir ? '' : ' (reabrir exige a permissão "Reabrir O.S. fechada")'}` : '';
+      av.textContent = fechada ? `O.S. fechada em ${fmtBR(o.data_fechamento)}${o.fechada_por ? ' por ' + o.fechada_por : ''}. Para editar, reabra a O.S.${podeReabrir ? '' : ' (reabrir exige a permissão "Reabrir O.S. fechada")'}` : '';
+      document.getElementById('osBox').classList.toggle('leitura', fechada);
 
+      // faixa de resumo (sempre visível)
+      document.getElementById('osResumo').innerHTML =
+        `<span class="eqn">${e(o.equipamento || 'Equipamento não informado')}</span>` +
+        (o.tag ? `<span>TAG <b>${e(o.tag)}</b></span>` : '') +
+        (o.cliente ? `<span>${e(o.cliente)}</span>` : '') +
+        `<span>${e(o.tipo_manutencao || '')}${o.prioridade ? ', prioridade ' + e(String(o.prioridade).toLowerCase()) : ''}</span>` +
+        `<span class="eq-k">Aberta em ${e(fmtBR(o.data_abertura))}</span>` +
+        (o.tag ? `<button type="button" class="eq-link" onclick="abrirEquipamentoDaOS()">ver ficha do equipamento</button>` : '');
+
+      // etapa 1
       set('osfAbertura', fmtBR(o.data_abertura)); set('osfFechamento', fechada ? fmtBR(o.data_fechamento) : '—');
       set('osfCliente', o.cliente); set('osfEquipamento', o.equipamento);
       set('osfTag', o.tag); set('osfSerie', o.serie); set('osfPatrimonio', o.patrimonio);
-      document.getElementById('osfVerEquip').style.display = o.tag ? '' : 'none';
       set('osfTipo', o.tipo_manutencao); set('osfExecucao', o.execucao || 'INTERNA'); set('osfPrioridade', o.prioridade || 'MÉDIA');
-      set('osfSolicitante', o.solicitante); set('osfDefeito', o.defeito_relatado); set('osfDiagnostico', o.diagnostico_tecnico); set('osfServico', o.servico_realizado);
+      set('osfSolicitante', o.solicitante); set('osfDefeito', o.defeito_relatado);
       const nomes = (bancoDados.usuarios || []).map(u => u.nome).filter(Boolean);
       if (o.tecnico && !nomes.includes(o.tecnico)) nomes.unshift(o.tecnico);
       const sel = document.getElementById('osfTecnico');
       sel.innerHTML = '<option value="">—</option>' + nomes.map(n => `<option value="${e(n)}">${e(n)}</option>`).join('');
       set('osfTecnico', o.tecnico);
-      ['osfTipo', 'osfExecucao', 'osfPrioridade', 'osfTecnico', 'osfSolicitante', 'osfDefeito', 'osfDiagnostico', 'osfServico'].forEach(id => { document.getElementById(id).disabled = fechada; });
-      document.getElementById('osBtnSalvar').style.display = fechada ? 'none' : '';
-      document.getElementById('osOcForm').style.display = fechada ? 'none' : '';
-      limparFormOcorrenciaOS_();
+      combos.cmbOcTipo.definir(o.ocorrencia_id ? { id: o.ocorrencia_id, nome: o.ocorrencia_nome } : null);
+      combos.cmbOcCausa.definir(o.causa_id ? { id: o.causa_id, nome: o.causa_nome } : null);
+      // etapa 2
+      combos.cmbOsAnalise.definir(o.analise_id ? { id: o.analise_id, nome: o.analise_nome } : null);
+      set('osfDiagnostico', o.diagnostico_tecnico);
+
+      ['osfTipo', 'osfExecucao', 'osfPrioridade', 'osfTecnico', 'osfSolicitante', 'osfDefeito', 'osfDiagnostico'].forEach(id => { document.getElementById(id).disabled = fechada; });
+      [combos.cmbOcTipo, combos.cmbOcCausa, combos.cmbOsAnalise].forEach(c => { c.input.disabled = fechada; });
+      osSujo = false;
       renderTimelineOS();
+      atualizarPassosOS_();
     }
 
-    function coletarDadosOS_() {
-      const v = id => (document.getElementById(id).value || '').trim();
-      return { tipo_manutencao: v('osfTipo'), execucao: v('osfExecucao'), prioridade: v('osfPrioridade'), tecnico: v('osfTecnico'),
-               solicitante: v('osfSolicitante'), defeito_relatado: v('osfDefeito'), diagnostico_tecnico: v('osfDiagnostico'), servico_realizado: v('osfServico') };
+    // situação de cada etapa, calculada a partir dos dados da O.S. e da mão de obra
+    function estadoOS_() {
+      const o = osAtual.os, carregado = !!osTempos, validos = trechosValidosOS_();
+      const fechados = validos.filter(a => a.fim);
+      const tempoMs = fechados.reduce((s, a) => s + duracaoMs_(a), 0);
+      const semDesc = fechados.filter(a => !String(a.descricao || '').trim());
+      const rodando = validos.filter(a => !a.fim);
+      const feitas = [!!(o.ocorrencia_id && o.causa_id), !!o.analise_id,
+                      carregado && tempoMs > 0 && !semDesc.length && !rodando.length, o.status === 'FECHADA'];
+      let atual = feitas.indexOf(false); if (atual < 0) atual = 3;
+      return { feitas, atual, carregado, tempoMs, semDesc, rodando };
     }
 
-    async function salvarAlteracoesOS() {
+    function atualizarPassosOS_() {
       if (!osAtual) return;
-      const btn = document.getElementById('osBtnSalvar'); btn.disabled = true;
-      const r = await rpcPriv('os_atualizar', { p_protocolo: osAtual.os.protocolo, p_dados: coletarDadosOS_() });
+      const st = estadoOS_(), fechada = osAtual.os.status === 'FECHADA';
+      if (osEtapaVendo < 0 || osEtapaVendo > st.atual) osEtapaVendo = st.atual;
+      document.getElementById('osPassos').innerHTML = OS_ETAPAS.map((p, i) => {
+        const cls = st.feitas[i] ? 'feito' : (!fechada && i === st.atual ? 'atual' : '');
+        const vendo = !fechada && i === osEtapaVendo;
+        const pode = fechada || i <= st.atual;
+        return `<li><button type="button" class="os-passo ${cls}${vendo ? ' vendo' : ''}" data-i="${i}" ${pode ? '' : 'disabled'}
+          ${vendo ? 'aria-current="step"' : ''} onclick="irEtapaOS(+this.dataset.i)">
+          <span class="n">${st.feitas[i] ? '<i class="fa-solid fa-check"></i>' : p.n}</span>
+          <span class="t">${p.nome}<span class="s">${p.sub}</span></span></button></li>`;
+      }).join('');
+      document.querySelectorAll('#modalOS .os-etapa').forEach((sec, i) => sec.classList.toggle('ativa', fechada || i === osEtapaVendo));
+      renderConferenciaOS_(st);
+    }
+
+    async function irEtapaOS(i) {
+      if (!osAtual) return;
+      if (osAtual.os.status === 'FECHADA') {
+        const sec = document.getElementById('osEtapa' + (i + 1)); if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      if (i > estadoOS_().atual || i === osEtapaVendo) return;
+      if (osSujo) {
+        const c = await confirmarAcao({ titulo: 'Alterações não salvas', rotuloBotao: 'Descartar e trocar',
+          texto: 'Os dados desta etapa ainda não foram salvos. Trocar de etapa descarta as alterações.' });
+        if (!c.ok) return;
+        renderFichaOS();
+      }
+      osEtapaVendo = i;
+      atualizarPassosOS_();
+      document.getElementById('osPassos').scrollIntoView({ block: 'nearest' });
+    }
+
+    function dadosEtapaOS_(n) {
+      const v = id => (document.getElementById(id).value || '').trim();
+      if (n === 1) return { tipo_manutencao: v('osfTipo'), execucao: v('osfExecucao'), prioridade: v('osfPrioridade'), tecnico: v('osfTecnico'),
+        solicitante: v('osfSolicitante'), defeito_relatado: v('osfDefeito'), ocorrencia_id: combos.cmbOcTipo.valor, causa_id: combos.cmbOcCausa.valor };
+      return { analise_id: combos.cmbOsAnalise.valor, diagnostico_tecnico: v('osfDiagnostico') };
+    }
+
+    async function salvarEtapaOS(n) {
+      if (!osAtual) return;
+      const d = dadosEtapaOS_(n);
+      if (n === 1 && !d.ocorrencia_id) { showToast('Escolha a ocorrência (motivo do chamado).', 'error'); combos.cmbOcTipo.input.focus(); return; }
+      if (n === 1 && !d.causa_id) { showToast('Escolha a causa.', 'error'); combos.cmbOcCausa.input.focus(); return; }
+      if (n === 2 && !d.analise_id) { showToast('Escolha a análise realizada.', 'error'); combos.cmbOsAnalise.input.focus(); return; }
+      const btn = document.getElementById('osBtnEtapa' + n); btn.disabled = true;
+      const r = await rpcPriv('os_atualizar', { p_protocolo: osAtual.os.protocolo, p_dados: d });
       btn.disabled = false;
       if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); return; }
-      showToast("Alterações da O.S. salvas.", "success");
-      recarregarFichaOS();
+      osSujo = false; osEtapaVendo = n;          // índice n = próxima etapa
+      showToast(n === 1 ? 'Requisição salva.' : 'Diagnóstico salvo.', 'success');
+      await recarregarFichaOS();
+    }
+
+    function continuarMaoDeObraOS() {
+      if (!osAtual) return;
+      const st = estadoOS_();
+      if (!st.feitas[2]) {
+        const msg = !st.carregado ? 'Aguarde carregar a mão de obra.'
+          : st.rodando.length ? 'O cronômetro ainda está rodando: descreva o que foi feito e clique em "Registrar mão de obra".'
+          : st.semDesc.length ? 'Há tempo sem descrição do serviço: cada técnico precisa registrar a sua mão de obra.'
+          : 'Registre a mão de obra antes de continuar.';
+        showToast(msg, 'warning'); return;
+      }
+      osEtapaVendo = 3; atualizarPassosOS_();
+    }
+
+    // agrupa os trechos descritos: um "serviço registrado" por técnico + descrição
+    function lancamentosOS_() {
+      const g = {};
+      trechosValidosOS_().filter(a => a.fim && String(a.descricao || '').trim()).forEach(a => {
+        const desc = String(a.descricao).trim(), k = a.tecnico_nome + '\u0001' + desc;
+        const x = g[k] || (g[k] = { tecnico: a.tecnico_nome, descricao: desc, ms: 0, ini: a.inicio });
+        x.ms += duracaoMs_(a);
+        if (new Date(a.inicio) < new Date(x.ini)) x.ini = a.inicio;
+      });
+      return Object.values(g).sort((p, q) => new Date(p.ini) - new Date(q.ini));
+    }
+    function servicoMontadoOS_() { return lancamentosOS_().map(l => l.tecnico + ': ' + l.descricao).join('\n'); }
+
+    function renderConferenciaOS_(st) {
+      if (!osAtual) return;
+      const o = osAtual.os, e = escAttr_, fechada = o.status === 'FECHADA';
+      const itens = [
+        [!!o.ocorrencia_id, 'Ocorrência', o.ocorrencia_nome],
+        [!!o.causa_id, 'Causa', o.causa_nome],
+        [!!o.analise_id, 'Análise realizada', o.analise_nome],
+        [st.carregado && st.tempoMs > 0, 'Mão de obra registrada', st.carregado ? (st.tempoMs > 0 ? fmtHoras_(st.tempoMs) : '') : 'carregando...'],
+        [st.carregado && !st.semDesc.length, 'Todo o tempo com descrição do serviço', st.semDesc.length ? st.semDesc.length + ' trecho(s) sem descrição' : ''],
+        [st.carregado && !st.rodando.length, 'Nenhum cronômetro rodando', st.rodando.map(a => a.tecnico_nome).join(', ')]
+      ];
+      document.getElementById('osConf').innerHTML = itens.map(([ok, rot, det]) =>
+        `<li class="${ok ? 'ok' : 'falta'}"><span class="ic" aria-hidden="true"><i class="fa-solid ${ok ? 'fa-check' : 'fa-xmark'}"></i></span>
+          <span>${rot}${det ? ` <span class="eq-k">${e(det)}</span>` : ''}<span class="sr-only">${ok ? ' (ok)' : ' (pendente)'}</span></span></li>`).join('');
+      const tudo = itens.every(x => x[0]);
+      const btn = document.getElementById('osBtnFechar');
+      btn.style.display = fechada ? 'none' : '';
+      btn.disabled = !tudo;
+      document.getElementById('osConfDica').textContent = fechada ? '' : (tudo ? 'Tudo certo. Confira o serviço realizado e feche a O.S.' : 'Complete os itens em vermelho para fechar a O.S.');
+      document.getElementById('osServicoPrevia').textContent = fechada ? (o.servico_realizado || '—')
+        : (servicoMontadoOS_() || 'Aparece aqui a partir dos registros de mão de obra.');
     }
 
     async function fecharOS() {
       if (!osAtual) return;
-      const d = coletarDadosOS_();
-      if (!d.servico_realizado) { showToast('Preencha o "Serviço realizado" antes de fechar a O.S.', 'warning'); document.getElementById('osfServico').focus(); return; }
-      const rodando = trechosRodandoOS_();
-      if (rodando.length) { showToast('Há cronômetro rodando (' + rodando.map(a => a.tecnico_nome).join(', ') + '). Pause antes de fechar a O.S.', 'warning'); return; }
+      const st = estadoOS_();
+      if (st.feitas.slice(0, 3).some(x => !x)) { showToast('Complete as etapas anteriores antes de fechar a O.S.', 'warning'); return; }
       const c = await confirmarAcao({ titulo: 'Fechar O.S. ' + osAtual.os.protocolo, rotuloBotao: 'Fechar O.S.',
         texto: 'Depois de fechada, a O.S. não pode mais ser editada. Para alterar será preciso reabri-la (a reabertura exige permissão e motivo, e fica registrada).' });
       if (!c.ok) return;
-      let r = await rpcPriv('os_atualizar', { p_protocolo: osAtual.os.protocolo, p_dados: d });
-      if (r.ok) r = await rpcPriv('os_fechar', { p_protocolo: osAtual.os.protocolo });
+      const btn = document.getElementById('osBtnFechar'); btn.disabled = true;
+      const r = await rpcPriv('os_fechar', { p_protocolo: osAtual.os.protocolo });
+      btn.disabled = false;
       if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); recarregarFichaOS(); return; }
       showToast("O.S. " + osAtual.os.protocolo + " fechada.", "success");
       recarregarFichaOS();
@@ -6248,72 +6486,72 @@ abaAgenda.appendRow([
       if (!osAtual) return;
       if (!temPermissao('os.reabrir')) { showToast("Você não tem permissão para reabrir O.S. fechada.", "error"); return; }
       const c = await confirmarAcao({ titulo: 'Reabrir O.S. ' + osAtual.os.protocolo, rotuloBotao: 'Reabrir O.S.', motivo: true, minimo: 5,
-        texto: 'A O.S. volta a ficar aberta para edição e novas ocorrências. O motivo fica registrado na linha do tempo e na auditoria.' });
+        texto: 'A O.S. volta a ficar aberta para edição. O motivo fica registrado no histórico e na auditoria.' });
       if (!c.ok) return;
       const r = await rpcPriv('os_reabrir', { p_protocolo: osAtual.os.protocolo, p_motivo: c.motivo });
       if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); return; }
       showToast("O.S. " + osAtual.os.protocolo + " reaberta.", "success");
+      osEtapaVendo = -1;
       recarregarFichaOS();
     }
 
-    function abrirEquipamentoDaOS() {
+    async function abrirEquipamentoDaOS() {
       if (!osAtual || !osAtual.os.tag) return;
       const tag = osAtual.os.tag;
-      fecharFichaOS(); mudarAba('equipamentos'); abrirFichaEquipamento(tag);
+      if (!(await fecharFichaOS())) return;
+      mudarAba('equipamentos'); abrirFichaEquipamento(tag);
     }
 
-    // ----- ocorrências -----
-    function limparFormOcorrenciaOS_() {
-      osOcEditando = null;
-      if (combos.cmbOcTipo) combos.cmbOcTipo.limpar();
-      if (combos.cmbOcCausa) combos.cmbOcCausa.limpar();
-      const obs = document.getElementById('osOcObs'); if (obs) obs.value = '';
-      const b = document.getElementById('osOcBtn'); if (b) b.innerHTML = '<i class="fa-solid fa-plus"></i> Registrar ocorrência';
-      const c = document.getElementById('osOcCancelar'); if (c) c.style.display = 'none';
-    }
-
-    async function registrarOcorrenciaOS() {
-      if (!osAtual) return;
-      const tipo = combos.cmbOcTipo.valor, causa = combos.cmbOcCausa.valor, obs = (document.getElementById('osOcObs').value || '').trim();
-      if (!tipo) { showToast("Selecione o tipo de ocorrência.", "error"); return; }
-      if (!causa) { showToast("Selecione a causa.", "error"); return; }
-      const btn = document.getElementById('osOcBtn'); btn.disabled = true;
-      const r = await rpcPriv('os_ocorrencia_salvar', { p_protocolo: osAtual.os.protocolo, p_id: osOcEditando || novoUuid_(), p_dados: { tipo_ocorrencia_id: tipo, causa_id: causa, observacao: obs } });
-      btn.disabled = false;
-      if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); return; }
-      showToast(osOcEditando ? "Ocorrência corrigida." : "Ocorrência registrada.", "success");
-      await recarregarFichaOS();
-    }
-
-    function editarOcorrenciaOS(id) {
-      const ev = osAtual && osAtual.ocorrencias.find(x => x.id === id);
-      if (!ev) return;
-      osOcEditando = id;
-      combos.cmbOcTipo.definir({ id: ev.tipo_ocorrencia_id, nome: ev.tipo });
-      combos.cmbOcCausa.definir({ id: ev.causa_id, nome: ev.causa });
-      document.getElementById('osOcObs').value = ev.observacao || '';
-      document.getElementById('osOcBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar correção';
-      document.getElementById('osOcCancelar').style.display = '';
-      document.getElementById('osOcObs').focus();
-    }
-
+    // histórico (registros do sistema e ocorrências antigas), só leitura
     function renderTimelineOS() {
       const box = document.getElementById('osTimeline'), e = escAttr_;
       const lista = (osAtual && osAtual.ocorrencias) || [];
-      const fechada = osAtual && osAtual.os.status === 'FECHADA';
-      if (!lista.length) { box.innerHTML = '<div class="eq-k" style="padding:8px 0;">Nenhuma ocorrência registrada ainda.</div>'; return; }
-      const eu = usuarioLogado && usuarioLogado.nome;
-      box.innerHTML = lista.map(x => {
-        const editavel = !fechada && !x.automatica && (x.criado_por_nome === eu || temPermissao('os.reabrir'));
-        return `<div class="os-ev${x.automatica ? ' auto' : ''}">
+      if (!lista.length) { box.innerHTML = '<div class="eq-k" style="padding:6px 0;">O fechamento e as reaberturas da O.S. ficam registrados aqui.</div>'; return; }
+      box.innerHTML = lista.map(x => `<div class="os-ev${x.automatica ? ' auto' : ''}">
           <div class="os-ev-ponto"></div>
           <div class="os-ev-corpo">
             <div class="os-ev-topo"><b>${e(x.tipo) || (x.automatica ? 'Registro do sistema' : 'Ocorrência')}</b>${x.causa ? ` <span class="eq-chip cinza">${e(x.causa)}</span>` : ''}<span class="eq-k" style="margin-left:auto;">${e(fmtBR(x.ocorrido_em))}</span></div>
             ${x.observacao ? `<div class="os-ev-obs">${e(x.observacao)}</div>` : ''}
-            <div class="eq-k">${e(x.criado_por_nome) || ''}${x.atualizado_em ? ` · corrigido por ${e(x.atualizado_por_nome)} em ${e(fmtBR(x.atualizado_em))}` : ''}
-              ${editavel ? ` <button type="button" class="eq-link" data-id="${e(x.id)}" onclick="editarOcorrenciaOS(this.dataset.id)">Corrigir</button>` : ''}</div>
-          </div></div>`;
-      }).join('');
+            <div class="eq-k">${e(x.criado_por_nome) || ''}${x.atualizado_em ? ` · corrigido por ${e(x.atualizado_por_nome)} em ${e(fmtBR(x.atualizado_em))}` : ''}</div>
+          </div></div>`).join('');
+    }
+
+    // ----- mão de obra: registrar o serviço (para o cronômetro e grava a descrição) -----
+    function renderMaoDeObraOS_() {
+      if (!osAtual || !osTempos) return;
+      const e = escAttr_, fechada = osAtual.os.status === 'FECHADA', euId = osTempos.eu_id;
+      const consulta = usuarioLogado && usuarioLogado.perfil === 'CONSULTA';
+      const validos = trechosValidosOS_();
+      const meuRodando = validos.some(a => a.tecnico_id === euId && !a.fim);
+      const meusSemDesc = validos.filter(a => a.tecnico_id === euId && a.fim && !String(a.descricao || '').trim()).length;
+      document.getElementById('osMoReg').style.display = fechada || consulta ? 'none' : '';
+      document.getElementById('osMoBtn').disabled = !(meuRodando || meusSemDesc);
+      document.getElementById('osMoDica').textContent = meuRodando ? 'Ao registrar, o seu cronômetro para automaticamente.'
+        : meusSemDesc ? `Você tem ${meusSemDesc} trecho${meusSemDesc > 1 ? 's' : ''} de tempo sem descrição. Descreva o que foi feito.`
+        : 'Inicie o cronômetro ao começar o serviço. Ao terminar, descreva aqui o que foi feito.';
+      const semDesc = validos.filter(a => a.fim && !String(a.descricao || '').trim());
+      const nomes = [...new Set(semDesc.map(a => a.tecnico_nome))];
+      const pend = document.getElementById('osMoPend');
+      pend.style.display = semDesc.length && !fechada ? '' : 'none';
+      pend.textContent = semDesc.length ? `Tempo ainda sem descrição do serviço: ${nomes.join(', ')}. Cada técnico registra a sua mão de obra.` : '';
+      const lanc = lancamentosOS_();
+      document.getElementById('osMoLista').innerHTML = lanc.length ? lanc.map(l =>
+        `<div class="os-lanc"><div class="topo"><b>${e(l.tecnico)}</b><span class="eq-k">${e(fmtBR(l.ini))}</span><span class="dur">${fmtHoras_(l.ms)}</span></div>
+          <div class="desc">${e(l.descricao)}</div></div>`).join('')
+        : '<div class="eq-k" style="padding:4px 0;">Nenhum serviço registrado ainda.</div>';
+    }
+
+    async function registrarMaoDeObraOS() {
+      if (!osAtual) return;
+      const campo = document.getElementById('osMoDesc'), desc = (campo.value || '').trim();
+      if (desc.length < 10) { showToast('Descreva o que foi feito (mínimo de 10 letras).', 'error'); campo.focus(); return; }
+      const btn = document.getElementById('osMoBtn'); btn.disabled = true;
+      const r = await rpcPriv('os_cronometro', { p_protocolo: osAtual.os.protocolo, p_acao: 'registrar', p_descricao: desc });
+      btn.disabled = false;
+      if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); return; }
+      campo.value = '';
+      showToast('Mão de obra registrada. Cronômetro parado.', 'success');
+      carregarTemposOS();
     }
 
     // ----- mão de obra (cronômetro) -----
@@ -6377,6 +6615,8 @@ abaAgenda.appendRow([
       atualizarRelogiosOS_();
       pararRelogioOS_();
       if (validos.some(a => !a.fim)) osRelogioTimer = setInterval(atualizarRelogiosOS_, 1000);
+      renderMaoDeObraOS_();
+      atualizarPassosOS_();
     }
 
     function atualizarRelogiosOS_() {
@@ -6428,7 +6668,7 @@ abaAgenda.appendRow([
       box.innerHTML = (osTempos.apontamentos || []).map(a => {
         const per = `${fmtBR(a.inicio)} → ${a.fim ? fmtBR(a.fim).slice(-5) : 'rodando'}`;
         const chips = (a.origem === 'MANUAL' ? ' <span class="eq-chip ambar">Manual</span>' : '') + (a.cancelado ? ' <span class="eq-chip vermelho">Excluído</span>' : '');
-        const obs = [a.justificativa ? 'Justificativa: ' + a.justificativa : '', a.encerrado_por_nome ? 'Pausado por ' + a.encerrado_por_nome : '',
+        const obs = [a.descricao ? 'Serviço: ' + a.descricao : 'Sem descrição do serviço', a.justificativa ? 'Justificativa: ' + a.justificativa : '', a.encerrado_por_nome ? 'Pausado por ' + a.encerrado_por_nome : '',
           a.cancelado ? `${a.cancelado_por_nome || ''}: ${a.motivo_cancelamento || ''}` : '', a.origem === 'MANUAL' ? 'Lançado por ' + (a.criado_por_nome || '') : ''].filter(Boolean);
         const acoes = podeMexer && !a.cancelado ? ` <button type="button" class="eq-link" data-id="${e(a.id)}" onclick="corrigirTrechoOS(this.dataset.id)">Corrigir</button>
           <button type="button" class="eq-link" data-id="${e(a.id)}" onclick="excluirTrechoOS(this.dataset.id)">Excluir</button>` : '';
@@ -6449,6 +6689,7 @@ abaAgenda.appendRow([
       document.getElementById('osTempoIni').value = trecho ? paraInputLocal_(trecho.inicio) : '';
       document.getElementById('osTempoFim').value = trecho ? paraInputLocal_(trecho.fim || agoraServidor_()) : paraInputLocal_(agoraServidor_());
       document.getElementById('osTempoJust').value = '';
+      document.getElementById('osTempoDesc').value = trecho ? (trecho.descricao || '') : '';
       document.getElementById('osTempoFormTitulo').textContent = trecho ? `Corrigir trecho de ${trecho.tecnico_nome} (o original fica registrado como corrigido)` : 'Lançar tempo manual';
       document.getElementById('osTempoForm').style.display = '';
       (trecho ? document.getElementById('osTempoIni') : sel).focus();
@@ -6459,14 +6700,15 @@ abaAgenda.appendRow([
     async function salvarLancamentoManualOS() {
       if (!osAtual) return;
       const v = id => (document.getElementById(id).value || '').trim();
-      const tec = v('osTempoTec'), ini = v('osTempoIni'), fim = v('osTempoFim'), just = v('osTempoJust');
+      const tec = v('osTempoTec'), ini = v('osTempoIni'), fim = v('osTempoFim'), just = v('osTempoJust'), desc = v('osTempoDesc');
       if (!tec) { showToast("Selecione o técnico.", "error"); return; }
       if (!ini || !fim) { showToast("Informe início e fim.", "error"); return; }
       if (new Date(fim) <= new Date(ini)) { showToast("O fim precisa ser depois do início.", "error"); return; }
+      if (desc.length < 10) { showToast("Descreva o que foi feito (mínimo de 10 letras).", "error"); document.getElementById('osTempoDesc').focus(); return; }
       if (just.length < 5) { showToast("Informe a justificativa (mínimo de 5 letras).", "error"); document.getElementById('osTempoJust').focus(); return; }
       const btn = document.getElementById('osTempoBtnSalvar'); btn.disabled = true;
       const r = await rpcPriv('os_tempo_ajustar', { p_protocolo: osAtual.os.protocolo, p_id: novoUuid_(),
-        p_dados: { tecnico_id: tec, inicio: new Date(ini).toISOString(), fim: new Date(fim).toISOString(), justificativa: just, substitui_id: osTempoSubstitui } });
+        p_dados: { tecnico_id: tec, inicio: new Date(ini).toISOString(), fim: new Date(fim).toISOString(), justificativa: just, descricao: desc, substitui_id: osTempoSubstitui } });
       btn.disabled = false;
       if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); return; }
       showToast(osTempoSubstitui ? "Trecho corrigido." : "Tempo lançado.", "success");
@@ -6486,21 +6728,41 @@ abaAgenda.appendRow([
       carregarTemposOS();
     }
 
+    // listas da abertura: a ocorrência depende do tipo/grupo do equipamento escolhido
+    function tipoEquipNovaOS_() {
+      const tag = (document.getElementById('osTag').value || '').trim();
+      const eq = tag && tag !== '-' ? (bancoDados.equipamentos || []).find(x => x.tag === tag) : null;
+      return (eq && eq.tipoId) || OS_SEM_TIPO;
+    }
+    function garantirCombosNovaOS(abrirId) {
+      if (combos.cmbNovaOsOc) return;
+      combos.cmbNovaOsOc = new Combo('cmbNovaOsOc', { catalogo: 'tipos_ocorrencia', tipo: tipoEquipNovaOS_, subItem: subValePara_,
+        dicaVazio: 'Peça a quem gerencia os catálogos para cadastrar as ocorrências deste tipo ou grupo de equipamento.' });
+      combos.cmbNovaOsCausa = new Combo('cmbNovaOsCausa', { catalogo: 'causas' });
+      if (abrirId && combos[abrirId]) combos[abrirId].aoDigitar('', true);   // o foco já aconteceu: abre a lista
+    }
+    function limparOcorrenciaNovaOS_() { if (combos.cmbNovaOsOc) combos.cmbNovaOsOc.limpar(); }
+
     function salvarNovaOS(e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
       const g = id => document.getElementById(id).value.trim();
+      garantirCombosNovaOS();
+      const ocorrencia = combos.cmbNovaOsOc.valor;
+      if (!g('osTag') || g('osTag') === '-') { showToast('Escolha o equipamento da O.S.', 'error'); document.getElementById('osBuscaEquip').focus(); return false; }
+      if (!ocorrencia) { showToast('Escolha a ocorrência (motivo do chamado).', 'error'); combos.cmbNovaOsOc.input.focus(); return false; }
       const btn = document.getElementById('btnSalvarOS');
       btn.disabled = true;
       postAPI({
-        acao: "CRIAR_OS",
+        acao: "CRIAR_OS", ocorrenciaId: ocorrencia, causaId: combos.cmbNovaOsCausa.valor,
         cliente: g('osCliente'), tag: g('osTag'), serie: g('osSerie'), patrimonio: g('osPatrimonio'),
         equipamento: g('osNomeEquip'), tipoManutencao: g('osTipo'), execucao: g('osExecucao'), prioridade: g('osPrioridade'),
         solicitante: g('osSolicitante'), tecnico: g('osTecnico'),
-        defeitoRelatado: g('osDefeito'), diagnosticoTecnico: g('osDiagnostico'), servicoRealizado: g('osServico')
+        defeitoRelatado: g('osDefeito')
       }).then(res => {
         btn.disabled = false;
         if (res.status === "sucesso") {
           document.getElementById('formNovaOS').reset();
+          combos.cmbNovaOsOc.limpar(); combos.cmbNovaOsCausa.limpar();
           showToast(`O.S. ${res.protocoloOS} aberta!`, "success");
           buscarAtualizacoesSilenciosas();
           mudarAba('os_gestao');
@@ -6730,7 +6992,12 @@ abaAgenda.appendRow([
           { k: 'registro_anvisa', r: 'Registro ANVISA', t: 'texto' },
           { k: 'validade_anvisa', r: 'Validade do registro', t: 'data' }]
       },
-      tipos_equipamento: { rotulo: 'Tipos de equipamento', singular: 'tipo', colunas: [['nome', 'Tipo (descrição)']], campos: [{ k: 'nome', r: 'Nome', t: 'texto', obrig: true }] },
+      tipos_equipamento: {
+        rotulo: 'Tipos de equipamento', singular: 'tipo', colunas: [['nome', 'Tipo (descrição)'], ['grupo_nome', 'Grupo']],
+        campos: [{ k: 'nome', r: 'Nome', t: 'texto', obrig: true },
+                 { k: 'grupo_id', r: 'Grupo de equipamento', t: 'combo', catalogo: 'grupos_equipamento', nomeKey: 'grupo_nome', dica: 'O tipo passa a receber as ocorrências e análises cadastradas para o grupo.' }]
+      },
+      grupos_equipamento: { rotulo: 'Grupos de equipamento', singular: 'grupo', colunas: [['nome', 'Grupo'], ['qtd_tipos', 'Tipos no grupo']], campos: [{ k: 'nome', r: 'Nome', t: 'texto', obrig: true }] },
       fornecedores: {
         rotulo: 'Fornecedores', singular: 'fornecedor', colunas: [['nome', 'Fornecedor'], ['cnpj', 'CNPJ'], ['telefone', 'Telefone'], ['email', 'E-mail']],
         campos: [{ k: 'nome', r: 'Nome', t: 'texto', obrig: true }, { k: 'cnpj', r: 'CNPJ', t: 'texto' }, { k: 'telefone', r: 'Telefone', t: 'texto' }, { k: 'email', r: 'E-mail', t: 'texto' }]
@@ -6748,11 +7015,15 @@ abaAgenda.appendRow([
         campos: [{ k: 'nome', r: 'Nome', t: 'texto', obrig: true }, { k: 'cnpj', r: 'CNPJ', t: 'texto' }, { k: 'telefone', r: 'Telefone', t: 'texto' }, { k: 'email', r: 'E-mail', t: 'texto' }, { k: 'endereco', r: 'Endereço', t: 'texto' }]
       },
       tipos_ocorrencia: {
-        rotulo: 'Tipos de ocorrência', singular: 'tipo de ocorrência', colunas: [['nome', 'Tipo de ocorrência'], ['tipo_nome', 'Vale para', 'todos']],
-        campos: [{ k: 'nome', r: 'Nome', t: 'texto', obrig: true },
-                 { k: 'tipo_equipamento_id', r: 'Tipo de equipamento', t: 'combo', catalogo: 'tipos_equipamento', nomeKey: 'tipo_nome', dica: 'Deixe em branco para valer para todos os equipamentos.' }]
+        rotulo: 'Ocorrências', singular: 'ocorrência', colunas: [['nome', 'Ocorrência (motivo do chamado)'], ['vale_para_txt', 'Vale para']],
+        campos: [{ k: 'nome', r: 'Nome', t: 'texto', obrig: true }, { k: 'vale_para', r: 'Vale para', t: 'valepara' }]
       },
-      causas: { rotulo: 'Causas', singular: 'causa', colunas: [['nome', 'Causa']], campos: [{ k: 'nome', r: 'Nome', t: 'texto', obrig: true }] }
+      causas: { rotulo: 'Causas', singular: 'causa', colunas: [['nome', 'Causa']], campos: [{ k: 'nome', r: 'Nome', t: 'texto', obrig: true }] },
+      analises: {
+        rotulo: 'Análises realizadas', singular: 'análise', colunas: [['nome', 'Análise realizada'], ['vale_para_txt', 'Vale para']],
+        campos: [{ k: 'nome', r: 'Nome', t: 'texto', obrig: true }, { k: 'vale_para', r: 'Vale para', t: 'valepara' }]
+      },
+      motivos_pendencia: { rotulo: 'Motivos de pendência', singular: 'motivo de pendência', colunas: [['nome', 'Motivo de pendência']], campos: [{ k: 'nome', r: 'Nome', t: 'texto', obrig: true }] }
     };
     let catAtual = 'fabricantes', catItens = [], catTotal = 0, _catTimer = null, _catEditando = null, _unirOrigem = null;
 
@@ -6785,6 +7056,7 @@ abaAgenda.appendRow([
       const inativos = !!document.getElementById('catInativos')?.checked;
       const r = await buscarCatalogo(catAtual, termo, null, 50, offset, !inativos);
       if (r.erro) { document.getElementById('catInfo').textContent = 'Não foi possível carregar: ' + r.erro; return; }
+      (r.itens || []).forEach(it => { if (it.vale_para) it.vale_para_txt = it.vale_para.texto; });
       catItens = offset ? catItens.concat(r.itens) : r.itens;
       catTotal = r.total;
       renderCatalogoTela();
@@ -6812,6 +7084,15 @@ abaAgenda.appendRow([
       document.getElementById('catFormTitulo').textContent = (it ? 'Editar ' : 'Novo ') + cfg.singular;
       const e = escAttr_;
       document.getElementById('catFormCampos').innerHTML = cfg.campos.map(c => {
+        if (c.t === 'valepara') return `<div class="form-group" style="margin-bottom:12px;"><label>${c.r} *</label>
+          <div class="os-vp-op"><label><input type="radio" name="catVpModo" value="todos" style="width:auto;" onchange="mudarModoValePara()" /> Todos os equipamentos</label>
+            <label><input type="radio" name="catVpModo" value="alguns" style="width:auto;" onchange="mudarModoValePara()" /> Só alguns grupos ou tipos</label></div>
+          <div id="catVpAlguns" style="display:none;">
+            <div class="form-group combo" id="catVpGrupo" style="margin:12px 0 6px;"><label>Grupos de equipamento</label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite para adicionar um grupo..." /><div class="combo-lista" role="listbox"></div></div>
+            <div id="catVpGrupos" class="os-vp-chips"></div>
+            <div class="form-group combo" id="catVpTipo" style="margin:12px 0 6px;"><label>Tipos de equipamento <span class="text-slate-500">(fora dos grupos acima)</span></label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite para adicionar um tipo..." /><div class="combo-lista" role="listbox"></div></div>
+            <div id="catVpTipos" class="os-vp-chips"></div>
+          </div></div>`;
         if (c.t === 'combo') return `<div class="form-group combo" id="catc_${c.k}" style="margin-bottom:12px;"><label>${c.r}${c.obrig ? ' *' : ''}</label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite para buscar..." /><div class="combo-lista" role="listbox"></div>${c.dica ? `<div class="eq-k" style="margin-top:4px;">${c.dica}</div>` : ''}</div>`;
         return `<div class="form-group" style="margin-bottom:12px;"><label>${c.r}${c.obrig ? ' *' : ''}</label><input type="${c.t === 'data' ? 'date' : 'text'}" id="catf_${c.k}" value="${e(it ? (it[c.k] || '') : '')}" ${c.k === 'nome' ? 'maxlength="200"' : ''} /></div>`;
       }).join('');
@@ -6819,10 +7100,43 @@ abaAgenda.appendRow([
         const cb = combos['catc_' + c.k] = new Combo('catc_' + c.k, { catalogo: c.catalogo });
         if (it && it[c.k]) cb.definir({ id: it[c.k], nome: it[c.nomeKey] });
       });
+      if (cfg.campos.some(c => c.t === 'valepara')) {
+        const vp = (it && it.vale_para) || {};
+        catVP = { todos: it ? !!it.aplica_todos : true,
+                  grupos: (vp.grupos || []).map(x => ({ id: x.id, nome: x.nome })), tipos: (vp.tipos || []).map(x => ({ id: x.id, nome: x.nome })) };
+        combos.catVpGrupo = new Combo('catVpGrupo', { catalogo: 'grupos_equipamento', aoMudar: x => adicionarValePara_('grupos', x, 'catVpGrupo') });
+        combos.catVpTipo = new Combo('catVpTipo', { catalogo: 'tipos_equipamento', subItem: x => x.grupo_nome ? 'grupo ' + x.grupo_nome : 'sem grupo',
+                                                    aoMudar: x => adicionarValePara_('tipos', x, 'catVpTipo') });
+        document.querySelector(`input[name="catVpModo"][value="${catVP.todos ? 'todos' : 'alguns'}"]`).checked = true;
+        renderValePara_();
+      } else catVP = null;
       document.getElementById('catfAtivo').checked = it ? !!it.ativo : true;
       document.getElementById('catFormAtivoGrp').style.display = it ? '' : 'none';
       document.getElementById('modalCatalogo').classList.add('active');
       const primeiro = document.querySelector('#catFormCampos input:not([type=hidden])'); if (primeiro) primeiro.focus();
+    }
+    // campo "Vale para" (Todos / grupos / tipos) de ocorrências e análises
+    let catVP = null;
+    function adicionarValePara_(lista, it, comboId) {
+      if (!it || !catVP) return;
+      if (!catVP[lista].some(x => x.id === it.id)) catVP[lista].push({ id: it.id, nome: it.nome });
+      setTimeout(() => { if (combos[comboId]) combos[comboId].limpar(); }, 0);
+      renderValePara_();
+    }
+    function removerValePara(lista, id) { if (!catVP) return; catVP[lista] = catVP[lista].filter(x => x.id !== id); renderValePara_(); }
+    function mudarModoValePara() {
+      const m = document.querySelector('input[name="catVpModo"]:checked');
+      if (catVP && m) { catVP.todos = m.value === 'todos'; renderValePara_(); }
+    }
+    function renderValePara_() {
+      if (!catVP) return;
+      const e = escAttr_;
+      document.getElementById('catVpAlguns').style.display = catVP.todos ? 'none' : '';
+      const chips = lista => catVP[lista].length ? catVP[lista].map(x =>
+        `<span class="eq-chip azul">${e(x.nome)}<button type="button" class="os-vp-x" aria-label="Remover ${e(x.nome)}" data-l="${lista}" data-id="${e(x.id)}" onclick="removerValePara(this.dataset.l, this.dataset.id)">×</button></span>`).join('')
+        : '<span class="eq-k">Nenhum.</span>';
+      document.getElementById('catVpGrupos').innerHTML = chips('grupos');
+      document.getElementById('catVpTipos').innerHTML = chips('tipos');
     }
     function fecharFormCatalogo() { document.getElementById('modalCatalogo')?.classList.remove('active'); _catEditando = null; }
 
@@ -6830,6 +7144,11 @@ abaAgenda.appendRow([
       if (ev) { ev.preventDefault(); ev.stopPropagation(); }
       const cfg = CATALOGOS[catAtual], dados = {};
       for (const c of cfg.campos) {
+        if (c.t === 'valepara') {
+          if (!catVP.todos && !catVP.grupos.length && !catVP.tipos.length) { showToast('Escolha pelo menos um grupo ou tipo de equipamento, ou marque "Todos os equipamentos".', 'error'); return false; }
+          dados.vale_para = { todos: catVP.todos, grupos: catVP.grupos.map(x => x.id), tipos: catVP.tipos.map(x => x.id) };
+          continue;
+        }
         const v = c.t === 'combo' ? combos['catc_' + c.k].valor : (document.getElementById('catf_' + c.k).value || '').trim();
         if (c.obrig && !v) { showToast('Preencha: ' + c.r + '.', 'error'); return false; }
         dados[c.k] = v;
@@ -6839,7 +7158,7 @@ abaAgenda.appendRow([
       const r = await salvarCatalogo(catAtual, _catEditando ? _catEditando.id : null, dados);
       btn.disabled = false;
       if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); return false; }
-      showToast(cfg.singular.charAt(0).toUpperCase() + cfg.singular.slice(1) + ' salvo: ' + (r.nome || '') , 'success');
+      showToast('Salvo: ' + (r.nome || cfg.singular), 'success');
       fecharFormCatalogo();
       carregarCatalogoTela(0);
       return false;
@@ -6882,8 +7201,11 @@ abaAgenda.appendRow([
       unidades: { obrig: ['nome'], todas: ['nome', 'cnpj', 'telefone', 'email', 'endereco'] },
       setores: { obrig: ['cliente', 'nome'], todas: ['cliente', 'nome'] },
       modelos: { obrig: ['fabricante', 'modelo'], todas: ['fabricante', 'modelo', 'tipo', 'registro_anvisa', 'validade_anvisa'] },
+      grupos_equipamento: { obrig: ['nome'], todas: ['nome', 'tipo_equipamento'], dica: 'Uma linha por tipo: nome do grupo e o tipo de equipamento que entra nele (o tipo precisa já estar cadastrado). Um tipo fica em um grupo só.' },
       causas: { obrig: ['nome'], todas: ['nome'] },
-      tipos_ocorrencia: { obrig: ['nome'], todas: ['tipo_equipamento', 'nome'] }
+      tipos_ocorrencia: { obrig: ['nome'], todas: ['nome', 'vale_para'], dica: 'vale_para: em branco ou TODOS vale para todos os equipamentos; ou nomes de grupos e/ou tipos separados por | (ex.: REFRIGERAÇÃO|INCUBADORA). Item que já existe só ganha os vínculos novos.' },
+      analises: { obrig: ['nome'], todas: ['nome', 'vale_para'], dica: 'vale_para: em branco ou TODOS vale para todos os equipamentos; ou nomes de grupos e/ou tipos separados por | (ex.: INFUSÃO|BOMBA DE SERINGA). Item que já existe só ganha os vínculos novos.' },
+      motivos_pendencia: { obrig: ['nome'], todas: ['nome'] }
     };
     let _impLinhas = [], _impEnviando = false;
 
@@ -6920,7 +7242,8 @@ abaAgenda.appendRow([
       if (!cfg || linhasCsv.length < 2) return { erro: 'A planilha está vazia ou só tem o cabeçalho.', objetos: [] };
       const alias = { descricao: catalogo === 'modelos' ? 'tipo' : 'nome', tipo_descricao: 'tipo', tipo_de_equipamento: 'tipo', registro: 'registro_anvisa', anvisa: 'registro_anvisa', validade: 'validade_anvisa', razao_social: 'nome', unidade_contrato: 'nome', cep: 'cep' };
       if (catalogo === 'modelos') alias.nome = 'modelo';
-      if (catalogo === 'tipos_ocorrencia') { alias.tipo = 'tipo_equipamento'; alias.tipo_de_equipamento = 'tipo_equipamento'; alias.equipamento = 'tipo_equipamento'; alias.descricao = 'nome'; alias.ocorrencia = 'nome'; }
+      if (catalogo === 'tipos_ocorrencia' || catalogo === 'analises') Object.assign(alias, { tipo: 'vale_para', tipo_equipamento: 'vale_para', tipo_de_equipamento: 'vale_para', equipamento: 'vale_para', grupo: 'vale_para', grupos: 'vale_para', descricao: 'nome', ocorrencia: 'nome', analise: 'nome', analise_realizada: 'nome' });
+      if (catalogo === 'grupos_equipamento') Object.assign(alias, { grupo: 'nome', tipo: 'tipo_equipamento', tipo_de_equipamento: 'tipo_equipamento', descricao: 'tipo_equipamento' });
       const cab = linhasCsv[0].map(h => { const k = chaveCabecalho_(h); return alias[k] || k; });
       const faltam = cfg.obrig.filter(c => !cab.includes(c));
       if (faltam.length) return { erro: 'Faltam colunas obrigatórias: ' + faltam.join(', ') + '. Colunas encontradas: ' + (cab.filter(Boolean).join(', ') || 'nenhuma') + '.', objetos: [] };
@@ -6944,7 +7267,7 @@ abaAgenda.appendRow([
       const cfg = IMPORT_COLUNAS[catAtual];
       _impLinhas = [];
       document.getElementById('impTitulo').textContent = 'Importar planilha — ' + CATALOGOS[catAtual].rotulo;
-      document.getElementById('impColunas').innerHTML = cfg.todas.map(c => `<code>${c}</code>${cfg.obrig.includes(c) ? '<b>*</b>' : ''}`).join(' · ');
+      document.getElementById('impColunas').innerHTML = cfg.todas.map(c => `<code>${c}</code>${cfg.obrig.includes(c) ? '<b>*</b>' : ''}`).join(' · ') + (cfg.dica ? `<br><span>${escAttr_(cfg.dica)}</span>` : '');
       document.getElementById('impArquivo').value = '';
       document.getElementById('impPrevia').innerHTML = '';
       document.getElementById('impResultado').innerHTML = '';
@@ -7576,6 +7899,7 @@ abaAgenda.appendRow([
       mudarAba('os_abertura');
       const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
       document.getElementById('formNovaOS').reset();
+      limparOcorrenciaNovaOS_(); if (combos.cmbNovaOsCausa) combos.cmbNovaOsCausa.limpar();
       set('osBuscaEquip', `TAG: ${eq.tag} | ${eq.nome} | Série: ${eq.serie}`);
       set('osCliente', eq.cliente || eq.unidade || '');
       set('osTag', eq.tag);
