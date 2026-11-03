@@ -1040,7 +1040,7 @@ html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdow
     .os-box { width: 900px; }
     .os-resumo { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; padding: 10px 14px; margin-bottom: 14px; border-radius: 12px; border: 1px solid #334155; background: #0b1220; font-size: 13px; }
     .os-resumo .eqn { font-size: 15px; font-weight: 800; }
-    .os-passos { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0 0 16px; padding: 0; }
+    .os-passos { list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 0 0 16px; padding: 0; }
     .os-passo { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; padding: 8px 12px; border-radius: 12px; border: 1px solid #334155; background: transparent; color: #94a3b8; font-size: 13px; font-weight: 700; text-align: left; cursor: pointer; }
     .os-passo .n { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; border: 2px solid currentColor; font-size: 12px; font-weight: 800; }
     .os-passo .t { min-width: 0; line-height: 1.2; }
@@ -1091,8 +1091,26 @@ html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdow
     html.light .os-lanc { border-bottom-color: #d5dfec; }
     html.light .os-conf li.falta { color: #be123c; }
     html.light .os-previa { border-color: #cbd5e1; background: #f8fafc; }
+    .os-anexo-acoes { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .os-galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .os-anexo { margin: 0; min-width: 0; }
+    .os-anexo-mini { display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 4 / 3; padding: 0; overflow: hidden; border-radius: 10px; border: 1px solid #334155; background: #0b1220; color: #94a3b8; cursor: pointer; }
+    .os-anexo-mini img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .os-anexo-mini .pdf { display: flex; flex-direction: column; align-items: center; gap: 6px; font-weight: 800; font-size: 13px; color: #f43f5e; }
+    .os-anexo-mini .pdf i { font-size: 30px; }
+    .os-anexo-mini .sem { font-size: 12px; padding: 8px; text-align: center; }
+    .os-anexo-mini:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }
+    .os-anexo figcaption { margin-top: 6px; display: grid; gap: 3px; }
+    .os-anexo-leg { width: 100%; padding: 6px 8px !important; font-size: 12px !important; min-height: 0 !important; }
+    .os-visor { width: 920px; }
+    #visorImg { display: block; max-width: 100%; max-height: 74vh; margin: 0 auto; object-fit: contain; border-radius: 8px; }
+    html.light .os-anexo-mini { background: #f1f5f9; border-color: #cbd5e1; color: #475569; }
+    html.light .os-anexo-mini .pdf { color: #be123c; }
     @media (max-width: 720px) {
-      .os-passos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .os-passos { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+      .os-passo { justify-content: center; padding: 8px 4px; min-height: 44px; }
+      .os-passo .t { display: none; }
+      .os-galeria { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .os-passo .s { display: none; }
       .os-etapa { padding: 14px; }
       .os-etapa-pe > * { flex: 1 1 auto; }
@@ -2888,19 +2906,46 @@ abaAgenda.appendRow([
           <button type="button" id="osBtnEtapa3" class="btn-submit" onclick="continuarMaoDeObraOS()"><i class="fa-solid fa-list-check"></i> Continuar para o fechamento</button></div>
       </section>
 
-      <!-- ETAPA 4: FECHAMENTO -->
+      <!-- ETAPA 4: FOTOS E ANEXOS -->
       <section class="os-etapa" id="osEtapa4">
-        <div class="os-etapa-tit"><span class="n">4</span><div><b>Fechamento</b><div class="eq-k">Confira e feche a O.S.</div></div></div>
+        <div class="os-etapa-tit"><span class="n">4</span><div><b>Fotos e anexos</b><div class="eq-k" id="osAnexoRegra">Registre o serviço com fotos ou anexe documentos</div></div>
+          <span id="osAnexoTotal" class="eq-chip cinza" style="margin-left:auto;">0 anexos</span></div>
+        <div id="osAnexoAcoes" class="os-anexo-acoes">
+          <button type="button" class="btn-submit" onclick="document.getElementById('osFotoCamera').click()"><i class="fa-solid fa-camera"></i> Tirar foto</button>
+          <button type="button" class="eq-btn" onclick="document.getElementById('osAnexoArquivo').click()"><i class="fa-solid fa-paperclip"></i> Anexar arquivo</button>
+          <span class="eq-k">Fotos (JPG, PNG, WEBP) ou PDF, até 10 MB. As fotos são reduzidas antes do envio.</span>
+          <input type="file" id="osFotoCamera" accept="image/*" capture="environment" hidden onchange="enviarAnexosOS(this)" />
+          <input type="file" id="osAnexoArquivo" accept="image/jpeg,image/png,image/webp,application/pdf" multiple hidden onchange="enviarAnexosOS(this)" />
+        </div>
+        <div id="osAnexoProgresso" class="eq-k" style="min-height:16px; margin:8px 0;" aria-live="polite"></div>
+        <div id="osAnexoGaleria" class="os-galeria"></div>
+        <div class="os-etapa-pe">
+          <button type="button" class="eq-btn" onclick="irEtapaOS(2)">Voltar</button>
+          <button type="button" id="osBtnEtapa4" class="btn-submit" onclick="continuarFotosOS()"><i class="fa-solid fa-list-check"></i> Continuar para o fechamento</button></div>
+      </section>
+
+      <!-- ETAPA 5: FECHAMENTO -->
+      <section class="os-etapa" id="osEtapa5">
+        <div class="os-etapa-tit"><span class="n">5</span><div><b>Fechamento</b><div class="eq-k">Confira e feche a O.S.</div></div></div>
         <ul id="osConf" class="os-conf"></ul>
         <div class="os-sub">Serviço realizado <span class="eq-k" style="font-weight:500;">(montado a partir da mão de obra)</span></div>
         <div id="osServicoPrevia" class="os-previa"></div>
         <div class="os-etapa-pe">
-          <button type="button" class="eq-btn" onclick="irEtapaOS(2)">Voltar</button>
+          <button type="button" class="eq-btn" onclick="irEtapaOS(3)">Voltar</button>
           <span style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:flex-end;"><span id="osConfDica" class="eq-k"></span>
             <button type="button" id="osBtnFechar" class="btn-submit" onclick="fecharOS()"><i class="fa-solid fa-lock"></i> Fechar O.S.</button></span></div>
         <div class="os-sub">Histórico</div>
         <div id="osTimeline"></div>
       </section>
+    </div>
+  </div>
+
+  <div id="modalVisorAnexo" class="modal-overlay" style="z-index: 1150;" onclick="if (event.target === this) fecharVisorAnexo()">
+    <div class="modal-box os-visor">
+      <div class="modal-title"><span id="visorTitulo">Foto</span>
+        <button type="button" onclick="fecharVisorAnexo()" aria-label="Fechar" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark"></i></button></div>
+      <img id="visorImg" alt="" />
+      <div id="visorLegenda" class="eq-k" style="margin-top:10px;"></div>
     </div>
   </div>
 
@@ -6233,16 +6278,17 @@ abaAgenda.appendRow([
     }
 
     // ----- ficha em etapas (passo a passo) -----
-    // 1 Requisição -> 2 Diagnóstico -> 3 Mão de obra -> 4 Fechamento.
+    // 1 Requisição -> 2 Diagnóstico -> 3 Mão de obra -> 4 Fotos e anexos -> 5 Fechamento.
     // Só avança com a etapa atual completa; pode voltar enquanto a O.S. estiver aberta.
     const OS_ETAPAS = [
       { n: 1, nome: 'Requisição', sub: 'Chamado e motivo' },
       { n: 2, nome: 'Diagnóstico', sub: 'Análise do técnico' },
       { n: 3, nome: 'Mão de obra', sub: 'Tempo e serviço' },
-      { n: 4, nome: 'Fechamento', sub: 'Conferência' }
+      { n: 4, nome: 'Fotos e anexos', sub: 'Registro do serviço' },
+      { n: 5, nome: 'Fechamento', sub: 'Conferência' }
     ];
     const OS_SEM_TIPO = '00000000-0000-0000-0000-000000000000';
-    let osEtapaVendo = -1, osSujo = false;
+    let osEtapaVendo = -1, osEtapaManual = false, osSujo = false;   // manual = o usuário escolheu a etapa
 
     function marcarSujoOS() { osSujo = true; }
     function subValePara_(it) { return it.aplica_todos ? 'Todos os equipamentos' : ((it.vale_para && it.vale_para.texto) || ''); }
@@ -6263,7 +6309,10 @@ abaAgenda.appendRow([
 
     async function abrirFichaOS(protocolo) {
       garantirCombosOS();
-      osTempos = null; osTrechosAbertos = false; osEtapaVendo = -1; osSujo = false;
+      osTempos = null; osTrechosAbertos = false; osEtapaVendo = -1; osEtapaManual = false; osSujo = false;
+      osAnexos = null; osAnexoUrls = {}; osAnexoUrlsEm = 0;
+      document.getElementById('osAnexoGaleria').innerHTML = '';
+      document.getElementById('osAnexoProgresso').textContent = '';
       document.getElementById('modalOS').classList.add('active');
       document.getElementById('osFichaNumero').textContent = protocolo;
       document.getElementById('osResumo').innerHTML = '<span class="eq-k">Carregando...</span>';
@@ -6275,6 +6324,7 @@ abaAgenda.appendRow([
       osAtual = r;
       renderFichaOS();
       carregarTemposOS();
+      carregarAnexosOS();
     }
 
     async function fecharFichaOS(forcar) {
@@ -6284,7 +6334,7 @@ abaAgenda.appendRow([
         if (!c.ok) return false;
       }
       document.getElementById('modalOS')?.classList.remove('active');
-      osAtual = null; osSujo = false; osEtapaVendo = -1;
+      osAtual = null; osSujo = false; osEtapaVendo = -1; osAnexos = null; osAnexoUrls = {};
       pararRelogioOS_(); osTempos = null; osTrechosAbertos = false;
       buscarAtualizacoesSilenciosas();
       return true;
@@ -6293,7 +6343,7 @@ abaAgenda.appendRow([
     async function recarregarFichaOS() {
       if (!osAtual) return;
       const r = await rpcPriv('os_obter', { p_protocolo: osAtual.os.protocolo });
-      if (r.ok) { osAtual = r; renderFichaOS(); carregarTemposOS(); } else showToast("⚠️ " + textoErroPriv(r), "error");
+      if (r.ok) { osAtual = r; renderFichaOS(); carregarTemposOS(); carregarAnexosOS(); } else showToast("⚠️ " + textoErroPriv(r), "error");
     }
 
     function renderFichaOS() {
@@ -6355,16 +6405,20 @@ abaAgenda.appendRow([
       const tempoMs = fechados.reduce((s, a) => s + duracaoMs_(a), 0);
       const semDesc = fechados.filter(a => !String(a.descricao || '').trim());
       const rodando = validos.filter(a => !a.fim);
+      const anexosCarregados = !!osAnexos, fotos = osAnexos ? (osAnexos.fotos || 0) : 0;
+      const corretiva = String(o.tipo_manutencao || '').toUpperCase() === 'CORRETIVA';
       const feitas = [!!(o.ocorrencia_id && o.causa_id), !!o.analise_id,
-                      carregado && tempoMs > 0 && !semDesc.length && !rodando.length, o.status === 'FECHADA'];
-      let atual = feitas.indexOf(false); if (atual < 0) atual = 3;
-      return { feitas, atual, carregado, tempoMs, semDesc, rodando };
+                      carregado && tempoMs > 0 && !semDesc.length && !rodando.length,
+                      anexosCarregados && (!corretiva || fotos >= 1), o.status === 'FECHADA'];
+      let atual = feitas.indexOf(false); if (atual < 0) atual = 4;
+      return { feitas, atual, carregado, tempoMs, semDesc, rodando, anexosCarregados, fotos, corretiva };
     }
 
     function atualizarPassosOS_() {
       if (!osAtual) return;
       const st = estadoOS_(), fechada = osAtual.os.status === 'FECHADA';
-      if (osEtapaVendo < 0 || osEtapaVendo > st.atual) osEtapaVendo = st.atual;
+      // enquanto o usuário não escolhe outra etapa, a ficha acompanha a primeira pendente (tempos e anexos chegam depois)
+      if (!osEtapaManual || osEtapaVendo < 0 || osEtapaVendo > st.atual) osEtapaVendo = st.atual;
       document.getElementById('osPassos').innerHTML = OS_ETAPAS.map((p, i) => {
         const cls = st.feitas[i] ? 'feito' : (!fechada && i === st.atual ? 'atual' : '');
         const vendo = !fechada && i === osEtapaVendo;
@@ -6391,7 +6445,7 @@ abaAgenda.appendRow([
         if (!c.ok) return;
         renderFichaOS();
       }
-      osEtapaVendo = i;
+      osEtapaVendo = i; osEtapaManual = true;
       atualizarPassosOS_();
       document.getElementById('osPassos').scrollIntoView({ block: 'nearest' });
     }
@@ -6413,7 +6467,7 @@ abaAgenda.appendRow([
       const r = await rpcPriv('os_atualizar', { p_protocolo: osAtual.os.protocolo, p_dados: d });
       btn.disabled = false;
       if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); return; }
-      osSujo = false; osEtapaVendo = n;          // índice n = próxima etapa
+      osSujo = false; osEtapaVendo = n; osEtapaManual = true;   // índice n = próxima etapa
       showToast(n === 1 ? 'Requisição salva.' : 'Diagnóstico salvo.', 'success');
       await recarregarFichaOS();
     }
@@ -6428,7 +6482,17 @@ abaAgenda.appendRow([
           : 'Registre a mão de obra antes de continuar.';
         showToast(msg, 'warning'); return;
       }
-      osEtapaVendo = 3; atualizarPassosOS_();
+      osEtapaVendo = 3; osEtapaManual = true; atualizarPassosOS_();
+    }
+
+    function continuarFotosOS() {
+      if (!osAtual) return;
+      const st = estadoOS_();
+      if (!st.feitas[3]) {
+        showToast(!st.anexosCarregados ? 'Aguarde carregar os anexos.' : 'Em corretiva, envie pelo menos 1 foto do serviço antes de continuar.', 'warning');
+        return;
+      }
+      osEtapaVendo = 4; osEtapaManual = true; atualizarPassosOS_();
     }
 
     // agrupa os trechos descritos: um "serviço registrado" por técnico + descrição
@@ -6455,6 +6519,8 @@ abaAgenda.appendRow([
         [st.carregado && !st.semDesc.length, 'Todo o tempo com descrição do serviço', st.semDesc.length ? st.semDesc.length + ' trecho(s) sem descrição' : ''],
         [st.carregado && !st.rodando.length, 'Nenhum cronômetro rodando', st.rodando.map(a => a.tecnico_nome).join(', ')]
       ];
+      if (st.corretiva) itens.push([st.anexosCarregados && st.fotos >= 1, 'Pelo menos 1 foto (obrigatória em corretiva)',
+        st.anexosCarregados ? (st.fotos ? st.fotos + (st.fotos > 1 ? ' fotos' : ' foto') : '') : 'carregando...']);
       document.getElementById('osConf').innerHTML = itens.map(([ok, rot, det]) =>
         `<li class="${ok ? 'ok' : 'falta'}"><span class="ic" aria-hidden="true"><i class="fa-solid ${ok ? 'fa-check' : 'fa-xmark'}"></i></span>
           <span>${rot}${det ? ` <span class="eq-k">${e(det)}</span>` : ''}<span class="sr-only">${ok ? ' (ok)' : ' (pendente)'}</span></span></li>`).join('');
@@ -6470,7 +6536,7 @@ abaAgenda.appendRow([
     async function fecharOS() {
       if (!osAtual) return;
       const st = estadoOS_();
-      if (st.feitas.slice(0, 3).some(x => !x)) { showToast('Complete as etapas anteriores antes de fechar a O.S.', 'warning'); return; }
+      if (st.feitas.slice(0, 4).some(x => !x)) { showToast('Complete as etapas anteriores antes de fechar a O.S.', 'warning'); return; }
       const c = await confirmarAcao({ titulo: 'Fechar O.S. ' + osAtual.os.protocolo, rotuloBotao: 'Fechar O.S.',
         texto: 'Depois de fechada, a O.S. não pode mais ser editada. Para alterar será preciso reabri-la (a reabertura exige permissão e motivo, e fica registrada).' });
       if (!c.ok) return;
@@ -6491,7 +6557,7 @@ abaAgenda.appendRow([
       const r = await rpcPriv('os_reabrir', { p_protocolo: osAtual.os.protocolo, p_motivo: c.motivo });
       if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); return; }
       showToast("O.S. " + osAtual.os.protocolo + " reaberta.", "success");
-      osEtapaVendo = -1;
+      osEtapaVendo = -1; osEtapaManual = false;
       recarregarFichaOS();
     }
 
@@ -6514,6 +6580,174 @@ abaAgenda.appendRow([
             ${x.observacao ? `<div class="os-ev-obs">${e(x.observacao)}</div>` : ''}
             <div class="eq-k">${e(x.criado_por_nome) || ''}${x.atualizado_em ? ` · corrigido por ${e(x.atualizado_por_nome)} em ${e(fmtBR(x.atualizado_em))}` : ''}</div>
           </div></div>`).join('');
+    }
+
+    // ----- fotos e anexos -----
+    // Bucket PRIVADO: links de envio e de visualização são temporários e gerados pela Edge Function "os-anexos",
+    // que confere a sessão no banco antes. A foto é reduzida no aparelho (máx. 1600 px, JPEG) antes do envio.
+    const OS_ANEXO_MAX = 10485760, OS_ANEXOS_POR_OS = 30;
+    let osAnexos = null, osAnexoUrls = {}, osAnexoUrlsEm = 0, osAnexoEnviando = false;
+
+    async function chamarFuncaoAnexos_(corpo) {
+      const token = usuarioLogado && usuarioLogado.token;
+      if (!token) return { erro: 'sem_sessao' };
+      try {
+        const { data, error } = await supabaseClient.functions.invoke('os-anexos', { body: { ...corpo, token } });
+        if (error) {
+          let msg = error.message || String(error);
+          try { const det = error.context && typeof error.context.json === 'function' ? await error.context.json() : null; if (det && det.erro) msg = det.erro; } catch (e) {}
+          if (/failed to send|not found|404|fetch/i.test(msg)) msg = 'serviço de arquivos indisponível (a Edge Function "os-anexos" foi publicada?)';
+          return { erro: msg };
+        }
+        if (data && data.erro === 'sessao_invalida') avisarSessaoExpirada();
+        return data || { erro: 'Resposta vazia do serviço de arquivos.' };
+      } catch (e) { return { erro: 'Falha de conexão com o serviço de arquivos.' }; }
+    }
+
+    async function carregarAnexosOS() {
+      if (!osAtual) return;
+      const protocolo = osAtual.os.protocolo;
+      const r = await rpcPriv('os_anexos_listar', { p_protocolo: protocolo });
+      if (!osAtual || osAtual.os.protocolo !== protocolo) return;
+      if (!r.ok) { document.getElementById('osAnexoGaleria').innerHTML = `<div class="eq-k">${escAttr_(textoErroPriv(r))}</div>`; return; }
+      osAnexos = r; osAnexoUrls = {};
+      if ((r.itens || []).length) {
+        const v = await chamarFuncaoAnexos_({ acao: 'leitura', protocolo });
+        if (!osAtual || osAtual.os.protocolo !== protocolo) return;
+        if (v.ok) { osAnexoUrls = v.urls || {}; osAnexoUrlsEm = Date.now(); }
+        else document.getElementById('osAnexoProgresso').textContent = 'Não foi possível carregar as imagens: ' + v.erro;
+      }
+      renderAnexosOS_();
+      atualizarPassosOS_();
+    }
+
+    function renderAnexosOS_() {
+      if (!osAtual || !osAnexos) return;
+      const e = escAttr_, o = osAtual.os, fechada = o.status === 'FECHADA', itens = osAnexos.itens || [];
+      const consulta = usuarioLogado && usuarioLogado.perfil === 'CONSULTA';
+      const corretiva = String(o.tipo_manutencao || '').toUpperCase() === 'CORRETIVA';
+      document.getElementById('osAnexoAcoes').style.display = fechada || consulta ? 'none' : '';
+      document.getElementById('osAnexoRegra').textContent = corretiva ? 'Em corretiva, pelo menos 1 foto é obrigatória para fechar a O.S.'
+        : 'Fotos e documentos são opcionais neste tipo de manutenção.';
+      const nf = osAnexos.fotos || 0;
+      document.getElementById('osAnexoTotal').textContent = itens.length + (itens.length === 1 ? ' anexo' : ' anexos') + (nf ? ` (${nf} foto${nf > 1 ? 's' : ''})` : '');
+      const admin = temPermissao('os.reabrir'), euId = osAnexos.eu_id;
+      document.getElementById('osAnexoGaleria').innerHTML = itens.length ? itens.map(a => {
+        const url = osAnexoUrls[a.id], mexe = !fechada && !consulta && (a.criado_por === euId || admin);
+        const mini = a.eh_foto ? (url ? `<img src="${e(url)}" alt="${e(a.legenda || a.nome || 'Foto do serviço')}" loading="lazy" />` : '<span class="sem">Sem visualização</span>')
+          : '<span class="pdf"><i class="fa-solid fa-file-pdf"></i>PDF</span>';
+        return `<figure class="os-anexo">
+          <button type="button" class="os-anexo-mini" data-id="${e(a.id)}" onclick="abrirAnexoOS(this.dataset.id)" aria-label="Abrir ${e(a.nome || 'anexo')}">${mini}</button>
+          <figcaption>
+            <input type="text" class="os-anexo-leg" data-id="${e(a.id)}" value="${e(a.legenda || '')}" maxlength="300" aria-label="Legenda"
+              placeholder="${mexe ? 'Legenda (opcional)' : ''}" ${mexe ? '' : 'disabled'} onchange="salvarLegendaAnexoOS(this)" />
+            <div class="eq-k">${e(a.criado_por_nome || '')}, ${e(fmtBR(a.criado_em))}</div>
+            ${mexe ? `<div><button type="button" class="eq-link" data-id="${e(a.id)}" onclick="removerAnexoOS(this.dataset.id)">Remover</button></div>` : ''}
+          </figcaption></figure>`;
+      }).join('') : `<div class="eq-k" style="padding:6px 0;">Nenhum anexo ainda.${!fechada && corretiva ? ' Tire pelo menos 1 foto do serviço.' : ''}</div>`;
+    }
+
+    function carregarImagem_(arquivo) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(arquivo), img = new Image();
+        img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('não consegui abrir esta imagem neste navegador (tire a foto em JPG)')); };
+        img.src = url;
+      });
+    }
+
+    async function prepararArquivoOS_(f) {
+      const tipo = String(f.type || '').toLowerCase();
+      if (tipo === 'application/pdf') {
+        if (f.size > OS_ANEXO_MAX) throw new Error('PDF maior que 10 MB');
+        return { blob: f, tipo, nome: f.name || 'documento.pdf' };
+      }
+      if (!tipo.startsWith('image/')) throw new Error('tipo não aceito (envie foto ou PDF)');
+      const img = await carregarImagem_(f);
+      const MAX = 1600, esc = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(img.naturalWidth * esc)); c.height = Math.max(1, Math.round(img.naturalHeight * esc));
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      const blob = await new Promise(res => c.toBlob(res, 'image/jpeg', 0.8));
+      if (!blob) throw new Error('falha ao preparar a imagem');
+      return { blob, tipo: 'image/jpeg', nome: String(f.name || 'foto').replace(/\.[^.]+$/, '') + '.jpg' };
+    }
+
+    async function enviarAnexosOS(input) {
+      const arquivos = Array.from(input.files || []); input.value = '';
+      if (!arquivos.length || !osAtual || osAnexoEnviando) return;
+      const restante = OS_ANEXOS_POR_OS - ((osAnexos && osAnexos.itens) || []).length;
+      if (arquivos.length > restante) { showToast(`Limite de ${OS_ANEXOS_POR_OS} anexos por O.S. Ainda dá para enviar ${Math.max(0, restante)}.`, 'warning'); return; }
+      osAnexoEnviando = true;
+      const botoes = document.querySelectorAll('#osAnexoAcoes button'); botoes.forEach(b => { b.disabled = true; });
+      const prog = document.getElementById('osAnexoProgresso'), protocolo = osAtual.os.protocolo, falhas = [];
+      let ok = 0;
+      for (let i = 0; i < arquivos.length; i++) {
+        const f = arquivos[i];
+        prog.textContent = `Enviando ${i + 1} de ${arquivos.length}: ${f.name || 'foto'}...`;
+        try {
+          const p = await prepararArquivoOS_(f);
+          if (p.blob.size > OS_ANEXO_MAX) throw new Error('arquivo maior que 10 MB');
+          const id = novoUuid_();
+          let r = await rpcPriv('os_anexo_registrar', { p_protocolo: protocolo, p_id: id, p_dados: { nome: p.nome, tipo_mime: p.tipo, tamanho: p.blob.size } });
+          if (!r.ok) throw new Error(textoErroPriv(r));
+          const u = await chamarFuncaoAnexos_({ acao: 'upload', anexo_id: id });
+          if (!u.ok) throw new Error(u.erro);
+          const up = await supabaseClient.storage.from('os-anexos').uploadToSignedUrl(u.path, u.token_envio, p.blob, { contentType: p.tipo });
+          if (up.error) throw new Error(up.error.message);
+          r = await rpcPriv('os_anexo_confirmar', { p_id: id });
+          if (!r.ok) throw new Error(textoErroPriv(r));
+          ok++;
+        } catch (err) { falhas.push((f.name || 'arquivo') + ': ' + (err.message || err)); }
+      }
+      osAnexoEnviando = false; botoes.forEach(b => { b.disabled = false; });
+      prog.textContent = falhas.length ? 'Não enviado(s): ' + falhas.join(' | ') : '';
+      if (ok) showToast(ok === 1 ? 'Anexo enviado.' : ok + ' anexos enviados.', 'success');
+      else if (falhas.length) showToast('⚠️ ' + falhas[0], 'error');
+      carregarAnexosOS();
+    }
+
+    async function abrirAnexoOS(id) {
+      const a = osAnexos && (osAnexos.itens || []).find(x => x.id === id);
+      if (!a || !osAtual) return;
+      if (!osAnexoUrls[id] || Date.now() - osAnexoUrlsEm > 50 * 60000) {      // links valem 1 hora
+        const v = await chamarFuncaoAnexos_({ acao: 'leitura', protocolo: osAtual.os.protocolo });
+        if (!v.ok) { showToast('⚠️ ' + v.erro, 'error'); return; }
+        osAnexoUrls = v.urls || {}; osAnexoUrlsEm = Date.now();
+      }
+      const url = osAnexoUrls[id];
+      if (!url) { showToast('Arquivo indisponível no momento.', 'error'); return; }
+      if (!a.eh_foto) { window.open(url, '_blank', 'noopener'); return; }
+      const img = document.getElementById('visorImg');
+      img.src = url; img.alt = a.legenda || a.nome || 'Foto do serviço';
+      document.getElementById('visorTitulo').textContent = a.nome || 'Foto';
+      document.getElementById('visorLegenda').textContent = [a.legenda, (a.criado_por_nome || '') + ', ' + fmtBR(a.criado_em)].filter(Boolean).join(' | ');
+      document.getElementById('modalVisorAnexo').classList.add('active');
+    }
+    document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && document.getElementById('modalVisorAnexo')?.classList.contains('active')) fecharVisorAnexo(); });
+    function fecharVisorAnexo() {
+      document.getElementById('modalVisorAnexo')?.classList.remove('active');
+      const img = document.getElementById('visorImg'); if (img) img.removeAttribute('src');
+    }
+
+    async function salvarLegendaAnexoOS(el) {
+      const id = el.dataset.id, leg = (el.value || '').trim();
+      const r = await rpcPriv('os_anexo_legenda', { p_id: id, p_legenda: leg });
+      if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); return; }
+      const a = osAnexos && (osAnexos.itens || []).find(x => x.id === id); if (a) a.legenda = leg;
+      showToast('Legenda salva.', 'success');
+    }
+
+    async function removerAnexoOS(id) {
+      const a = osAnexos && (osAnexos.itens || []).find(x => x.id === id);
+      if (!a || !osAtual) return;
+      const c = await confirmarAcao({ titulo: 'Remover anexo', rotuloBotao: 'Remover', motivo: true, minimo: 5,
+        texto: `Remover "${a.nome || 'anexo'}" da O.S.? O arquivo continua guardado e a remoção fica registrada com o seu nome e o motivo.` });
+      if (!c.ok) return;
+      const r = await rpcPriv('os_anexo_remover', { p_id: id, p_motivo: c.motivo });
+      if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); return; }
+      showToast('Anexo removido.', 'success');
+      carregarAnexosOS();
     }
 
     // ----- mão de obra: registrar o serviço (para o cronômetro e grava a descrição) -----
