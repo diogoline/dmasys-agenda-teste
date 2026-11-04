@@ -3583,7 +3583,7 @@ abaAgenda.appendRow([
         return await window.html2pdf().set({
           margin: margemMm,
           image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, scrollX: 0, scrollY: 0 },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
           pagebreak: { mode: ['css', 'legacy'] }
         }).from(holder.firstElementChild).outputPdf('blob');
@@ -6965,137 +6965,206 @@ abaAgenda.appendRow([
 
     async function urlParaDataUrl_(url) {
       if (!url) return '';
-      try {
-        const b = await (await fetch(url)).blob();
-        return await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(b); });
-      } catch (e) { return ''; }
+      for (let tentativa = 0; tentativa < 2; tentativa++) {
+        try {
+          const resp = await fetch(url, { cache: 'no-store' });
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          const b = await resp.blob();
+          return await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(b); });
+        } catch (e) { /* tenta mais uma vez */ }
+      }
+      return '';
     }
 
-    async function htmlRelatorioOS_() {
+    // Busca tudo de novo direto do banco (não usa o estado da tela, que pode estar sendo recarregado ao mesmo tempo)
+    async function dadosRelatorioOS_() {
+      const p = osAtual.os.protocolo;
       if (!osTempos) await carregarTemposOS();
-      if (!osAnexos || !osValid) await carregarAnexosOS();
-      if (Date.now() - osAnexoUrlsEm > 50 * 60000) {
-        const v = await chamarFuncaoAnexos_({ acao: 'leitura', protocolo: osAtual.os.protocolo });
-        if (v.ok) { osAnexoUrls = v.urls || {}; osAnexoUrlsEm = Date.now(); }
-      }
-      await prepararLogoPdf();
-      const e = escAttr_, o = osAtual.os, fechada = o.status === 'FECHADA', rascunho = !fechada;
-      const lin = (rot, val) => `<tr><th>${rot}</th><td>${e(val) || '—'}</td></tr>`;
-      const trechos = trechosValidosOS_().filter(a => a.fim).sort((p, q) => new Date(p.inicio) - new Date(q.inicio));
-      const totalMs = trechos.reduce((s, a) => s + duracaoMs_(a), 0);
-      const fotos = ((osAnexos && osAnexos.itens) || []).filter(a => a.eh_foto);
-      const docs = ((osAnexos && osAnexos.itens) || []).filter(a => !a.eh_foto);
-      const fotosHtml = [];
-      for (const f of fotos) {
-        const src = await urlParaDataUrl_(osAnexoUrls[f.id]);
-        fotosHtml.push(`<figure class="r-foto">${src ? `<img src="${src}" />` : '<div class="r-semimg">Imagem indisponível</div>'}
-          <figcaption>${e(f.legenda) || e(f.nome) || ''}<span>${e(f.criado_por_nome)} · ${e(fmtBR(f.criado_em))}</span></figcaption></figure>`);
-      }
-      const assHtml = [];
-      for (const papel of ['SETOR', 'TECNICO']) {
-        const a = assinaturaOS_(papel), src = a ? await urlParaDataUrl_(osAnexoUrls[a.id]) : '';
-        assHtml.push(`<div class="r-ass"><div class="r-ass-img">${src ? `<img src="${src}" />` : ''}</div>
-          <div class="r-ass-lin"><b>${a ? e(a.nome) : '&nbsp;'}</b><span>${OS_PAPEL[papel]}${a && a.cargo ? ' · ' + e(a.cargo) : ''}</span>
-          <span>${a ? 'Assinado em ' + e(fmtBR(a.coletada_em)) : 'Não assinado'}</span></div></div>`);
-      }
-      const agora = fmtBR(new Date().toISOString());
-      return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
-        body { font-family: Arial, Helvetica, sans-serif; color: #1e293b; font-size: 10.5px; line-height: 1.4; }
-        .r-topo { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-bottom: 10px; border-bottom: 3px solid #0b5ed7; }
-        .r-topo img { max-height: 52px; max-width: 170px; }
-        .r-tit { text-align: right; }
-        .r-tit .k { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: #0b5ed7; }
-        .r-tit .n { font-size: 24px; font-weight: 800; color: #0f172a; }
-        .r-tit .s { display: inline-block; margin-top: 3px; padding: 2px 10px; border-radius: 999px; font-size: 10px; font-weight: 700; color: #fff; background: ${fechada ? '#059669' : '#d97706'}; }
-        .r-rasc { margin: 10px 0 0; padding: 7px 10px; border: 1.5px dashed #d97706; border-radius: 6px; color: #b45309; font-weight: 800; text-align: center; letter-spacing: 1px; }
-        h2 { margin: 16px 0 6px; padding: 5px 9px; font-size: 11.5px; letter-spacing: .6px; color: #fff; background: #0b5ed7; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; }
-        .r-kv th { width: 24%; text-align: left; font-weight: 700; color: #475569; background: #f1f5f9; }
-        .r-kv th, .r-kv td { padding: 5px 8px; border: 1px solid #dbe3ee; vertical-align: top; }
-        .r-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .r-tab th { background: #f1f5f9; color: #475569; text-align: left; font-size: 9.5px; text-transform: uppercase; letter-spacing: .4px; }
-        .r-tab th, .r-tab td { padding: 5px 7px; border: 1px solid #dbe3ee; vertical-align: top; }
-        .r-tab td.num { white-space: nowrap; text-align: right; font-weight: 700; }
-        .r-total { margin-top: 5px; text-align: right; font-weight: 800; }
-        .r-texto { padding: 8px 10px; border: 1px solid #dbe3ee; border-left: 4px solid #0b5ed7; border-radius: 4px; white-space: pre-wrap; }
-        .r-fotolin { display: flex; gap: 10px; margin-bottom: 10px; page-break-inside: avoid; }
-        .r-foto, .r-fotovazio { flex: 1 1 0; min-width: 0; }
-        .r-foto { margin: 0; border: 1px solid #dbe3ee; border-radius: 6px; padding: 6px; }
-        .r-foto img { display: block; width: 100%; height: 210px; object-fit: contain; background: #f8fafc; }
-        .r-semimg { height: 210px; display: flex; align-items: center; justify-content: center; color: #94a3b8; background: #f8fafc; }
-        .r-foto figcaption { margin-top: 4px; font-weight: 700; }
-        .r-foto figcaption span, .r-ass-lin span { display: block; font-weight: 400; color: #64748b; font-size: 9.5px; }
-        .r-asss { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 8px; page-break-inside: avoid; }
-        .r-ass-img { height: 70px; display: flex; align-items: flex-end; justify-content: center; }
-        .r-ass-img img { max-height: 68px; max-width: 100%; }
-        .r-ass-lin { border-top: 1px solid #334155; padding-top: 4px; text-align: center; }
-        .r-bloco { page-break-inside: avoid; }
-        .r-rodape { margin-top: 18px; padding-top: 8px; border-top: 1px solid #cbd5e1; font-size: 8.5px; color: #64748b; text-align: center; }
-      </style></head><body>
-        <div class="r-topo"><img src="${PDF_LOGO_SRC}" />
-          <div class="r-tit"><div class="k">RELATÓRIO DE ORDEM DE SERVIÇO</div><div class="n">${e(o.protocolo)}</div><span class="s">${fechada ? 'FECHADA' : 'ABERTA'}</span></div></div>
-        ${rascunho ? '<div class="r-rasc">RASCUNHO · documento sem validade até o fechamento da O.S.</div>' : ''}
-
-        <div class="r-bloco"><h2>IDENTIFICAÇÃO</h2>
-        <div class="r-2"><table class="r-kv">${lin('Cliente / unidade', o.cliente)}${lin('Equipamento', o.equipamento)}${lin('TAG', o.tag)}${lin('Nº de série', o.serie)}${lin('Patrimônio', o.patrimonio)}</table>
-          <table class="r-kv">${lin('Tipo de manutenção', o.tipo_manutencao)}${lin('Execução', o.execucao)}${lin('Prioridade', o.prioridade)}${lin('Abertura', fmtBR(o.data_abertura))}${lin('Fechamento', fechada ? fmtBR(o.data_fechamento) : '')}</table></div>
-        <table class="r-kv" style="margin-top:6px;">${lin('Solicitante', o.solicitante)}${lin('Técnico responsável', o.tecnico)}${o.reaberturas > 0 ? lin('Reaberturas', o.reaberturas + 'x' + (o.motivo_ultima_reabertura ? ' (última: ' + o.motivo_ultima_reabertura + ')' : '')) : ''}</table></div>
-
-        <div class="r-bloco"><h2>REQUISIÇÃO</h2>
-        <table class="r-kv">${lin('Ocorrência', o.ocorrencia_nome)}${lin('Causa', o.causa_nome)}${lin('Observação', o.defeito_relatado)}</table></div>
-
-        <div class="r-bloco"><h2>DIAGNÓSTICO</h2>
-        <table class="r-kv">${lin('Análise realizada', o.analise_nome)}${lin('Complemento', o.diagnostico_tecnico)}</table></div>
-
-        <h2>MÃO DE OBRA</h2>
-        ${trechos.length ? `<table class="r-tab"><thead><tr><th>Técnico</th><th>Início</th><th>Fim</th><th>Tempo</th><th>Serviço</th></tr></thead><tbody>
-          ${trechos.map(a => `<tr><td>${e(a.tecnico_nome)}</td><td>${e(fmtBR(a.inicio))}</td><td>${e(fmtBR(a.fim))}</td><td class="num">${fmtHoras_(duracaoMs_(a))}</td><td>${e(a.descricao) || '—'}</td></tr>`).join('')}
-          </tbody></table><div class="r-total">Total: ${fmtHoras_(totalMs)}</div>` : '<div class="r-texto">Nenhuma mão de obra registrada.</div>'}
-
-        <div class="r-bloco"><h2>SERVIÇO REALIZADO</h2>
-        <div class="r-texto">${e(fechada ? o.servico_realizado : servicoMontadoOS_()) || '—'}</div></div>
-
-        ${fotosHtml.length ? linhasFotos_(fotosHtml) : ''}
-        ${docs.length ? `<div class="r-bloco"><h2>DOCUMENTOS ANEXOS</h2><table class="r-tab"><tbody>${docs.map(d => `<tr><td>${e(d.nome)}</td><td>${e(d.legenda) || ''}</td><td>${e(d.criado_por_nome)} · ${e(fmtBR(d.criado_em))}</td></tr>`).join('')}</tbody></table></div>` : ''}
-
-        <div class="r-bloco"><h2>VALIDAÇÃO</h2><div class="r-asss">${assHtml.join('')}</div></div>
-
-        <div class="r-rodape">${PDF_RODAPE_TXT}<br/>Documento gerado pelo DMA SYS em ${e(agora)}${usuarioLogado ? ' por ' + e(usuarioLogado.nome) : ''}.</div>
-      </body></html>`;
+      const [ra, rv, rl] = await Promise.all([
+        rpcPriv('os_anexos_listar', { p_protocolo: p }),
+        rpcPriv('os_validacao_obter', { p_protocolo: p }),
+        chamarFuncaoAnexos_({ acao: 'leitura', protocolo: p })]);
+      const urls = rl.ok ? (rl.urls || {}) : {};
+      const anexos = ra.ok ? (ra.itens || []) : [];
+      const assin = rv.ok ? (rv.assinaturas || []) : [];
+      const img = {};
+      await Promise.all([...anexos.filter(a => a.eh_foto), ...assin].map(async x => { img[x.id] = await urlParaDataUrl_(urls[x.id]); }));
+      return { anexos, assin, img, falhaLinks: !rl.ok };
     }
 
     // fotos em linhas de 2 (cada linha é um bloco que não se divide entre páginas)
     function linhasFotos_(figs) {
       const out = [];
       for (let i = 0; i < figs.length; i += 2) out.push(`<div class="r-fotolin">${figs[i]}${figs[i + 1] || '<div class="r-fotovazio"></div>'}</div>`);
-      // o título vai junto com a primeira linha, para não ficar sozinho no fim da página
-      return `<div class="r-bloco"><h2>FOTOS</h2>${out.shift()}</div>` + out.join('');
+      return out;
+    }
+
+    function duracaoTxt_(ms) {
+      const m = Math.max(0, Math.round(ms / 60000)), d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mm = m % 60;
+      return d ? `${d}d ${h}h${String(mm).padStart(2, '0')}` : `${h}h${String(mm).padStart(2, '0')}`;
+    }
+
+    async function htmlRelatorioOS_() {
+      await prepararLogoPdf();
+      const D = await dadosRelatorioOS_();
+      const e = escAttr_, o = osAtual.os, fechada = o.status === 'FECHADA';
+      const val = v => (v === null || v === undefined || String(v).trim() === '') ? '<span class="r-vazio">Não informado</span>' : e(v);
+      const campo = (rot, v, largo) => `<div class="r-campo${largo ? ' largo' : ''}"><div class="r-rot">${rot}</div><div class="r-val">${val(v)}</div></div>`;
+      const secao = (n, tit, corpo, extra) => `<section class="r-sec"><div class="r-sec-h"><span class="r-num">${n}</span><span class="r-sec-t">${tit}</span>${extra || ''}</div>${corpo}</section>`;
+
+      const trechos = trechosValidosOS_().filter(a => a.fim).sort((p, q) => new Date(p.inicio) - new Date(q.inicio));
+      const totalMs = trechos.reduce((s, a) => s + duracaoMs_(a), 0);
+      const atendMs = fechada && o.data_fechamento ? new Date(o.data_fechamento) - new Date(o.data_abertura) : 0;
+      const fotos = D.anexos.filter(a => a.eh_foto), docs = D.anexos.filter(a => !a.eh_foto);
+      const assin = p => D.assin.find(a => a.papel === p) || null;
+      const servico = fechada ? o.servico_realizado : servicoMontadoOS_();
+
+      const figs = fotos.map((f, i) => `<figure class="r-foto">
+          <div class="r-foto-img">${D.img[f.id] ? `<img src="${D.img[f.id]}" />` : '<span class="r-vazio">Imagem indisponível</span>'}</div>
+          <figcaption><b>Foto ${i + 1}</b>${f.legenda ? ' · ' + e(f.legenda) : ''}<span>${e(f.criado_por_nome || '')} · ${e(fmtBR(f.criado_em))}</span></figcaption></figure>`);
+      const linhas = linhasFotos_(figs);
+
+      const blocoAss = p => {
+        const a = assin(p);
+        return `<div class="r-ass">
+          <div class="r-ass-img">${a && D.img[a.id] ? `<img src="${D.img[a.id]}" />` : (a ? '' : '<span class="r-vazio">Não assinado</span>')}</div>
+          <div class="r-ass-lin"></div>
+          <div class="r-ass-nome">${a ? e(a.nome) : '&nbsp;'}</div>
+          <div class="r-ass-cargo">${OS_PAPEL[p]}${a && a.cargo ? ' · ' + e(a.cargo) : ''}</div>
+          ${a ? `<div class="r-ass-data">Assinado eletronicamente em ${e(fmtBR(a.coletada_em))}</div>` : ''}</div>`;
+      };
+
+      const C = { tinta: '#111827', texto: '#374151', suave: '#6b7280', linha: '#e5e7eb', fundo: '#f8fafc', destaque: '#ea580c', ok: '#047857' };
+      return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+        .r-doc, .r-doc * { all: revert; box-sizing: border-box; }
+        .r-doc { display: block; width: 703px; padding: 0; margin: 0; background: #fff; color: ${C.texto};
+                 font-family: Inter, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 10.5px; line-height: 1.45; }
+        .r-doc img { display: block; }
+        .r-doc .r-head { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 14px; border-bottom: 1px solid ${C.linha}; }
+        .r-doc .r-head img { max-height: 54px; max-width: 190px; object-fit: contain; }
+        .r-doc .r-id { text-align: right; }
+        .r-doc .r-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: ${C.suave}; }
+        .r-doc .r-numos { font-size: 26px; font-weight: 800; letter-spacing: -.5px; color: ${C.tinta}; line-height: 1.1; margin-top: 2px; }
+        .r-doc .r-pill { display: inline-block; margin-top: 6px; padding: 3px 10px; border-radius: 999px; font-size: 9px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+                         color: ${fechada ? C.ok : '#b45309'}; background: ${fechada ? '#ecfdf5' : '#fffbeb'}; border: 1px solid ${fechada ? '#a7f3d0' : '#fde68a'}; }
+        .r-doc .r-rasc { margin-top: 12px; padding: 8px 12px; border-radius: 8px; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; font-weight: 700; text-align: center; }
+        .r-doc .r-hero { margin-top: 16px; padding: 16px 18px; border-radius: 12px; background: ${C.fundo}; border: 1px solid ${C.linha}; }
+        .r-doc .r-hero-eq { font-size: 17px; font-weight: 800; color: ${C.tinta}; letter-spacing: -.2px; }
+        .r-doc .r-hero-sub { margin-top: 3px; color: ${C.suave}; }
+        .r-doc .r-hero-sub b { color: ${C.texto}; font-weight: 700; }
+        .r-doc .r-kpis { display: flex; gap: 10px; margin-top: 14px; }
+        .r-doc .r-kpi { flex: 1 1 0; padding: 9px 11px; border-radius: 9px; background: #fff; border: 1px solid ${C.linha}; }
+        .r-doc .r-kpi .k { font-size: 8.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: ${C.suave}; }
+        .r-doc .r-kpi .v { margin-top: 2px; font-size: 13px; font-weight: 800; color: ${C.tinta}; white-space: nowrap; }
+        .r-doc .r-kpi.acc { border-color: #fed7aa; background: #fff7ed; }
+        .r-doc .r-kpi.acc .v { color: ${C.destaque}; }
+        .r-doc .r-sec { margin-top: 20px; page-break-inside: avoid; }
+        .r-doc .r-sec-h { display: flex; align-items: baseline; gap: 10px; padding-bottom: 7px; margin-bottom: 10px; border-bottom: 1px solid ${C.linha}; }
+        .r-doc .r-num { font-size: 10px; font-weight: 800; color: ${C.destaque}; letter-spacing: 1px; }
+        .r-doc .r-sec-t { font-size: 11px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase; color: ${C.tinta}; }
+        .r-doc .r-sec-x { margin-left: auto; font-size: 9.5px; color: ${C.suave}; }
+        .r-doc .r-grade { display: flex; flex-wrap: wrap; row-gap: 10px; }
+        .r-doc .r-campo { width: 33.333%; padding-right: 14px; }
+        .r-doc .r-campo.largo { width: 100%; }
+        .r-doc .r-rot { font-size: 8.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: ${C.suave}; }
+        .r-doc .r-val { margin-top: 2px; font-size: 11px; font-weight: 600; color: ${C.tinta}; word-break: break-word; }
+        .r-doc .r-vazio { color: #9ca3af; font-weight: 400; font-style: italic; }
+        .r-doc .r-tab { width: 100%; border-collapse: collapse; }
+        .r-doc .r-tab th { padding: 7px 8px; text-align: left; font-size: 8.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: ${C.suave}; background: ${C.fundo}; border-bottom: 1px solid ${C.linha}; }
+        .r-doc .r-tab td { padding: 8px; vertical-align: top; color: ${C.tinta}; border-bottom: 1px solid ${C.linha}; }
+        .r-doc .r-tab td.num { text-align: right; white-space: nowrap; font-weight: 700; }
+        .r-doc .r-tab td.dt { white-space: nowrap; color: ${C.texto}; }
+        .r-doc .r-tab tfoot td { border-bottom: 0; font-weight: 800; }
+        .r-doc .r-texto { padding: 12px 14px; border-radius: 10px; background: ${C.fundo}; border: 1px solid ${C.linha}; border-left: 3px solid ${C.destaque};
+                          color: ${C.tinta}; font-size: 11px; white-space: pre-wrap; }
+        .r-doc .r-fotolin { display: flex; gap: 12px; margin-bottom: 12px; page-break-inside: avoid; }
+        .r-doc .r-foto, .r-doc .r-fotovazio { flex: 1 1 0; min-width: 0; margin: 0; }
+        .r-doc .r-foto-img { height: 200px; border-radius: 10px; overflow: hidden; background: #f1f5f9; border: 1px solid ${C.linha};
+                             display: flex; align-items: center; justify-content: center; }
+        .r-doc .r-foto-img img { width: 100%; height: 100%; object-fit: contain; }
+        .r-doc .r-foto figcaption { display: block; margin-top: 6px; color: ${C.tinta}; }
+        .r-doc .r-foto figcaption span { display: block; font-size: 9px; color: ${C.suave}; }
+        .r-doc .r-asss { display: flex; gap: 28px; }
+        .r-doc .r-ass { flex: 1 1 0; text-align: center; }
+        .r-doc .r-ass-img { height: 74px; display: flex; align-items: flex-end; justify-content: center; }
+        .r-doc .r-ass-img img { max-height: 72px; max-width: 100%; object-fit: contain; }
+        .r-doc .r-ass-lin { margin-top: 4px; border-top: 1px solid ${C.tinta}; }
+        .r-doc .r-ass-nome { margin-top: 6px; font-size: 11px; font-weight: 800; color: ${C.tinta}; }
+        .r-doc .r-ass-cargo { color: ${C.texto}; }
+        .r-doc .r-ass-data { margin-top: 2px; font-size: 9px; color: ${C.suave}; }
+        .r-doc .r-nota { margin-top: 10px; font-size: 9px; color: ${C.suave}; text-align: center; }
+        .r-doc .r-rodape { margin-top: 24px; padding-top: 10px; border-top: 1px solid ${C.linha}; font-size: 8.5px; line-height: 1.5; color: ${C.suave}; text-align: center; }
+        .r-doc .r-rodape b { color: ${C.texto}; }
+      </style></head><body><div class="r-doc">
+        <header class="r-head">
+          <img src="${PDF_LOGO_SRC}" />
+          <div class="r-id"><div class="r-eyebrow">Relatório de Ordem de Serviço</div><div class="r-numos">${e(o.protocolo)}</div>
+            <span class="r-pill">${fechada ? 'Fechada' : 'Em andamento'}</span></div>
+        </header>
+        ${fechada ? '' : '<div class="r-rasc">RASCUNHO · Este documento só tem validade depois do fechamento da O.S.</div>'}
+
+        <div class="r-hero">
+          <div class="r-hero-eq">${e(o.equipamento || 'Equipamento')}</div>
+          <div class="r-hero-sub">${o.tag ? `TAG <b>${e(o.tag)}</b>` : ''}${o.serie ? ` · Série <b>${e(o.serie)}</b>` : ''}${o.patrimonio ? ` · Patrimônio <b>${e(o.patrimonio)}</b>` : ''}${o.cliente ? ` · ${e(o.cliente)}` : ''}</div>
+          <div class="r-kpis">
+            <div class="r-kpi"><div class="k">Manutenção</div><div class="v">${e(o.tipo_manutencao || '—')}</div></div>
+            <div class="r-kpi"><div class="k">Abertura</div><div class="v">${e(fmtBR(o.data_abertura))}</div></div>
+            <div class="r-kpi"><div class="k">Fechamento</div><div class="v">${fechada ? e(fmtBR(o.data_fechamento)) : '—'}</div></div>
+            <div class="r-kpi acc"><div class="k">Tempo de atendimento</div><div class="v">${fechada ? duracaoTxt_(atendMs) : '—'}</div></div>
+            <div class="r-kpi"><div class="k">Mão de obra</div><div class="v">${fmtHoras_(totalMs)}</div></div>
+          </div>
+        </div>
+
+        ${secao('01', 'Dados do chamado', `<div class="r-grade">
+            ${campo('Cliente / unidade', o.cliente)}${campo('Solicitante', o.solicitante)}${campo('Técnico responsável', o.tecnico)}
+            ${campo('Execução', o.execucao)}${campo('Prioridade', o.prioridade)}${campo('Reaberturas', o.reaberturas > 0 ? o.reaberturas + 'x' : 'Nenhuma')}</div>`)}
+
+        ${secao('02', 'Requisição', `<div class="r-grade">${campo('Ocorrência', o.ocorrencia_nome)}${campo('Causa', o.causa_nome)}${campo('Observação', o.defeito_relatado)}</div>`)}
+
+        ${secao('03', 'Diagnóstico', `<div class="r-grade">${campo('Análise realizada', o.analise_nome)}${campo('Complemento', o.diagnostico_tecnico, true)}</div>`)}
+
+        ${secao('04', 'Mão de obra', trechos.length ? `<table class="r-tab"><thead><tr><th>Técnico</th><th>Início</th><th>Fim</th><th>Serviço executado</th><th style="text-align:right">Tempo</th></tr></thead><tbody>
+            ${trechos.map(a => `<tr><td><b>${e(a.tecnico_nome)}</b></td><td class="dt">${e(fmtBR(a.inicio))}</td><td class="dt">${e(fmtBR(a.fim))}</td><td>${e(a.descricao) || '—'}</td><td class="num">${fmtHoras_(duracaoMs_(a))}</td></tr>`).join('')}
+            </tbody><tfoot><tr><td colspan="4" style="text-align:right">Total</td><td class="num">${fmtHoras_(totalMs)}</td></tr></tfoot></table>`
+          : '<div class="r-texto">Nenhuma mão de obra registrada.</div>', `<span class="r-sec-x">${trechos.length} registro${trechos.length === 1 ? '' : 's'}</span>`)}
+
+        ${secao('05', 'Serviço realizado', `<div class="r-texto">${e(servico) || 'Não informado.'}</div>`)}
+
+        ${linhas.length ? `<section class="r-sec"><div class="r-sec-h"><span class="r-num">06</span><span class="r-sec-t">Registro fotográfico</span><span class="r-sec-x">${fotos.length} foto${fotos.length === 1 ? '' : 's'}</span></div>${linhas[0]}</section>${linhas.slice(1).join('')}` : ''}
+        ${docs.length ? secao(linhas.length ? '07' : '06', 'Documentos anexos', `<table class="r-tab"><tbody>${docs.map(d => `<tr><td><b>${e(d.nome)}</b>${d.legenda ? ' · ' + e(d.legenda) : ''}</td><td class="dt" style="text-align:right">${e(d.criado_por_nome)} · ${e(fmtBR(d.criado_em))}</td></tr>`).join('')}</tbody></table>`) : ''}
+
+        <section class="r-sec"><div class="r-sec-h"><span class="r-num">${String(5 + (linhas.length ? 1 : 0) + (docs.length ? 1 : 0) + 1).padStart(2, '0')}</span><span class="r-sec-t">Validação</span></div>
+          <div class="r-asss">${blocoAss('SETOR')}${blocoAss('TECNICO')}</div>
+          <div class="r-nota">Assinaturas coletadas eletronicamente no DMA SYS, com registro de data, hora e usuário.</div></section>
+
+        <footer class="r-rodape">${PDF_RODAPE_TXT}<br/>Gerado pelo DMA SYS em ${e(fmtBR(new Date().toISOString()))}${usuarioLogado ? ' por ' + e(usuarioLogado.nome) : ''}.</footer>
+      </div></body></html>`;
     }
 
     async function pdfRelatorioOS_() {
       const html = await htmlRelatorioOS_();
       if (!window.html2pdf) await carregarScriptExterno('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
-      // A biblioteca copia o elemento para a própria área de desenho: se o elemento copiado estiver
-      // "escondido fora da tela", a cópia também fica fora e o PDF sai em branco. Por isso o conteúdo vai
-      // num elemento interno (sem posição especial) e só a caixa externa fica escondida.
+      // o conteúdo vai num elemento interno (a biblioteca copia o elemento passado; se a cópia levasse o
+      // "fora da tela", o PDF sairia em branco)
       const holder = document.createElement('div');
       holder.style.cssText = 'position:fixed;left:-10000px;top:0;';
-      holder.innerHTML = `<div style="width:720px;background:#fff;color:#1e293b;">${prepararHtmlPdf(html)}</div>`;
+      holder.innerHTML = prepararHtmlPdf(html);
       document.body.appendChild(holder);
       try {
+        await Promise.all([...holder.querySelectorAll('img')].map(i => (i.decode ? i.decode() : Promise.resolve()).catch(() => {})));
         const pdf = await window.html2pdf().set({
-          margin: [10, 10, 14, 10],
+          margin: [12, 12, 14, 12],
           image: { type: 'jpeg', quality: 0.95 },
-          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
+          // scrollX/scrollY = 0: sem isso, a rolagem da tela desloca o desenho (espaço em branco em cima e conteúdo cortado embaixo)
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, scrollX: 0, scrollY: 0 },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          // 'avoid' só em blocos comuns: a biblioteca insere um espaçador antes do elemento evitado,
-          // e dentro de grade/tabela esse espaçador desloca o conteúdo
-          pagebreak: { mode: ['css', 'legacy'], avoid: ['.r-bloco', '.r-fotolin', '.r-asss'] }
-        }).from(holder.firstElementChild).toPdf().get('pdf');
+          // 'avoid' só em blocos comuns: a biblioteca insere um espaçador antes do elemento evitado
+          pagebreak: { mode: ['css', 'legacy'], avoid: ['.r-sec', '.r-fotolin', '.r-hero'] }
+        }).from(holder.querySelector('.r-doc')).toPdf().get('pdf');
         const n = pdf.internal.getNumberOfPages(), W = pdf.internal.pageSize.getWidth(), H = pdf.internal.pageSize.getHeight();
         for (let i = 1; i <= n; i++) {
-          pdf.setPage(i); pdf.setFontSize(8); pdf.setTextColor(110);
-          pdf.text(`${osAtual.os.protocolo}  |  página ${i} de ${n}`, W - 10, H - 6, { align: 'right' });
+          pdf.setPage(i); pdf.setFontSize(7.5); pdf.setTextColor(120);
+          pdf.text(`${osAtual.os.protocolo}  ·  página ${i} de ${n}`, W - 12, H - 6, { align: 'right' });
         }
         return pdf.output('blob');
       } finally { holder.remove(); }
