@@ -1040,7 +1040,7 @@ html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdow
     .os-box { width: 900px; }
     .os-resumo { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; padding: 10px 14px; margin-bottom: 14px; border-radius: 12px; border: 1px solid #334155; background: #0b1220; font-size: 13px; }
     .os-resumo .eqn { font-size: 15px; font-weight: 800; }
-    .os-passos { list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 0 0 16px; padding: 0; }
+    .os-passos { list-style: none; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin: 0 0 16px; padding: 0; }
     .os-passo { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; padding: 8px 12px; border-radius: 12px; border: 1px solid #334155; background: transparent; color: #94a3b8; font-size: 13px; font-weight: 700; text-align: left; cursor: pointer; }
     .os-passo .n { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; border: 2px solid currentColor; font-size: 12px; font-weight: 800; }
     .os-passo .t { min-width: 0; line-height: 1.2; }
@@ -1103,11 +1103,25 @@ html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdow
     .os-anexo figcaption { margin-top: 6px; display: grid; gap: 3px; }
     .os-anexo-leg { width: 100%; padding: 6px 8px !important; font-size: 12px !important; min-height: 0 !important; }
     .os-visor { width: 920px; }
+    .os-ass-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
+    .os-ass { padding: 14px; border-radius: 12px; border: 1px solid #334155; display: grid; gap: 6px; align-content: start; }
+    .os-ass.ok { border-color: rgba(16, 185, 129, .55); }
+    .os-ass .tit { display: flex; align-items: center; gap: 8px; font-weight: 800; }
+    .os-ass .img { height: 90px; border-radius: 8px; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #cbd5e1; }
+    .os-ass .img img { max-height: 84px; max-width: 100%; object-fit: contain; }
+    .os-ass .vazio { height: 90px; border-radius: 8px; border: 1px dashed rgba(148, 163, 184, .5); display: flex; align-items: center; justify-content: center; font-size: 12px; color: #94a3b8; }
+    .os-ass-pad-caixa { position: relative; margin-top: 6px; }
+    .os-ass-pad { display: block; width: 100%; height: 190px; background: #fff; border-radius: 10px; border: 2px dashed #94a3b8; touch-action: none; cursor: crosshair; }
+    .os-ass-linha { position: absolute; left: 6%; right: 6%; bottom: 36px; border-top: 1px solid #94a3b8; padding-top: 3px; font-size: 11px; color: #64748b; text-align: center; pointer-events: none; }
+    .os-rel { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    html.light .os-ass { border-color: #cbd5e1; }
+    html.light .os-ass.ok { border-color: #6ee7b7; background: #f0fdf4; }
     #visorImg { display: block; max-width: 100%; max-height: 74vh; margin: 0 auto; object-fit: contain; border-radius: 8px; }
     html.light .os-anexo-mini { background: #f1f5f9; border-color: #cbd5e1; color: #475569; }
     html.light .os-anexo-mini .pdf { color: #be123c; }
     @media (max-width: 720px) {
-      .os-passos { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+      .os-passos { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+      .os-ass-grade { grid-template-columns: 1fr; }
       .os-passo { justify-content: center; padding: 8px 4px; min-height: 44px; }
       .os-passo .t { display: none; }
       .os-galeria { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -2924,16 +2938,52 @@ abaAgenda.appendRow([
           <button type="button" id="osBtnEtapa4" class="btn-submit" onclick="continuarFotosOS()"><i class="fa-solid fa-list-check"></i> Continuar para o fechamento</button></div>
       </section>
 
-      <!-- ETAPA 5: FECHAMENTO -->
+      <!-- ETAPA 5: VALIDAÇÃO (ASSINATURAS) -->
       <section class="os-etapa" id="osEtapa5">
-        <div class="os-etapa-tit"><span class="n">5</span><div><b>Fechamento</b><div class="eq-k">Confira e feche a O.S.</div></div></div>
+        <div class="os-etapa-tit"><span class="n">5</span><div><b>Validação</b><div class="eq-k">Assinaturas do responsável do setor e do técnico</div></div></div>
+        <div id="osAssAviso" class="eq-aviso" style="display:none; margin:0 0 12px;"></div>
+        <div class="os-ass-grade">
+          <div class="os-ass" id="osAssSETOR"></div>
+          <div class="os-ass" id="osAssTECNICO"></div>
+        </div>
+        <div id="osAssColeta" class="os-mo-reg" style="display:none;">
+          <div id="osAssColetaTit" style="font-weight:800; margin-bottom:10px;"></div>
+          <div class="eq-g" id="osAssCampos">
+            <div class="form-group c6"><label for="osAssNome">Nome de quem assina *</label><input type="text" id="osAssNome" maxlength="120" autocomplete="off" /></div>
+            <div class="form-group c6"><label for="osAssCargo">Cargo ou matrícula</label><input type="text" id="osAssCargo" maxlength="120" autocomplete="off" /></div>
+          </div>
+          <div class="os-ass-pad-caixa"><canvas id="osAssPad" class="os-ass-pad" aria-label="Área para assinar com o dedo ou o mouse"></canvas><span class="os-ass-linha">Assine acima da linha</span></div>
+          <div class="os-mo-reg-pe" style="margin-top:10px;">
+            <span style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="button" class="eq-btn" onclick="limparPadAssinatura()">Limpar</button>
+              <button type="button" id="osAssUsarCad" class="eq-btn" onclick="usarAssinaturaCadastrada()" style="display:none;">Usar minha assinatura cadastrada</button></span>
+            <span style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="button" class="eq-btn" onclick="cancelarColetaAssinatura()">Cancelar</button>
+              <button type="button" id="osAssBtnSalvar" class="btn-submit" onclick="salvarAssinaturaOS()"><i class="fa-solid fa-signature"></i> Salvar assinatura</button></span>
+          </div>
+        </div>
+        <div class="os-etapa-pe">
+          <button type="button" class="eq-btn" onclick="irEtapaOS(3)">Voltar</button>
+          <button type="button" id="osBtnEtapa5" class="btn-submit" onclick="continuarValidacaoOS()"><i class="fa-solid fa-list-check"></i> Continuar para o fechamento</button></div>
+      </section>
+
+      <!-- ETAPA 6: FECHAMENTO -->
+      <section class="os-etapa" id="osEtapa6">
+        <div class="os-etapa-tit"><span class="n">6</span><div><b>Fechamento</b><div class="eq-k">Confira e feche a O.S.</div></div></div>
         <ul id="osConf" class="os-conf"></ul>
         <div class="os-sub">Serviço realizado <span class="eq-k" style="font-weight:500;">(montado a partir da mão de obra)</span></div>
         <div id="osServicoPrevia" class="os-previa"></div>
         <div class="os-etapa-pe">
-          <button type="button" class="eq-btn" onclick="irEtapaOS(3)">Voltar</button>
+          <button type="button" class="eq-btn" onclick="irEtapaOS(4)">Voltar</button>
           <span style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:flex-end;"><span id="osConfDica" class="eq-k"></span>
             <button type="button" id="osBtnFechar" class="btn-submit" onclick="fecharOS()"><i class="fa-solid fa-lock"></i> Fechar O.S.</button></span></div>
+        <div class="os-sub">Relatório da O.S.</div>
+        <div class="os-rel">
+          <span id="osRelInfo" class="eq-k"></span>
+          <span style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" id="osRelBtnVer" class="eq-btn" onclick="relatorioOS('ver')"><i class="fa-solid fa-print"></i> Visualizar / imprimir</button>
+            <button type="button" id="osRelBtnBaixar" class="eq-btn" onclick="relatorioOS('baixar')"><i class="fa-solid fa-download"></i> Baixar PDF</button></span>
+        </div>
         <div class="os-sub">Histórico</div>
         <div id="osTimeline"></div>
       </section>
@@ -6278,14 +6328,15 @@ abaAgenda.appendRow([
     }
 
     // ----- ficha em etapas (passo a passo) -----
-    // 1 Requisição -> 2 Diagnóstico -> 3 Mão de obra -> 4 Fotos e anexos -> 5 Fechamento.
+    // 1 Requisição -> 2 Diagnóstico -> 3 Mão de obra -> 4 Fotos e anexos -> 5 Validação -> 6 Fechamento.
     // Só avança com a etapa atual completa; pode voltar enquanto a O.S. estiver aberta.
     const OS_ETAPAS = [
       { n: 1, nome: 'Requisição', sub: 'Chamado e motivo' },
       { n: 2, nome: 'Diagnóstico', sub: 'Análise do técnico' },
       { n: 3, nome: 'Mão de obra', sub: 'Tempo e serviço' },
       { n: 4, nome: 'Fotos e anexos', sub: 'Registro do serviço' },
-      { n: 5, nome: 'Fechamento', sub: 'Conferência' }
+      { n: 5, nome: 'Validação', sub: 'Assinaturas' },
+      { n: 6, nome: 'Fechamento', sub: 'Conferência' }
     ];
     const OS_SEM_TIPO = '00000000-0000-0000-0000-000000000000';
     let osEtapaVendo = -1, osEtapaManual = false, osSujo = false;   // manual = o usuário escolheu a etapa
@@ -6310,7 +6361,7 @@ abaAgenda.appendRow([
     async function abrirFichaOS(protocolo) {
       garantirCombosOS();
       osTempos = null; osTrechosAbertos = false; osEtapaVendo = -1; osEtapaManual = false; osSujo = false;
-      osAnexos = null; osAnexoUrls = {}; osAnexoUrlsEm = 0;
+      osAnexos = null; osAnexoUrls = {}; osAnexoUrlsEm = 0; osValid = null; cancelarColetaAssinatura();
       document.getElementById('osAnexoGaleria').innerHTML = '';
       document.getElementById('osAnexoProgresso').textContent = '';
       document.getElementById('modalOS').classList.add('active');
@@ -6334,7 +6385,7 @@ abaAgenda.appendRow([
         if (!c.ok) return false;
       }
       document.getElementById('modalOS')?.classList.remove('active');
-      osAtual = null; osSujo = false; osEtapaVendo = -1; osAnexos = null; osAnexoUrls = {};
+      osAtual = null; osSujo = false; osEtapaVendo = -1; osAnexos = null; osAnexoUrls = {}; osValid = null; cancelarColetaAssinatura();
       pararRelogioOS_(); osTempos = null; osTrechosAbertos = false;
       buscarAtualizacoesSilenciosas();
       return true;
@@ -6409,9 +6460,10 @@ abaAgenda.appendRow([
       const corretiva = String(o.tipo_manutencao || '').toUpperCase() === 'CORRETIVA';
       const feitas = [!!(o.ocorrencia_id && o.causa_id), !!o.analise_id,
                       carregado && tempoMs > 0 && !semDesc.length && !rodando.length,
-                      anexosCarregados && (!corretiva || fotos >= 1), o.status === 'FECHADA'];
-      let atual = feitas.indexOf(false); if (atual < 0) atual = 4;
-      return { feitas, atual, carregado, tempoMs, semDesc, rodando, anexosCarregados, fotos, corretiva };
+                      anexosCarregados && (!corretiva || fotos >= 1),
+                      !!osValid && !!assinaturaOS_('SETOR') && !!assinaturaOS_('TECNICO'), o.status === 'FECHADA'];
+      let atual = feitas.indexOf(false); if (atual < 0) atual = 5;
+      return { feitas, atual, carregado, tempoMs, semDesc, rodando, anexosCarregados, fotos, corretiva, validCarregada: !!osValid };
     }
 
     function atualizarPassosOS_() {
@@ -6495,6 +6547,13 @@ abaAgenda.appendRow([
       osEtapaVendo = 4; osEtapaManual = true; atualizarPassosOS_();
     }
 
+    function continuarValidacaoOS() {
+      if (!osAtual) return;
+      const st = estadoOS_();
+      if (!st.feitas[4]) { showToast('Colete as duas assinaturas (setor e técnico) antes de continuar.', 'warning'); return; }
+      osEtapaVendo = 5; osEtapaManual = true; atualizarPassosOS_();
+    }
+
     // agrupa os trechos descritos: um "serviço registrado" por técnico + descrição
     function lancamentosOS_() {
       const g = {};
@@ -6521,6 +6580,9 @@ abaAgenda.appendRow([
       ];
       if (st.corretiva) itens.push([st.anexosCarregados && st.fotos >= 1, 'Pelo menos 1 foto (obrigatória em corretiva)',
         st.anexosCarregados ? (st.fotos ? st.fotos + (st.fotos > 1 ? ' fotos' : ' foto') : '') : 'carregando...']);
+      const sSet = assinaturaOS_('SETOR'), sTec = assinaturaOS_('TECNICO');
+      itens.push([!!sSet, 'Assinatura do responsável do setor', sSet ? sSet.nome : (st.validCarregada ? '' : 'carregando...')]);
+      itens.push([!!sTec, 'Assinatura do técnico', sTec ? sTec.nome : (st.validCarregada ? '' : 'carregando...')]);
       document.getElementById('osConf').innerHTML = itens.map(([ok, rot, det]) =>
         `<li class="${ok ? 'ok' : 'falta'}"><span class="ic" aria-hidden="true"><i class="fa-solid ${ok ? 'fa-check' : 'fa-xmark'}"></i></span>
           <span>${rot}${det ? ` <span class="eq-k">${e(det)}</span>` : ''}<span class="sr-only">${ok ? ' (ok)' : ' (pendente)'}</span></span></li>`).join('');
@@ -6536,7 +6598,7 @@ abaAgenda.appendRow([
     async function fecharOS() {
       if (!osAtual) return;
       const st = estadoOS_();
-      if (st.feitas.slice(0, 4).some(x => !x)) { showToast('Complete as etapas anteriores antes de fechar a O.S.', 'warning'); return; }
+      if (st.feitas.slice(0, 5).some(x => !x)) { showToast('Complete as etapas anteriores antes de fechar a O.S.', 'warning'); return; }
       const c = await confirmarAcao({ titulo: 'Fechar O.S. ' + osAtual.os.protocolo, rotuloBotao: 'Fechar O.S.',
         texto: 'Depois de fechada, a O.S. não pode mais ser editada. Para alterar será preciso reabri-la (a reabertura exige permissão e motivo, e fica registrada).' });
       if (!c.ok) return;
@@ -6544,8 +6606,10 @@ abaAgenda.appendRow([
       const r = await rpcPriv('os_fechar', { p_protocolo: osAtual.os.protocolo });
       btn.disabled = false;
       if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); recarregarFichaOS(); return; }
-      showToast("O.S. " + osAtual.os.protocolo + " fechada.", "success");
-      recarregarFichaOS();
+      showToast("O.S. " + osAtual.os.protocolo + " fechada. Gerando o relatório final...", "success");
+      await recarregarFichaOS();
+      try { await gerarRelatorioFinalOS_(); showToast('Relatório final guardado.', 'success'); }
+      catch (err) { showToast('⚠️ O.S. fechada, mas o relatório final não foi guardado: ' + (err.message || err) + '. Use "Baixar PDF" para tentar de novo.', 'error'); }
     }
 
     async function reabrirOS() {
@@ -6607,17 +6671,19 @@ abaAgenda.appendRow([
     async function carregarAnexosOS() {
       if (!osAtual) return;
       const protocolo = osAtual.os.protocolo;
-      const r = await rpcPriv('os_anexos_listar', { p_protocolo: protocolo });
+      const [r, rv] = await Promise.all([rpcPriv('os_anexos_listar', { p_protocolo: protocolo }), rpcPriv('os_validacao_obter', { p_protocolo: protocolo })]);
       if (!osAtual || osAtual.os.protocolo !== protocolo) return;
       if (!r.ok) { document.getElementById('osAnexoGaleria').innerHTML = `<div class="eq-k">${escAttr_(textoErroPriv(r))}</div>`; return; }
       osAnexos = r; osAnexoUrls = {};
-      if ((r.itens || []).length) {
+      osValid = rv.ok ? rv : { ok: false, assinaturas: [], pendencias: [], erro: textoErroPriv(rv) };
+      if ((r.itens || []).length || (osValid.assinaturas || []).length || osValid.relatorio) {
         const v = await chamarFuncaoAnexos_({ acao: 'leitura', protocolo });
         if (!osAtual || osAtual.os.protocolo !== protocolo) return;
         if (v.ok) { osAnexoUrls = v.urls || {}; osAnexoUrlsEm = Date.now(); }
         else document.getElementById('osAnexoProgresso').textContent = 'Não foi possível carregar as imagens: ' + v.erro;
       }
       renderAnexosOS_();
+      renderValidacaoOS_();
       atualizarPassosOS_();
     }
 
@@ -6748,6 +6814,315 @@ abaAgenda.appendRow([
       if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); return; }
       showToast('Anexo removido.', 'success');
       carregarAnexosOS();
+    }
+
+    // ----- validação: assinaturas (setor e técnico) -----
+    // A imagem vai para o bucket privado (mesma Edge Function das fotos). Mudanças na O.S. depois de assinar
+    // invalidam as assinaturas no banco (gatilhos do script 10); reabrir também.
+    let osValid = null, osPad = null, osAssPapel = null;
+    const OS_PAPEL = { SETOR: 'Responsável do setor', TECNICO: 'Técnico' };
+
+    function assinaturaOS_(papel) { return ((osValid && osValid.assinaturas) || []).find(a => a.papel === papel) || null; }
+
+    function renderValidacaoOS_() {
+      if (!osAtual || !osValid) return;
+      const e = escAttr_, fechada = osAtual.os.status === 'FECHADA';
+      const consulta = usuarioLogado && usuarioLogado.perfil === 'CONSULTA';
+      const pend = osValid.pendencias || [];
+      ['SETOR', 'TECNICO'].forEach(papel => {
+        const a = assinaturaOS_(papel), url = a && osAnexoUrls[a.id];
+        const podeColetar = !fechada && !consulta;
+        const rot = papel === 'TECNICO' && !a && usuarioLogado ? `${OS_PAPEL[papel]}: ${e(usuarioLogado.nome)}` : OS_PAPEL[papel];
+        document.getElementById('osAss' + papel).className = 'os-ass' + (a ? ' ok' : '');
+        document.getElementById('osAss' + papel).innerHTML = `
+          <div class="tit">${a ? '<span class="eq-chip verde">Assinado</span>' : '<span class="eq-chip ambar">Pendente</span>'} ${rot}</div>
+          ${a ? `<div class="img">${url ? `<img src="${e(url)}" alt="Assinatura de ${e(a.nome)}" />` : '<span class="eq-k">Sem visualização</span>'}</div>
+                 <div><b>${e(a.nome)}</b>${a.cargo ? ` <span class="eq-k">${e(a.cargo)}</span>` : ''}</div>
+                 <div class="eq-k">Coletada em ${e(fmtBR(a.coletada_em))}${a.coletada_por_nome ? ' por ' + e(a.coletada_por_nome) : ''}</div>`
+              : `<div class="vazio">Ainda não assinado</div>`}
+          ${podeColetar ? `<div><button type="button" class="${a ? 'eq-link' : 'btn-submit'}" data-p="${papel}" onclick="abrirColetaAssinatura(this.dataset.p)" ${pend.length ? 'disabled' : ''}>
+              ${a ? 'Assinar de novo' : (papel === 'TECNICO' ? 'Assinar como técnico' : 'Coletar assinatura do setor')}</button></div>` : ''}`;
+      });
+      const av = document.getElementById('osAssAviso');
+      let msg = '';
+      if (!fechada && pend.length) msg = 'Antes das assinaturas, falta: ' + pend.join(', ') + '.';
+      else if (!fechada && osValid.ultima_invalidacao) {
+        const u = osValid.ultima_invalidacao;
+        msg = `A assinatura do ${OS_PAPEL[u.papel].toLowerCase()} perdeu a validade em ${fmtBR(u.em)}: ${u.motivo}. Colete de novo.`;
+      }
+      av.style.display = msg ? '' : 'none'; av.textContent = msg;
+      renderRelatorioInfoOS_();
+    }
+
+    function abrirColetaAssinatura(papel) {
+      if (!osAtual || !osValid) return;
+      if ((osValid.pendencias || []).length) { showToast('Antes das assinaturas, falta: ' + osValid.pendencias.join(', ') + '.', 'warning'); return; }
+      osAssPapel = papel;
+      const tec = papel === 'TECNICO';
+      document.getElementById('osAssColetaTit').textContent = tec ? `Assinatura do técnico: ${usuarioLogado ? usuarioLogado.nome : ''}` : 'Assinatura do responsável do setor';
+      document.getElementById('osAssCampos').style.display = tec ? 'none' : '';
+      if (!tec) {
+        document.getElementById('osAssNome').value = osAtual.os.solicitante || '';
+        document.getElementById('osAssCargo').value = '';
+      }
+      document.getElementById('osAssUsarCad').style.display = tec && usuarioLogado && usuarioLogado.assinaturaUrl ? '' : 'none';
+      const box = document.getElementById('osAssColeta');
+      box.style.display = '';
+      requestAnimationFrame(() => { iniciarPadAssinatura_(); box.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+    }
+
+    function cancelarColetaAssinatura() {
+      const box = document.getElementById('osAssColeta'); if (box) box.style.display = 'none';
+      osAssPapel = null; osPad = null;
+    }
+
+    function iniciarPadAssinatura_() {
+      const cv = document.getElementById('osAssPad');
+      const b = cv.getBoundingClientRect(), dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+      cv.width = Math.max(1, Math.round(b.width * dpr)); cv.height = Math.max(1, Math.round(b.height * dpr));
+      const ctx = cv.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#0f172a'; ctx.fillStyle = '#0f172a';
+      osPad = { cv, ctx, desenhou: false, ativo: false, ultimo: null };
+      if (cv.dataset.pronto) return;
+      cv.dataset.pronto = '1';
+      const pos = ev => { const r = cv.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; };
+      cv.addEventListener('pointerdown', ev => {
+        if (!osPad) return; ev.preventDefault();
+        try { cv.setPointerCapture(ev.pointerId); } catch (e) {}
+        osPad.ativo = true; osPad.ultimo = pos(ev); osPad.desenhou = true;
+        osPad.ctx.beginPath(); osPad.ctx.arc(osPad.ultimo.x, osPad.ultimo.y, 1.2, 0, Math.PI * 2); osPad.ctx.fill();
+      });
+      cv.addEventListener('pointermove', ev => {
+        if (!osPad || !osPad.ativo) return; ev.preventDefault();
+        const p = pos(ev), c = osPad.ctx;
+        c.beginPath(); c.moveTo(osPad.ultimo.x, osPad.ultimo.y); c.lineTo(p.x, p.y); c.stroke(); osPad.ultimo = p;
+      });
+      const fim = () => { if (osPad) osPad.ativo = false; };
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach(n => cv.addEventListener(n, fim));
+    }
+    function limparPadAssinatura() { if (osPad) iniciarPadAssinatura_(); }
+
+    async function usarAssinaturaCadastrada() {
+      if (!osPad || !usuarioLogado || !usuarioLogado.assinaturaUrl) return;
+      try {
+        const img = await new Promise((res, rej) => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => res(i); i.onerror = rej; i.src = usuarioLogado.assinaturaUrl; });
+        iniciarPadAssinatura_();
+        const r = osPad.cv.getBoundingClientRect(), esc = Math.min((r.width * .9) / img.naturalWidth, (r.height * .7) / img.naturalHeight);
+        const w = img.naturalWidth * esc, h = img.naturalHeight * esc;
+        osPad.ctx.drawImage(img, (r.width - w) / 2, (r.height - h) / 2 - 12, w, h);
+        osPad.cv.toDataURL();   // testa se a imagem pode ser usada (link de outro site sem permissão bloqueia)
+        osPad.desenhou = true;
+      } catch (e) {
+        iniciarPadAssinatura_();
+        showToast('Não foi possível usar a assinatura cadastrada. Assine na área indicada.', 'warning');
+      }
+    }
+
+    // envia um arquivo já registrado no banco: link temporário da Edge Function + envio direto ao bucket
+    async function subirArquivoOS_(id, blob, tipo) {
+      const u = await chamarFuncaoAnexos_({ acao: 'upload', anexo_id: id });
+      if (!u.ok) throw new Error(u.erro);
+      const up = await supabaseClient.storage.from('os-anexos').uploadToSignedUrl(u.path, u.token_envio, blob, { contentType: tipo });
+      if (up.error) throw new Error(up.error.message);
+    }
+
+    async function salvarAssinaturaOS() {
+      if (!osAtual || !osPad || !osAssPapel) return;
+      const tec = osAssPapel === 'TECNICO';
+      const nome = (document.getElementById('osAssNome').value || '').trim(), cargo = (document.getElementById('osAssCargo').value || '').trim();
+      if (!tec && nome.length < 3) { showToast('Informe o nome de quem está assinando.', 'error'); document.getElementById('osAssNome').focus(); return; }
+      if (!osPad.desenhou) { showToast('Assine na área indicada.', 'error'); return; }
+      const btn = document.getElementById('osAssBtnSalvar'); btn.disabled = true;
+      try {
+        const blob = await new Promise(res => osPad.cv.toBlob(res, 'image/png'));
+        if (!blob) throw new Error('falha ao preparar a imagem da assinatura');
+        const id = novoUuid_();
+        let r = await rpcPriv('os_assinatura_registrar', { p_protocolo: osAtual.os.protocolo, p_id: id,
+          p_dados: { papel: osAssPapel, nome: tec ? '' : nome, cargo: tec ? '' : cargo, tamanho: blob.size } });
+        if (!r.ok) throw new Error(textoErroPriv(r));
+        await subirArquivoOS_(id, blob, 'image/png');
+        r = await rpcPriv('os_assinatura_confirmar', { p_id: id });
+        if (!r.ok) throw new Error(textoErroPriv(r));
+        showToast('Assinatura salva.', 'success');
+        cancelarColetaAssinatura();
+        await carregarAnexosOS();
+      } catch (err) {
+        showToast('⚠️ ' + (err.message || err), 'error');
+      } finally { btn.disabled = false; }
+    }
+
+    // ----- relatório da O.S. (PDF) -----
+    function renderRelatorioInfoOS_() {
+      if (!osAtual) return;
+      const fechada = osAtual.os.status === 'FECHADA', rel = osValid && osValid.relatorio;
+      document.getElementById('osRelInfo').textContent = !fechada ? 'Prévia: o PDF sai com a marca RASCUNHO até a O.S. ser fechada.'
+        : rel ? `Relatório final guardado em ${fmtBR(rel.gerado_em)}${rel.gerado_por_nome ? ' por ' + rel.gerado_por_nome : ''}.`
+        : 'O relatório final ainda não foi guardado. Ele é gerado ao visualizar ou baixar.';
+    }
+
+    async function urlParaDataUrl_(url) {
+      if (!url) return '';
+      try {
+        const b = await (await fetch(url)).blob();
+        return await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(b); });
+      } catch (e) { return ''; }
+    }
+
+    async function htmlRelatorioOS_() {
+      if (!osTempos) await carregarTemposOS();
+      if (!osAnexos || !osValid) await carregarAnexosOS();
+      if (Date.now() - osAnexoUrlsEm > 50 * 60000) {
+        const v = await chamarFuncaoAnexos_({ acao: 'leitura', protocolo: osAtual.os.protocolo });
+        if (v.ok) { osAnexoUrls = v.urls || {}; osAnexoUrlsEm = Date.now(); }
+      }
+      await prepararLogoPdf();
+      const e = escAttr_, o = osAtual.os, fechada = o.status === 'FECHADA', rascunho = !fechada;
+      const lin = (rot, val) => `<tr><th>${rot}</th><td>${e(val) || '—'}</td></tr>`;
+      const trechos = trechosValidosOS_().filter(a => a.fim).sort((p, q) => new Date(p.inicio) - new Date(q.inicio));
+      const totalMs = trechos.reduce((s, a) => s + duracaoMs_(a), 0);
+      const fotos = ((osAnexos && osAnexos.itens) || []).filter(a => a.eh_foto);
+      const docs = ((osAnexos && osAnexos.itens) || []).filter(a => !a.eh_foto);
+      const fotosHtml = [];
+      for (const f of fotos) {
+        const src = await urlParaDataUrl_(osAnexoUrls[f.id]);
+        fotosHtml.push(`<figure class="r-foto">${src ? `<img src="${src}" />` : '<div class="r-semimg">Imagem indisponível</div>'}
+          <figcaption>${e(f.legenda) || e(f.nome) || ''}<span>${e(f.criado_por_nome)} · ${e(fmtBR(f.criado_em))}</span></figcaption></figure>`);
+      }
+      const assHtml = [];
+      for (const papel of ['SETOR', 'TECNICO']) {
+        const a = assinaturaOS_(papel), src = a ? await urlParaDataUrl_(osAnexoUrls[a.id]) : '';
+        assHtml.push(`<div class="r-ass"><div class="r-ass-img">${src ? `<img src="${src}" />` : ''}</div>
+          <div class="r-ass-lin"><b>${a ? e(a.nome) : '&nbsp;'}</b><span>${OS_PAPEL[papel]}${a && a.cargo ? ' · ' + e(a.cargo) : ''}</span>
+          <span>${a ? 'Assinado em ' + e(fmtBR(a.coletada_em)) : 'Não assinado'}</span></div></div>`);
+      }
+      const agora = fmtBR(new Date().toISOString());
+      return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+        body { font-family: Arial, Helvetica, sans-serif; color: #1e293b; font-size: 10.5px; line-height: 1.4; }
+        .r-topo { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-bottom: 10px; border-bottom: 3px solid #0b5ed7; }
+        .r-topo img { max-height: 52px; max-width: 170px; }
+        .r-tit { text-align: right; }
+        .r-tit .k { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: #0b5ed7; }
+        .r-tit .n { font-size: 24px; font-weight: 800; color: #0f172a; }
+        .r-tit .s { display: inline-block; margin-top: 3px; padding: 2px 10px; border-radius: 999px; font-size: 10px; font-weight: 700; color: #fff; background: ${fechada ? '#059669' : '#d97706'}; }
+        .r-rasc { margin: 10px 0 0; padding: 7px 10px; border: 1.5px dashed #d97706; border-radius: 6px; color: #b45309; font-weight: 800; text-align: center; letter-spacing: 1px; }
+        h2 { margin: 16px 0 6px; padding: 5px 9px; font-size: 11.5px; letter-spacing: .6px; color: #fff; background: #0b5ed7; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; }
+        .r-kv th { width: 24%; text-align: left; font-weight: 700; color: #475569; background: #f1f5f9; }
+        .r-kv th, .r-kv td { padding: 5px 8px; border: 1px solid #dbe3ee; vertical-align: top; }
+        .r-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .r-tab th { background: #f1f5f9; color: #475569; text-align: left; font-size: 9.5px; text-transform: uppercase; letter-spacing: .4px; }
+        .r-tab th, .r-tab td { padding: 5px 7px; border: 1px solid #dbe3ee; vertical-align: top; }
+        .r-tab td.num { white-space: nowrap; text-align: right; font-weight: 700; }
+        .r-total { margin-top: 5px; text-align: right; font-weight: 800; }
+        .r-texto { padding: 8px 10px; border: 1px solid #dbe3ee; border-left: 4px solid #0b5ed7; border-radius: 4px; white-space: pre-wrap; }
+        .r-fotos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .r-foto { margin: 0; border: 1px solid #dbe3ee; border-radius: 6px; padding: 6px; page-break-inside: avoid; }
+        .r-foto img { display: block; width: 100%; height: 210px; object-fit: contain; background: #f8fafc; }
+        .r-semimg { height: 210px; display: flex; align-items: center; justify-content: center; color: #94a3b8; background: #f8fafc; }
+        .r-foto figcaption { margin-top: 4px; font-weight: 700; }
+        .r-foto figcaption span, .r-ass-lin span { display: block; font-weight: 400; color: #64748b; font-size: 9.5px; }
+        .r-asss { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 8px; page-break-inside: avoid; }
+        .r-ass-img { height: 70px; display: flex; align-items: flex-end; justify-content: center; }
+        .r-ass-img img { max-height: 68px; max-width: 100%; }
+        .r-ass-lin { border-top: 1px solid #334155; padding-top: 4px; text-align: center; }
+        .r-bloco { page-break-inside: avoid; }
+        .r-rodape { margin-top: 18px; padding-top: 8px; border-top: 1px solid #cbd5e1; font-size: 8.5px; color: #64748b; text-align: center; }
+      </style></head><body>
+        <div class="r-topo"><img src="${PDF_LOGO_SRC}" />
+          <div class="r-tit"><div class="k">RELATÓRIO DE ORDEM DE SERVIÇO</div><div class="n">${e(o.protocolo)}</div><span class="s">${fechada ? 'FECHADA' : 'ABERTA'}</span></div></div>
+        ${rascunho ? '<div class="r-rasc">RASCUNHO · documento sem validade até o fechamento da O.S.</div>' : ''}
+
+        <div class="r-bloco"><h2>IDENTIFICAÇÃO</h2>
+        <div class="r-2"><table class="r-kv">${lin('Cliente / unidade', o.cliente)}${lin('Equipamento', o.equipamento)}${lin('TAG', o.tag)}${lin('Nº de série', o.serie)}${lin('Patrimônio', o.patrimonio)}</table>
+          <table class="r-kv">${lin('Tipo de manutenção', o.tipo_manutencao)}${lin('Execução', o.execucao)}${lin('Prioridade', o.prioridade)}${lin('Abertura', fmtBR(o.data_abertura))}${lin('Fechamento', fechada ? fmtBR(o.data_fechamento) : '')}</table></div>
+        <table class="r-kv" style="margin-top:6px;">${lin('Solicitante', o.solicitante)}${lin('Técnico responsável', o.tecnico)}${o.reaberturas > 0 ? lin('Reaberturas', o.reaberturas + 'x' + (o.motivo_ultima_reabertura ? ' (última: ' + o.motivo_ultima_reabertura + ')' : '')) : ''}</table></div>
+
+        <div class="r-bloco"><h2>REQUISIÇÃO</h2>
+        <table class="r-kv">${lin('Ocorrência', o.ocorrencia_nome)}${lin('Causa', o.causa_nome)}${lin('Observação', o.defeito_relatado)}</table></div>
+
+        <div class="r-bloco"><h2>DIAGNÓSTICO</h2>
+        <table class="r-kv">${lin('Análise realizada', o.analise_nome)}${lin('Complemento', o.diagnostico_tecnico)}</table></div>
+
+        <h2>MÃO DE OBRA</h2>
+        ${trechos.length ? `<table class="r-tab"><thead><tr><th>Técnico</th><th>Início</th><th>Fim</th><th>Tempo</th><th>Serviço</th></tr></thead><tbody>
+          ${trechos.map(a => `<tr><td>${e(a.tecnico_nome)}</td><td>${e(fmtBR(a.inicio))}</td><td>${e(fmtBR(a.fim))}</td><td class="num">${fmtHoras_(duracaoMs_(a))}</td><td>${e(a.descricao) || '—'}</td></tr>`).join('')}
+          </tbody></table><div class="r-total">Total: ${fmtHoras_(totalMs)}</div>` : '<div class="r-texto">Nenhuma mão de obra registrada.</div>'}
+
+        <div class="r-bloco"><h2>SERVIÇO REALIZADO</h2>
+        <div class="r-texto">${e(fechada ? o.servico_realizado : servicoMontadoOS_()) || '—'}</div></div>
+
+        ${fotosHtml.length ? `<h2>FOTOS</h2><div class="r-fotos">${fotosHtml.join('')}</div>` : ''}
+        ${docs.length ? `<div class="r-bloco"><h2>DOCUMENTOS ANEXOS</h2><table class="r-tab"><tbody>${docs.map(d => `<tr><td>${e(d.nome)}</td><td>${e(d.legenda) || ''}</td><td>${e(d.criado_por_nome)} · ${e(fmtBR(d.criado_em))}</td></tr>`).join('')}</tbody></table></div>` : ''}
+
+        <div class="r-bloco"><h2>VALIDAÇÃO</h2><div class="r-asss">${assHtml.join('')}</div></div>
+
+        <div class="r-rodape">${PDF_RODAPE_TXT}<br/>Documento gerado pelo DMA SYS em ${e(agora)}${usuarioLogado ? ' por ' + e(usuarioLogado.nome) : ''}.</div>
+      </body></html>`;
+    }
+
+    async function pdfRelatorioOS_() {
+      const html = await htmlRelatorioOS_();
+      if (!window.html2pdf) await carregarScriptExterno('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
+      const holder = document.createElement('div');
+      holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:720px;background:#fff;color:#1e293b;';
+      holder.innerHTML = prepararHtmlPdf(html);
+      document.body.appendChild(holder);
+      try {
+        const pdf = await window.html2pdf().set({
+          margin: [10, 10, 14, 10],
+          image: { type: 'jpeg', quality: 0.95 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['css', 'legacy'], avoid: ['.r-bloco', '.r-foto', '.r-asss', 'tr'] }
+        }).from(holder).toPdf().get('pdf');
+        const n = pdf.internal.getNumberOfPages(), W = pdf.internal.pageSize.getWidth(), H = pdf.internal.pageSize.getHeight();
+        for (let i = 1; i <= n; i++) {
+          pdf.setPage(i); pdf.setFontSize(8); pdf.setTextColor(110);
+          pdf.text(`${osAtual.os.protocolo}  |  página ${i} de ${n}`, W - 10, H - 6, { align: 'right' });
+        }
+        return pdf.output('blob');
+      } finally { holder.remove(); }
+    }
+
+    async function gerarRelatorioFinalOS_() {
+      if (!osAtual || osAtual.os.status !== 'FECHADA') throw new Error('a O.S. não está fechada');
+      const blob = await pdfRelatorioOS_();
+      const id = novoUuid_();
+      let r = await rpcPriv('os_relatorio_registrar', { p_protocolo: osAtual.os.protocolo, p_id: id, p_tamanho: blob.size });
+      if (!r.ok) throw new Error(textoErroPriv(r));
+      await subirArquivoOS_(id, blob, 'application/pdf');
+      r = await rpcPriv('os_relatorio_confirmar', { p_id: id });
+      if (!r.ok) throw new Error(textoErroPriv(r));
+      await carregarAnexosOS();
+      return blob;
+    }
+
+    async function relatorioOS(modo) {
+      if (!osAtual) return;
+      const janela = modo === 'ver' ? window.open('', '_blank') : null;     // abre já no clique (senão o navegador bloqueia)
+      if (janela) janela.document.write('<p style="font-family:Arial;padding:24px;">Gerando o relatório da O.S...</p>');
+      const btns = [document.getElementById('osRelBtnVer'), document.getElementById('osRelBtnBaixar')];
+      btns.forEach(b => { b.disabled = true; });
+      try {
+        const o = osAtual.os, fechada = o.status === 'FECHADA', rel = osValid && osValid.relatorio;
+        let blob = null;
+        if (fechada && rel) {                                              // usa o PDF final guardado
+          if (!osAnexoUrls[rel.id] || Date.now() - osAnexoUrlsEm > 50 * 60000) {
+            const v = await chamarFuncaoAnexos_({ acao: 'leitura', protocolo: o.protocolo });
+            if (v.ok) { osAnexoUrls = v.urls || {}; osAnexoUrlsEm = Date.now(); }
+          }
+          if (osAnexoUrls[rel.id]) blob = await (await fetch(osAnexoUrls[rel.id])).blob();
+        }
+        if (!blob) blob = fechada ? await gerarRelatorioFinalOS_() : await pdfRelatorioOS_();
+        const url = URL.createObjectURL(blob), nome = `${o.protocolo}${fechada ? '' : '_RASCUNHO'}.pdf`;
+        if (janela) janela.location.href = url;
+        else { const a = document.createElement('a'); a.href = url; a.download = nome; document.body.appendChild(a); a.click(); a.remove(); }
+        setTimeout(() => URL.revokeObjectURL(url), 120000);
+      } catch (err) {
+        if (janela) janela.close();
+        showToast('⚠️ Não foi possível gerar o relatório: ' + (err.message || err), 'error');
+      } finally { btns.forEach(b => { b.disabled = false; }); }
     }
 
     // ----- mão de obra: registrar o serviço (para o cronômetro e grava a descrição) -----
