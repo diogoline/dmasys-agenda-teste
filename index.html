@@ -6619,6 +6619,7 @@ abaAgenda.appendRow([
       document.getElementById('osEt2Sub').textContent = st.prev ? 'Procedimento de manutenção preventiva' : 'O que o técnico analisou e encontrou';
       document.getElementById('osDiagBloco').style.display = st.prev ? 'none' : '';
       renderConferenciaOS_(st);
+      if (osValid) renderValidacaoOS_();
     }
 
     async function irEtapaOS(i) {
@@ -6765,7 +6766,7 @@ abaAgenda.appendRow([
       if (!c.ok) return;
       const r = await rpcPriv('os_reabrir', { p_protocolo: osAtual.os.protocolo, p_motivo: c.motivo });
       if (!r.ok) { showToast("⚠️ " + textoErroPriv(r), "error"); return; }
-      showToast("O.S. " + osAtual.os.protocolo + " reaberta.", "success");
+      showToast("O.S. " + osAtual.os.protocolo + " reaberta. As assinaturas foram invalidadas e precisam ser coletadas de novo. O restante continua valendo: só inicie o cronômetro se houver serviço novo.", "warning");
       osEtapaVendo = -1; osEtapaManual = false;
       recarregarFichaOS();
     }
@@ -6947,6 +6948,7 @@ abaAgenda.appendRow([
                               texto: d.texto || null, observacao: (d.observacao || '').trim() || null, resultado: r.resultado,
                               impede_uso: r.impede_uso === undefined ? null : r.impede_uso };
       c.resumo = r.resumo;
+      atualizarValidacaoOS_();
       // redesenha sem tirar o foco de quem ainda está digitando em outro campo
       const ativo = document.activeElement, linha = document.getElementById(`ckr-${ckId}-${itemId}`);
       const foco = ativo && ativo.dataset && ativo.dataset.c ? { c: ativo.dataset.c, i: ativo.dataset.i, cls: ativo.className, tag: ativo.tagName } : null;
@@ -7180,13 +7182,42 @@ abaAgenda.appendRow([
     let osValid = null, osPad = null, osAssPapel = null;
     const OS_PAPEL = { SETOR: 'Responsável do setor', TECNICO: 'Técnico' };
 
+    // o que falta antes de assinar, calculado com o estado ATUAL da ficha (o banco confere de novo ao assinar)
+    function pendenciasAntesAssinarOS_() {
+      if (!osAtual) return [];
+      const st = estadoOS_(), p = [];
+      if (!st.feitas[0]) p.push('ocorrência e causa (etapa 1)');
+      if (!st.feitas[1]) p.push(st.prev ? 'checklist completo (etapa 2)' : 'análise realizada e checklists completos (etapa 2)');
+      if (!st.carregado) p.push('carregando a mão de obra...');
+      else {
+        if (st.rodando.length) p.push('pausar ou registrar o cronômetro (' + [...new Set(st.rodando.map(a => a.tecnico_nome))].join(', ') + ')');
+        if (st.tempoMs <= 0) p.push('mão de obra');
+        if (st.semDesc.length) p.push('descrição da mão de obra (ou descartar o trecho iniciado por engano)');
+      }
+      if (!st.feitas[3]) p.push(st.anexosCarregados ? 'pelo menos 1 foto (obrigatória em corretiva)' : 'carregando os anexos...');
+      return p;
+    }
+
+    // recarrega assinaturas/pendências do banco depois de mudanças (os gatilhos podem ter invalidado assinaturas)
+    let _osValidTimer = null;
+    function atualizarValidacaoOS_() {
+      if (!osAtual || !osValid) return;
+      clearTimeout(_osValidTimer);
+      _osValidTimer = setTimeout(async () => {
+        if (!osAtual) return;
+        const p = osAtual.os.protocolo, r = await rpcPriv('os_validacao_obter', { p_protocolo: p });
+        if (!osAtual || osAtual.os.protocolo !== p || !r.ok) return;
+        osValid = r; renderValidacaoOS_(); atualizarPassosOS_();
+      }, 350);
+    }
+
     function assinaturaOS_(papel) { return ((osValid && osValid.assinaturas) || []).find(a => a.papel === papel) || null; }
 
     function renderValidacaoOS_() {
       if (!osAtual || !osValid) return;
       const e = escAttr_, fechada = osAtual.os.status === 'FECHADA';
       const consulta = usuarioLogado && usuarioLogado.perfil === 'CONSULTA';
-      const pend = osValid.pendencias || [];
+      const pend = pendenciasAntesAssinarOS_();
       ['SETOR', 'TECNICO'].forEach(papel => {
         const a = assinaturaOS_(papel), url = a && osAnexoUrls[a.id];
         const podeColetar = !fechada && !consulta;
@@ -7214,7 +7245,8 @@ abaAgenda.appendRow([
 
     function abrirColetaAssinatura(papel) {
       if (!osAtual || !osValid) return;
-      if ((osValid.pendencias || []).length) { showToast('Antes das assinaturas, falta: ' + osValid.pendencias.join(', ') + '.', 'warning'); return; }
+      const pendAgora = pendenciasAntesAssinarOS_();
+      if (pendAgora.length) { showToast('Antes das assinaturas, falta: ' + pendAgora.join(', ') + '.', 'warning'); return; }
       osAssPapel = papel;
       const tec = papel === 'TECNICO';
       document.getElementById('osAssColetaTit').textContent = tec ? `Assinatura do técnico: ${usuarioLogado ? usuarioLogado.nome : ''}` : 'Assinatura do responsável do setor';
@@ -7652,14 +7684,30 @@ abaAgenda.appendRow([
         : 'Inicie o cronômetro ao começar o serviço. Ao terminar, descreva aqui o que foi feito.';
       const semDesc = validos.filter(a => a.fim && !String(a.descricao || '').trim());
       const nomes = [...new Set(semDesc.map(a => a.tecnico_nome))];
+      // trechos meus, sem descrição e de até 15 min (rodando ou não): podem ser descartados se foram iniciados por engano
+      const descartaveis = fechada || consulta ? [] : validos.filter(a => a.tecnico_id === euId && !String(a.descricao || '').trim() && duracaoMs_(a) <= 15 * 60000);
       const pend = document.getElementById('osMoPend');
-      pend.style.display = semDesc.length && !fechada ? '' : 'none';
-      pend.textContent = semDesc.length ? `Tempo ainda sem descrição do serviço: ${nomes.join(', ')}. Cada técnico registra a sua mão de obra.` : '';
+      pend.style.display = (semDesc.length || descartaveis.length) && !fechada ? '' : 'none';
+      pend.innerHTML = (semDesc.length ? e(`Tempo ainda sem descrição do serviço: ${nomes.join(', ')}. Cada técnico registra a sua mão de obra.`) : '')
+        + (descartaveis.length ? `<div style="margin-top:${semDesc.length ? 8 : 0}px;">Iniciou o cronômetro sem necessidade? Descarte o trecho em vez de registrá-lo:
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">${descartaveis.map(a =>
+              `<button type="button" class="eq-btn" data-id="${e(a.id)}" onclick="descartarTrechoOS(this.dataset.id)"><i class="fa-solid fa-rotate-left"></i> Descartar trecho de ${e(fmtBR(a.inicio).slice(-5))} (${a.fim ? fmtHoras_(duracaoMs_(a)) : 'rodando'})</button>`).join('')}</div></div>` : '');
       const lanc = lancamentosOS_();
       document.getElementById('osMoLista').innerHTML = lanc.length ? lanc.map(l =>
         `<div class="os-lanc"><div class="topo"><b>${e(l.tecnico)}</b><span class="eq-k">${e(fmtBR(l.ini))}</span><span class="dur">${fmtHoras_(l.ms)}</span></div>
           <div class="desc">${e(l.descricao)}</div></div>`).join('')
         : '<div class="eq-k" style="padding:4px 0;">Nenhum serviço registrado ainda.</div>';
+    }
+
+    async function descartarTrechoOS(id) {
+      if (!osAtual) return;
+      const c = await confirmarAcao({ titulo: 'Descartar trecho de tempo', rotuloBotao: 'Descartar',
+        texto: 'O trecho será cancelado como "iniciado por engano" e não conta na mão de obra. Ele continua guardado no histórico, com o seu nome.' });
+      if (!c.ok) return;
+      const r = await rpcPriv('os_cronometro', { p_protocolo: osAtual.os.protocolo, p_acao: 'descartar', p_id: id });
+      if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); return; }
+      showToast('Trecho descartado.', 'success');
+      carregarTemposOS();
     }
 
     async function registrarMaoDeObraOS() {
@@ -7738,6 +7786,7 @@ abaAgenda.appendRow([
       if (validos.some(a => !a.fim)) osRelogioTimer = setInterval(atualizarRelogiosOS_, 1000);
       renderMaoDeObraOS_();
       atualizarPassosOS_();
+      atualizarValidacaoOS_();
     }
 
     function atualizarRelogiosOS_() {
