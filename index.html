@@ -1121,6 +1121,11 @@ html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdow
     .os-anexo figcaption { margin-top: 6px; display: grid; gap: 3px; }
     .os-anexo-leg { width: 100%; padding: 6px 8px !important; font-size: 12px !important; min-height: 0 !important; }
     .os-visor { width: 920px; }
+    .os-crono-barra { position: sticky; top: -1px; z-index: 6; margin: 0 0 14px; background: #0f172a; box-shadow: 0 6px 18px -12px rgba(0, 0, 0, .6); }
+    html.light .os-crono-barra { background: #ffffff; }
+    .ckr-uso { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; font-weight: 600; }
+    .ckr-crit { font-size: 12.5px; color: #fb7185; }
+    html.light .ckr-crit { color: #be123c; }
     .ckc { margin-top: 10px; padding: 14px; border-radius: 12px; border: 1px solid #334155; }
     .ckc-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
     .ckc-prog { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 8px 0 4px; }
@@ -2882,6 +2887,14 @@ abaAgenda.appendRow([
       <div id="osAvisoFechada" class="eq-aviso" style="display:none;"></div>
       <div id="osResumo" class="os-resumo"></div>
       <ol id="osPassos" class="os-passos" aria-label="Etapas da O.S."></ol>
+      <div id="osCrono" class="os-crono os-crono-barra">
+        <div style="min-width:0;">
+          <div class="eq-k">Meu tempo de atendimento nesta O.S.</div>
+          <div id="osCronoRelogio" class="os-crono-relogio">00:00:00</div>
+          <div id="osCronoInfo" class="eq-k"></div>
+        </div>
+        <button type="button" id="osCronoBtn" class="os-crono-btn" onclick="alternarCronometroOS()"><i class="fa-solid fa-play"></i> Iniciar</button>
+      </div>
 
       <!-- ETAPA 1: REQUISIÇÃO -->
       <section class="os-etapa" id="osEtapa1">
@@ -2932,14 +2945,7 @@ abaAgenda.appendRow([
       <section class="os-etapa" id="osEtapa3">
         <div class="os-etapa-tit"><span class="n">3</span><div><b>Mão de obra</b><div class="eq-k">Inicie o cronômetro ao começar e registre o que foi feito ao terminar</div></div>
           <span id="osTempoTotal" class="eq-chip cinza" style="margin-left:auto;">Total 0h00</span></div>
-        <div id="osCrono" class="os-crono">
-          <div style="min-width:0;">
-            <div class="eq-k">Meu tempo nesta O.S.</div>
-            <div id="osCronoRelogio" class="os-crono-relogio">00:00:00</div>
-            <div id="osCronoInfo" class="eq-k"></div>
-          </div>
-          <button type="button" id="osCronoBtn" class="os-crono-btn" onclick="alternarCronometroOS()"><i class="fa-solid fa-play"></i> Iniciar</button>
-        </div>
+        <div class="eq-k" style="margin-bottom:4px;">O cronômetro fica no topo da ficha e conta todo o atendimento: checklist, testes, reparo e fotos.</div>
         <div id="osMoReg" class="os-mo-reg">
           <div class="form-group" style="margin-bottom:8px;"><label for="osMoDesc">O que foi feito *</label>
             <textarea id="osMoDesc" rows="3" maxlength="2000" placeholder="Ex: Substituição do cabo de força, que estava rompido. Teste funcional aprovado."></textarea></div>
@@ -3189,7 +3195,7 @@ abaAgenda.appendRow([
               <tbody id="ckCorpo"></tbody>
             </table>
           </div>
-          <div class="eq-k" style="margin-top:10px;">CSV para importar: colunas <code>secao</code>, <code>item</code>, <code>tipo</code> (VERIFICACAO, MEDICAO ou TEXTO), <code>unidade</code>, <code>minimo</code>, <code>maximo</code>, <code>obrigatorio</code> (SIM/NÃO). Separador ponto e vírgula ou vírgula. O checklist importado abre no editor para você revisar antes de salvar.</div>
+          <div class="eq-k" style="margin-top:10px;">CSV para importar: colunas <code>secao</code>, <code>item</code>, <code>tipo</code> (VERIFICACAO, MEDICAO ou TEXTO), <code>unidade</code>, <code>minimo</code>, <code>maximo</code>, <code>obrigatorio</code> (SIM/NÃO), <code>critico</code> (SIM/NÃO). Separador ponto e vírgula ou vírgula. O checklist importado abre no editor para você revisar antes de salvar.</div>
         </div>
 
         <!-- editor -->
@@ -6481,7 +6487,8 @@ abaAgenda.appendRow([
     async function abrirFichaOS(protocolo) {
       garantirCombosOS();
       osTempos = null; osTrechosAbertos = false; osEtapaVendo = -1; osEtapaManual = false; osSujo = false;
-      osAnexos = null; osAnexoUrls = {}; osAnexoUrlsEm = 0; osValid = null; cancelarColetaAssinatura(); osChecklists = null; osCkObsAberta = {};
+      osAnexos = null; osAnexoUrls = {}; osAnexoUrlsEm = 0; osValid = null; cancelarColetaAssinatura(); osChecklists = null; osCkObsAberta = {}; osAvisouCrono = false;
+      { const m = document.getElementById('osMoDesc'); m.value = ''; delete m.dataset.sugerido; }
       document.getElementById('osCkLista').innerHTML = ''; document.getElementById('osCkDisp').innerHTML = '';
       document.getElementById('osAnexoGaleria').innerHTML = '';
       document.getElementById('osAnexoProgresso').textContent = '';
@@ -6710,7 +6717,8 @@ abaAgenda.appendRow([
         [!!o.causa_id, 'Causa', o.causa_nome],
         ...(st.prev ? [] : [[!!o.analise_id, 'Análise realizada', o.analise_nome]]),
         ...(st.prev || (st.ck.carregado && st.ck.tem) ? [[st.ck.ok && (st.ck.tem || !st.prev), 'Checklist completo',
-          !st.ck.carregado ? 'carregando...' : st.ck.tem ? `${st.ck.resp} de ${st.ck.total} respondidos${st.ck.nc ? ', ' + st.ck.nc + ' não conforme' + (st.ck.nc > 1 ? 's' : '') : ''}` : 'nenhum checklist']] : []),
+          !st.ck.carregado ? 'carregando...' : st.ck.tem ? (st.ck.resultado ? CK_RESULTADO[st.ck.resultado][1] + ' · ' + CK_RESULTADO[st.ck.resultado][2].toLowerCase() + ' · ' : '')
+            + `${st.ck.resp} de ${st.ck.total} respondidos${st.ck.nc ? ', ' + st.ck.nc + ' não conforme' + (st.ck.nc > 1 ? 's' : '') : ''}` : 'nenhum checklist']] : []),
         [st.carregado && st.tempoMs > 0, 'Mão de obra registrada', st.carregado ? (st.tempoMs > 0 ? fmtHoras_(st.tempoMs) : '') : 'carregando...'],
         [st.carregado && !st.semDesc.length, 'Todo o tempo com descrição do serviço', st.semDesc.length ? st.semDesc.length + ' trecho(s) sem descrição' : ''],
         [st.carregado && !st.rodando.length, 'Nenhum cronômetro rodando', st.rodando.map(a => a.tecnico_nome).join(', ')]
@@ -6786,7 +6794,7 @@ abaAgenda.appendRow([
     // ----- checklist dentro da O.S. -----
     // Na preventiva, a etapa 2 é o checklist (substitui a análise realizada). Nos outros tipos, checklist é opcional.
     // Cada resposta é gravada na hora; o servidor calcula o resultado (inclusive se a medição ficou nos limites).
-    let osChecklists = null, osCkObsAberta = {};
+    let osChecklists = null, osCkObsAberta = {}, osAvisouCrono = false;
 
     function ehPreventivaOS_() { return !!osAtual && String(osAtual.os.tipo_manutencao || '').toUpperCase() === 'PREVENTIVA'; }
 
@@ -6795,6 +6803,10 @@ abaAgenda.appendRow([
       const tem = osChecklists.length > 0;
       const pend = osChecklists.reduce((s, c) => s + (c.resumo.pendentes || 0), 0);
       const ncObs = osChecklists.reduce((s, c) => s + (c.resumo.nc_sem_obs || 0), 0);
+      const ncDec = osChecklists.reduce((s, c) => s + (c.resumo.nc_sem_decisao || 0), 0);
+      const resultados = osChecklists.map(c => c.resumo.resultado);
+      const resultado = !tem || resultados.some(x => !x) ? null : resultados.includes('REPROVADO') ? 'REPROVADO'
+                      : resultados.includes('APROVADO_RESSALVA') ? 'APROVADO_RESSALVA' : 'APROVADO';
       const total = osChecklists.reduce((s, c) => s + (c.resumo.total || 0), 0);
       const nc = osChecklists.reduce((s, c) => s + (c.resumo.nao_conformes || 0), 0);
       const resp = osChecklists.reduce((s, c) => s + (c.resumo.respondidos || 0), 0);
@@ -6802,7 +6814,8 @@ abaAgenda.appendRow([
       if (ehPreventivaOS_() && !tem) msg = 'A preventiva precisa de um checklist: use "Adicionar procedimento".';
       else if (pend) msg = `Faltam ${pend} ite${pend === 1 ? 'm obrigatório' : 'ns obrigatórios'} no checklist.`;
       else if (ncObs) msg = 'Descreva a não conformidade dos itens marcados como "Não conforme".';
-      return { carregado: true, tem, pend, ncObs, total, nc, resp, ok: !msg, msg };
+      else if (ncDec) msg = 'Nos itens não conformes, informe se o equipamento pode continuar em uso.';
+      return { carregado: true, tem, pend, ncObs, ncDec, total, nc, resp, resultado, ok: !msg, msg };
     }
 
     async function carregarChecklistsOS() {
@@ -6813,6 +6826,7 @@ abaAgenda.appendRow([
       if (!r.ok) { document.getElementById('osCkLista').innerHTML = `<div class="eq-k">${escAttr_(textoErroPriv(r))}</div>`; return; }
       osChecklists = r.itens || [];
       renderChecklistsOS_();
+      renderMaoDeObraOS_();
       atualizarPassosOS_();
     }
 
@@ -6823,9 +6837,12 @@ abaAgenda.appendRow([
       if (it.max != null) return `máximo ${it.max}${u}`;
       return it.unidade ? `em ${it.unidade} (sem limite)` : 'sem limite';
     }
-    function chipResultadoCk_(res, obrig) {
+    const CK_RESULTADO = { APROVADO: ['verde', 'Aprovado', 'Apto para uso'], APROVADO_RESSALVA: ['ambar', 'Aprovado com ressalva', 'Apto para uso, com ressalva'],
+                           REPROVADO: ['vermelho', 'Reprovado', 'Inapto para uso'] };
+    function chipResultadoCk_(res, obrig, r, crit) {
       if (res === 'CONFORME') return '<span class="eq-chip verde">Conforme</span>';
-      if (res === 'NAO_CONFORME') return '<span class="eq-chip vermelho">Não conforme</span>';
+      if (res === 'NAO_CONFORME') return crit || (r && r.impede_uso === true) ? '<span class="eq-chip vermelho">Não conforme · inapto</span>'
+        : r && r.impede_uso === false ? '<span class="eq-chip ambar">Não conforme · ressalva</span>' : '<span class="eq-chip vermelho">Não conforme</span>';
       if (res === 'NA') return '<span class="eq-chip cinza">N/A</span>';
       if (res === 'PREENCHIDO') return '<span class="eq-chip verde">Preenchido</span>';
       return obrig === false ? '<span class="eq-chip cinza">Opcional</span>' : '<span class="eq-chip ambar">Pendente</span>';
@@ -6852,20 +6869,27 @@ abaAgenda.appendRow([
                 <button type="button" class="ckb na${r.resposta === 'NA' ? ' on' : ''}" aria-pressed="${r.resposta === 'NA'}" ${dis}
                   data-c="${e(c.id)}" data-i="${e(it.id)}" onclick="responderCkOS(this.dataset.c, this.dataset.i, {resposta: this.classList.contains('on') ? '' : 'NA', texto: ''})">N/A</button>`;
       }
+      const decisao = res !== 'NAO_CONFORME' ? '' : it.critico
+        ? '<div class="ckr-crit">Item crítico: não conforme torna o equipamento <b>inapto para uso</b>.</div>'
+        : `<div class="ckr-uso"><span>O equipamento pode continuar em uso? *</span>
+            <button type="button" class="ckb ok${r.impede_uso === false ? ' on' : ''}" aria-pressed="${r.impede_uso === false}" ${dis}
+              data-c="${e(c.id)}" data-i="${e(it.id)}" onclick="responderCkOS(this.dataset.c, this.dataset.i, {impede_uso: this.classList.contains('on') ? '' : 'false'})">Sim, com ressalva</button>
+            <button type="button" class="ckb nc${r.impede_uso === true ? ' on' : ''}" aria-pressed="${r.impede_uso === true}" ${dis}
+              data-c="${e(c.id)}" data-i="${e(it.id)}" onclick="responderCkOS(this.dataset.c, this.dataset.i, {impede_uso: this.classList.contains('on') ? '' : 'true'})">Não, inapto</button></div>`;
       const corretiva = res === 'NAO_CONFORME'
         ? (r.corretiva ? `<div class="eq-k">Corretiva aberta: <button type="button" class="eq-link" data-p="${e(r.corretiva)}" onclick="abrirOsVinculada(this.dataset.p)">${e(r.corretiva)}</button></div>`
                        : (ro ? '' : `<button type="button" class="eq-link" data-c="${e(c.id)}" data-i="${e(it.id)}" onclick="abrirCorretivaCkOS(this.dataset.c, this.dataset.i)">Abrir O.S. corretiva para este item</button>`))
         : '';
       return `<div class="ckr${res === 'NAO_CONFORME' ? ' nc' : res ? ' ok' : ''}" id="ckr-${e(c.id)}-${e(it.id)}">
         <div class="ckr-top"><span class="ckr-n">${n}</span>
-          <div class="ckr-txt">${e(it.texto)}${obrig ? ' <span class="ckr-req" title="Obrigatório">*</span>' : ''}${it.tipo === 'MEDICAO' ? `<div class="eq-k">Faixa aceita: ${e(faixaCk_(it))}</div>` : ''}</div>
-          <span class="ckr-res">${chipResultadoCk_(res, obrig)}</span></div>
+          <div class="ckr-txt">${e(it.texto)}${obrig ? ' <span class="ckr-req" title="Obrigatório">*</span>' : ''}${it.critico ? ' <span class="eq-chip vermelho" title="Não conforme neste item reprova o equipamento">crítico</span>' : ''}${it.tipo === 'MEDICAO' ? `<div class="eq-k">Faixa aceita: ${e(faixaCk_(it))}</div>` : ''}</div>
+          <span class="ckr-res">${chipResultadoCk_(res, obrig, r, !!it.critico)}</span></div>
         <div class="ckr-resp">${resp}
           ${!ro && !obsVisivel ? `<button type="button" class="eq-link ckr-obs-link" data-k="${e(chave)}" data-c="${e(c.id)}" onclick="osCkObsAberta[this.dataset.k] = true; renderChecklistsOS_()">+ observação</button>` : ''}</div>
         <div class="ckr-obs" style="display:${obsVisivel ? '' : 'none'};">
           <textarea rows="2" maxlength="1000" ${dis} placeholder="${res === 'NAO_CONFORME' ? 'Descreva a não conformidade *' : 'Observação (opcional)'}" aria-label="Observação"
             data-c="${e(c.id)}" data-i="${e(it.id)}" onchange="responderCkOS(this.dataset.c, this.dataset.i, {observacao: this.value})">${e(r.observacao || '')}</textarea>
-          ${corretiva}</div>
+          ${decisao}${corretiva}</div>
       </div>`;
     }
 
@@ -6887,7 +6911,8 @@ abaAgenda.appendRow([
         let n = 0;
         return `<div class="ckc" id="ckc-${e(c.id)}">
           <div class="ckc-h">
-            <div style="min-width:0;"><b>${c.codigo} · ${e(c.nome)}</b> <span class="eq-k">versão ${c.versao}${c.origem === 'AUTOMATICO' ? ' · anexado automaticamente' : ''}</span></div>
+            <div style="min-width:0;"><b>${c.codigo} · ${e(c.nome)}</b> <span class="eq-k">versão ${c.versao}${c.origem === 'AUTOMATICO' ? ' · anexado automaticamente' : ''}</span>
+              ${rs.resultado ? `<span class="eq-chip ${CK_RESULTADO[rs.resultado][0]}">${CK_RESULTADO[rs.resultado][1]}</span>` : '<span class="eq-chip cinza">Em preenchimento</span>'}</div>
             ${ro ? '' : `<button type="button" class="eq-link" data-c="${e(c.id)}" onclick="removerChecklistOS(this.dataset.c)">Remover</button>`}
           </div>
           <div class="ckc-prog"><div class="ckc-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${pct}%"></span></div>
@@ -6904,12 +6929,23 @@ abaAgenda.appendRow([
 
     async function responderCkOS(ckId, itemId, mudanca) {
       const c = (osChecklists || []).find(x => x.id === ckId); if (!c) return;
+      // o preenchimento é serviço executado: avisa (uma vez) se o cronômetro do técnico estiver parado
+      if (!osAvisouCrono && osTempos && !(usuarioLogado && usuarioLogado.perfil === 'CONSULTA')
+          && !trechosValidosOS_().some(a => a.tecnico_id === osTempos.eu_id && !a.fim)) {
+        osAvisouCrono = true;
+        const cf = await confirmarAcao({ titulo: 'Cronômetro parado', rotuloBotao: 'Iniciar cronômetro',
+          texto: 'Você está executando o checklist com o cronômetro parado. O preenchimento faz parte do serviço e o tempo precisa ser registrado. Iniciar agora?' });
+        if (cf.ok) await alternarCronometroOS();
+      }
       const atual = c.respostas[itemId] || {};
-      const d = { resposta: atual.resposta || '', valor: atual.valor ?? '', texto: atual.texto || '', observacao: atual.observacao || '', ...mudanca };
+      const d = { resposta: atual.resposta || '', valor: atual.valor ?? '', texto: atual.texto || '', observacao: atual.observacao || '',
+                  impede_uso: atual.impede_uso === true ? 'true' : atual.impede_uso === false ? 'false' : '', ...mudanca };
+      if (typeof d.impede_uso === 'boolean') d.impede_uso = String(d.impede_uso);
       const r = await rpcPriv('os_checklist_responder', { p_id: ckId, p_item: itemId, p_dados: d });
       if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); renderChecklistsOS_(); return; }
       c.respostas[itemId] = { ...atual, resposta: d.resposta || null, valor: d.valor === '' ? null : String(d.valor).replace(',', '.'),
-                              texto: d.texto || null, observacao: (d.observacao || '').trim() || null, resultado: r.resultado };
+                              texto: d.texto || null, observacao: (d.observacao || '').trim() || null, resultado: r.resultado,
+                              impede_uso: r.impede_uso === undefined ? null : r.impede_uso };
       c.resumo = r.resumo;
       // redesenha sem tirar o foco de quem ainda está digitando em outro campo
       const ativo = document.activeElement, linha = document.getElementById(`ckr-${ckId}-${itemId}`);
@@ -7341,19 +7377,29 @@ abaAgenda.appendRow([
       const servico = fechada ? o.servico_realizado : servicoMontadoOS_();
       let sn = 0; const nx = () => String(++sn).padStart(2, '0');
       const prevR = String(o.tipo_manutencao || '').toUpperCase() === 'PREVENTIVA', cks = D.cks || [];
+      const resultadosCk = cks.map(c => c.resumo.resultado);
+      const veredito = (fechada && o.resultado) ? o.resultado : (!cks.length || resultadosCk.some(x => !x)) ? null
+        : resultadosCk.includes('REPROVADO') ? 'REPROVADO' : resultadosCk.includes('APROVADO_RESSALVA') ? 'APROVADO_RESSALVA' : 'APROVADO';
+      const ressalvas = [];
+      cks.forEach(c => (c.estrutura || []).forEach(s => s.itens.forEach(it => {
+        const r = c.respostas[it.id] || {};
+        if (r.resultado === 'NAO_CONFORME') ressalvas.push({ texto: it.texto, obs: r.observacao, grave: !!it.critico || r.impede_uso === true });
+      })));
       const ckTot = cks.reduce((a, c) => ({ t: a.t + c.resumo.total, ok: a.ok + c.resumo.conformes, nc: a.nc + c.resumo.nao_conformes, na: a.na + c.resumo.na }), { t: 0, ok: 0, nc: 0, na: 0 });
       const blocoChecklist = c => {
         const rs = c.resumo;
-        const corpo = `<div class="r-ck-meta">Procedimento ${c.codigo}, versão ${c.versao} · ${rs.total} itens · ${rs.conformes} conformes · ${rs.nao_conformes} não conformes · ${rs.na} N/A</div>
+        const corpo = `<div class="r-ck-meta">${rs.resultado ? `<span class="r-res ${rs.resultado === 'APROVADO' ? 'ok' : rs.resultado === 'REPROVADO' ? 'nc' : 'pend'}">${CK_RESULTADO[rs.resultado][1]}</span> · ` : ''}Procedimento ${c.codigo}, versão ${c.versao} · ${rs.total} itens · ${rs.conformes} conformes · ${rs.nao_conformes} não conformes · ${rs.na} N/A</div>
           <div class="r-ckl h"><div class="r-ckl-i">Item verificado</div><div class="r-ckl-r">Resultado</div><div class="r-ckl-o">Observação</div></div>` +
           (c.estrutura || []).map(s => `<div class="r-ck-st">${e(s.titulo)}</div>` + s.itens.map(it => {
             const r = c.respostas[it.id] || {}, res = r.resultado;
             const val = it.tipo === 'MEDICAO' && r.valor != null ? `${e(String(r.valor).replace('.', ','))}${it.unidade ? ' ' + e(it.unidade) : ''}`
                       : (it.tipo === 'TEXTO' && r.texto ? e(r.texto) : '');
-            const chip = res === 'CONFORME' ? '<span class="r-res ok">Conforme</span>' : res === 'NAO_CONFORME' ? '<span class="r-res nc">Não conforme</span>'
+            const grave = !!it.critico || r.impede_uso === true;
+            const chip = res === 'CONFORME' ? '<span class="r-res ok">Conforme</span>'
+                       : res === 'NAO_CONFORME' ? `<span class="r-res nc">Não conforme</span><span class="r-faixa">${grave ? 'impede o uso' : 'ressalva: segue em uso'}</span>`
                        : res === 'NA' ? '<span class="r-res na">N/A</span>' : res === 'PREENCHIDO' ? ''
                        : it.obrigatorio === false ? '<span class="r-vazio">—</span>' : '<span class="r-res pend">Sem resposta</span>';
-            return `<div class="r-ckl"><div class="r-ckl-i">${e(it.texto)}${it.tipo === 'MEDICAO' ? `<span class="r-faixa">Faixa aceita: ${e(faixaCk_(it))}</span>` : ''}</div>
+            return `<div class="r-ckl"><div class="r-ckl-i">${e(it.texto)}${it.critico ? ' <span class="r-crit">crítico</span>' : ''}${it.tipo === 'MEDICAO' ? `<span class="r-faixa">Faixa aceita: ${e(faixaCk_(it))}</span>` : ''}</div>
               <div class="r-ckl-r">${val ? `<b>${val}</b> ` : ''}${chip}</div>
               <div class="r-ckl-o">${e(r.observacao || '')}${r.corretiva ? `<span>Corretiva aberta: ${e(r.corretiva)}</span>` : ''}</div></div>`;
           }).join('')).join('');
@@ -7437,6 +7483,15 @@ abaAgenda.appendRow([
         .r-doc .r-rodape { margin-top: 24px; padding-top: 10px; border-top: 1px solid ${C.linha}; font-size: 8.5px; line-height: 1.5; color: ${C.suave}; text-align: center; }
         .r-doc .r-rodape b { color: ${C.texto}; }
         .r-doc .r-secl { margin-top: 20px; }
+        .r-doc .r-veredito { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: -16px -18px 14px; padding: 10px 18px; border-radius: 12px 12px 0 0; }
+        .r-doc .r-veredito.ok { background: #ecfdf5; border-bottom: 1px solid #a7f3d0; }
+        .r-doc .r-veredito.rs { background: #fffbeb; border-bottom: 1px solid #fde68a; }
+        .r-doc .r-veredito.nc { background: #fef2f2; border-bottom: 1px solid #fecaca; }
+        .r-doc .r-ver-k { font-size: 8.5px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: ${C.suave}; }
+        .r-doc .r-ver-v { font-size: 13px; font-weight: 800; letter-spacing: .6px; }
+        .r-doc .r-veredito.ok .r-ver-v { color: #047857; } .r-doc .r-veredito.rs .r-ver-v { color: #b45309; } .r-doc .r-veredito.nc .r-ver-v { color: #b91c1c; }
+        .r-doc .r-ver-l { flex-basis: 100%; font-size: 9.5px; color: ${C.texto}; }
+        .r-doc .r-crit { display: inline-block; margin-left: 4px; padding: 0 6px; border-radius: 999px; font-size: 8px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; color: #b91c1c; background: #fef2f2; }
         .r-doc .r-tab th { background: ${C.fundo} !important; color: ${C.suave} !important; }
         .r-doc .r-tab td { background: #fff !important; }
         .r-doc .r-hero-ck { margin-top: 10px; font-size: 10.5px; color: ${C.texto}; }
@@ -7466,6 +7521,9 @@ abaAgenda.appendRow([
         ${fechada ? '' : '<div class="r-rasc">RASCUNHO · Este documento só tem validade depois do fechamento da O.S.</div>'}
 
         <div class="r-hero">
+          ${veredito ? `<div class="r-veredito ${veredito === 'APROVADO' ? 'ok' : veredito === 'REPROVADO' ? 'nc' : 'rs'}">
+              <span class="r-ver-k">Resultado</span><span class="r-ver-v">${CK_RESULTADO[veredito][2].toUpperCase()}</span>
+              ${veredito !== 'APROVADO' && ressalvas.length ? `<span class="r-ver-l">${ressalvas.map(x => e(x.texto) + (x.obs ? ': ' + e(x.obs) : '')).join(' · ')}</span>` : ''}</div>` : ''}
           <div class="r-hero-eq">${e(o.equipamento || 'Equipamento')}</div>
           <div class="r-hero-sub">${o.tag ? `TAG <b>${e(o.tag)}</b>` : ''}${o.serie ? ` · Série <b>${e(o.serie)}</b>` : ''}${o.patrimonio ? ` · Patrimônio <b>${e(o.patrimonio)}</b>` : ''}${o.cliente ? ` · ${e(o.cliente)}` : ''}</div>
           <div class="r-kpis">
@@ -7584,6 +7642,11 @@ abaAgenda.appendRow([
       const meusSemDesc = validos.filter(a => a.tecnico_id === euId && a.fim && !String(a.descricao || '').trim()).length;
       document.getElementById('osMoReg').style.display = fechada || consulta ? 'none' : '';
       document.getElementById('osMoBtn').disabled = !(meuRodando || meusSemDesc);
+      const campoMo = document.getElementById('osMoDesc');
+      if (ehPreventivaOS_() && osChecklists && osChecklists.length && !campoMo.value && !campoMo.dataset.sugerido) {
+        campoMo.value = 'Execução de manutenção preventiva conforme ' + osChecklists.map(c => `procedimento ${c.codigo} v${c.versao} (${c.nome})`).join(' e ') + '.';
+        campoMo.dataset.sugerido = '1';
+      }
       document.getElementById('osMoDica').textContent = meuRodando ? 'Ao registrar, o seu cronômetro para automaticamente.'
         : meusSemDesc ? `Você tem ${meusSemDesc} trecho${meusSemDesc > 1 ? 's' : ''} de tempo sem descrição. Descreva o que foi feito.`
         : 'Inicie o cronômetro ao começar o serviço. Ao terminar, descreva aqui o que foi feito.';
@@ -7643,7 +7706,7 @@ abaAgenda.appendRow([
 
       // meu cronômetro
       const box = document.getElementById('osCrono'), btn = document.getElementById('osCronoBtn');
-      box.style.display = consulta ? 'none' : '';
+      box.style.display = consulta || fechada ? 'none' : '';
       box.classList.toggle('rodando', !!meuRodando);
       btn.style.display = fechada ? 'none' : '';
       btn.className = 'os-crono-btn' + (meuRodando ? ' pausar' : '');
@@ -8669,6 +8732,8 @@ abaAgenda.appendRow([
               <span class="ck-acoes">
                 <label style="display:flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;" title="Resposta obrigatória"><input type="checkbox" style="width:auto;" ${it.obrigatorio !== false ? 'checked' : ''} ${dis}
                   onchange="ckCampoItem(${si}, ${ii}, 'obrigatorio', this.checked)" /> obrig.</label>
+                ${it.tipo !== 'TEXTO' ? `<label style="display:flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;" title="Não conforme neste item reprova o equipamento (não aceita ressalva)"><input type="checkbox" style="width:auto;" ${it.critico ? 'checked' : ''} ${dis}
+                  onchange="ckCampoItem(${si}, ${ii}, 'critico', this.checked)" /> crítico</label>` : ''}
                 <button type="button" class="ck-ico" title="Subir item" aria-label="Subir item" onclick="ckMoverItem(${si}, ${ii}, -1)" ${si === 0 && ii === 0 ? 'disabled' : ''}><i class="fa-solid fa-arrow-up"></i></button>
                 <button type="button" class="ck-ico" title="Descer item" aria-label="Descer item" onclick="ckMoverItem(${si}, ${ii}, 1)" ${si === est.length - 1 && ii === s.itens.length - 1 ? 'disabled' : ''}><i class="fa-solid fa-arrow-down"></i></button>
                 <button type="button" class="ck-ico del" title="Remover item" aria-label="Remover item" onclick="ckRemoverItem(${si}, ${ii})"><i class="fa-solid fa-xmark"></i></button>
@@ -8796,7 +8861,8 @@ abaAgenda.appendRow([
       const cab = quebrar(linhas[0]).map(norm);
       const col = nomes => cab.findIndex(c => nomes.includes(c));
       const ix = { secao: col(['secao', 'seção', 'grupo', 'etapa']), item: col(['item', 'descricao', 'pergunta', 'texto']), tipo: col(['tipo', 'resposta']),
-                   unidade: col(['unidade', 'un']), min: col(['minimo', 'min', 'limite_min']), max: col(['maximo', 'max', 'limite_max']), obrig: col(['obrigatorio', 'obrig']) };
+                   unidade: col(['unidade', 'un']), min: col(['minimo', 'min', 'limite_min']), max: col(['maximo', 'max', 'limite_max']), obrig: col(['obrigatorio', 'obrig']),
+                   crit: col(['critico', 'critica']) };
       if (ix.item < 0) throw new Error('o arquivo precisa ter a coluna "item"');
       const est = [], porTitulo = {};
       linhas.slice(1).forEach(l => {
@@ -8808,7 +8874,8 @@ abaAgenda.appendRow([
         const tipo = /^(med|leit|num|m$)/.test(t) ? 'MEDICAO' : /^(text|t$|livre)/.test(t) ? 'TEXTO' : 'VERIFICACAO';
         const ob = norm(g(ix.obrig));
         s.itens.push({ id: ckNovoId_(), texto, tipo, unidade: tipo === 'MEDICAO' ? g(ix.unidade) : '', min: tipo === 'MEDICAO' ? g(ix.min) : '',
-                       max: tipo === 'MEDICAO' ? g(ix.max) : '', obrigatorio: !['nao', 'n', '0', 'false', 'opcional'].includes(ob) });
+                       max: tipo === 'MEDICAO' ? g(ix.max) : '', obrigatorio: !['nao', 'n', '0', 'false', 'opcional'].includes(ob),
+                       critico: tipo !== 'TEXTO' && ['sim', 's', '1', 'true', 'x'].includes(norm(g(ix.crit))) });
       });
       return est;
     }
