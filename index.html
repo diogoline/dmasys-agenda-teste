@@ -1036,6 +1036,24 @@ html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdow
     .os-ev-obs { margin: 4px 0; font-size: 13px; white-space: pre-wrap; word-break: break-word; }
     .eq-link { background: none; border: 0; padding: 0 4px; color: #38bdf8; cursor: pointer; font-weight: 700; text-decoration: underline; font-size: inherit; text-transform: none; letter-spacing: 0; }
     html.light .eq-link { color: #0b5ed7; }
+    /* editor de checklists (engrenagem) */
+    .ck-secao { margin-top: 12px; padding: 12px; border-radius: 12px; border: 1px solid #334155; }
+    .ck-secao-h { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .ck-secao-h input { flex: 1; font-weight: 700; }
+    .ck-item { display: grid; grid-template-columns: 22px minmax(0, 1fr) 225px auto; gap: 8px; align-items: start; padding: 8px 0; border-top: 1px dashed rgba(148, 163, 184, .3); }
+    .ck-item .n { padding-top: 9px; font-size: 11px; color: #94a3b8; text-align: right; }
+    .ck-item .med { grid-column: 2 / 4; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 12px; }
+    .ck-item .med input { width: 110px; }
+    .ck-acoes { display: flex; gap: 4px; align-items: center; padding-top: 4px; white-space: nowrap; }
+    .ck-ico { background: none; border: 1px solid transparent; border-radius: 6px; padding: 4px 6px; color: #94a3b8; cursor: pointer; line-height: 1; }
+    .ck-ico:hover:not(:disabled) { border-color: #475569; color: inherit; }
+    .ck-ico:disabled { opacity: .35; cursor: default; }
+    .ck-ico.del:hover:not(:disabled) { color: #f43f5e; border-color: #f43f5e; }
+    .ck-ro .ck-ico, .ck-ro #ckEdAddSecao, .ck-ro .ck-add-item { display: none; }
+    html.light .ck-secao { border-color: #cbd5e1; background: #fff; }
+    @media (max-width: 720px) { .ck-item { grid-template-columns: 18px minmax(0, 1fr); } .ck-item .med { grid-column: 2; } .ck-acoes { grid-column: 2; } }
+    .eq-g > .c2 { grid-column: span 2; min-width: 0; }
+    @media (max-width: 720px) { .eq-g > .c2 { grid-column: span 12; } }
     /* ficha da O.S. em etapas (passo a passo) */
     .os-box { width: 900px; }
     .os-resumo { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; padding: 10px 14px; margin-bottom: 14px; border-radius: 12px; border: 1px solid #334155; background: #0b1220; font-size: 13px; }
@@ -3071,6 +3089,7 @@ abaAgenda.appendRow([
       <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
         <button type="button" id="cfgBtnTags" class="eq-btn" onclick="mudarAbaConfig('tags')"><i class="fa-solid fa-tag"></i> Máscaras de TAG</button>
         <button type="button" id="cfgBtnUsuarios" class="eq-btn" onclick="mudarAbaConfig('usuarios')"><i class="fa-solid fa-user-shield"></i> Usuários e permissões</button>
+        <button type="button" id="cfgBtnChecklists" class="eq-btn" onclick="mudarAbaConfig('checklists')"><i class="fa-solid fa-list-check"></i> Checklists de manutenção</button>
         <button type="button" id="cfgBtnAuditoria" class="eq-btn" onclick="mudarAbaConfig('auditoria')"><i class="fa-solid fa-clock-rotate-left"></i> Histórico de alterações</button>
       </div>
 
@@ -3102,6 +3121,68 @@ abaAgenda.appendRow([
             <button type="submit" id="cfgBtnSalvarMasc" class="btn-submit"><i class="fa-solid fa-floppy-disk"></i> Salvar máscara</button>
           </div>
         </form>
+      </div>
+
+      <div id="cfgPainelChecklists" style="display:none;">
+        <!-- valores padrão da preventiva -->
+        <div class="card" id="ckCardPadrao" style="margin-bottom:16px;">
+          <div class="card-title" style="margin-bottom:6px;">Preventiva: valores padrão</div>
+          <div class="eq-k" style="margin-bottom:10px;">Toda O.S. preventiva já abre com esta ocorrência e esta causa (a ocorrência precisa valer para todos os equipamentos).</div>
+          <div class="eq-g">
+            <div class="form-group combo c5" id="cmbCfgPrevOc"><label>Ocorrência padrão</label><input type="text" class="combo-input" autocomplete="off" placeholder="Ex: Manutenção preventiva" /><div class="combo-lista" role="listbox"></div></div>
+            <div class="form-group combo c5" id="cmbCfgPrevCa"><label>Causa padrão</label><input type="text" class="combo-input" autocomplete="off" placeholder="Ex: Atividade programada" /><div class="combo-lista" role="listbox"></div></div>
+            <div class="form-group c2" style="display:flex; align-items:flex-end;"><button type="button" class="btn-submit" style="width:100%;" onclick="salvarPreventivaPadrao()"><i class="fa-solid fa-floppy-disk"></i> Salvar</button></div>
+          </div>
+        </div>
+
+        <!-- lista de modelos -->
+        <div id="ckLista">
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+            <input type="search" id="ckBusca" placeholder="Buscar por nome ou código..." style="max-width:320px;" oninput="clearTimeout(window._ckT); window._ckT = setTimeout(carregarChecklists, 300)" />
+            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="ckInativos" style="width:auto;" onchange="carregarChecklists()" /> Mostrar inativos</label>
+            <span style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="button" class="eq-btn" onclick="document.getElementById('ckArquivoCsv').click()"><i class="fa-solid fa-file-import"></i> Importar CSV</button>
+              <button type="button" class="btn-submit" onclick="novoChecklist()"><i class="fa-solid fa-plus"></i> Novo checklist</button>
+              <input type="file" id="ckArquivoCsv" accept=".csv,text/csv,text/plain" hidden onchange="importarChecklistCsv(this)" />
+            </span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead><tr><th class="td-center">Código</th><th>Nome</th><th>Vale para</th><th class="td-center">Itens</th><th class="td-center">Situação</th><th></th></tr></thead>
+              <tbody id="ckCorpo"></tbody>
+            </table>
+          </div>
+          <div class="eq-k" style="margin-top:10px;">CSV para importar: colunas <code>secao</code>, <code>item</code>, <code>tipo</code> (VERIFICACAO, MEDICAO ou TEXTO), <code>unidade</code>, <code>minimo</code>, <code>maximo</code>, <code>obrigatorio</code> (SIM/NÃO). Separador ponto e vírgula ou vírgula. O checklist importado abre no editor para você revisar antes de salvar.</div>
+        </div>
+
+        <!-- editor -->
+        <div id="ckEditor" style="display:none;">
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+            <button type="button" class="eq-btn" onclick="voltarListaChecklists()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+            <b id="ckEdTitulo"></b><span id="ckEdSituacao" class="eq-chip cinza"></span>
+            <span id="ckEdVersoes" class="eq-k" style="margin-left:auto;"></span>
+          </div>
+          <div id="ckEdAviso" class="eq-aviso" style="display:none; margin:0 0 12px;"></div>
+          <div class="eq-g">
+            <div class="form-group c12"><label for="ckNome">Nome do checklist *</label><input type="text" id="ckNome" maxlength="200" placeholder="Ex: Preventiva aspirador de secreção" oninput="ckSujo()" /></div>
+            <div class="form-group c12"><label for="ckDescricao">Descrição / orientação ao técnico</label><textarea id="ckDescricao" rows="2" maxlength="1000" oninput="ckSujo()"></textarea></div>
+          </div>
+          <div class="form-group" style="margin:6px 0 14px;"><label>Vale para *</label>
+            <div class="os-vp-op"><label><input type="radio" name="ckVpModo" value="todos" style="width:auto;" onchange="ckModoValePara()" /> Todos os equipamentos</label>
+              <label><input type="radio" name="ckVpModo" value="alguns" style="width:auto;" onchange="ckModoValePara()" /> Só alguns grupos ou tipos</label></div>
+            <div id="ckVpAlguns" style="display:none;">
+              <div class="eq-g" style="margin-top:10px;">
+                <div class="form-group combo c6" id="ckVpGrupo"><label>Grupos de equipamento</label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite para adicionar um grupo..." /><div class="combo-lista" role="listbox"></div></div>
+                <div class="form-group combo c6" id="ckVpTipo"><label>Tipos de equipamento</label><input type="text" class="combo-input" autocomplete="off" placeholder="Digite para adicionar um tipo..." /><div class="combo-lista" role="listbox"></div></div>
+              </div>
+              <div id="ckVpChips" class="os-vp-chips" style="margin-top:6px;"></div>
+            </div>
+          </div>
+          <div class="os-sub" style="display:flex; align-items:center; gap:10px;">Seções e itens <span id="ckEdContagem" class="eq-k" style="font-weight:500;"></span></div>
+          <div id="ckSecoes"></div>
+          <div id="ckEdAddSecao" style="margin-top:10px;"><button type="button" class="eq-btn" onclick="ckAddSecao()"><i class="fa-solid fa-plus"></i> Adicionar seção</button></div>
+          <div class="os-etapa-pe" id="ckEdAcoes"></div>
+        </div>
       </div>
 
       <div id="cfgPainelAuditoria" style="display:none;">
@@ -8050,10 +8131,11 @@ abaAgenda.appendRow([
       ['catalogo.gerenciar', 'Gerenciar catálogos (fabricantes, modelos, clientes...)'],
       ['auditoria.ver', 'Ver o histórico de alterações'],
       ['os.reabrir', 'Reabrir O.S. fechada'],
-      ['os.ajustar_tempo', 'Ajustar tempo de mão de obra (lançar, corrigir, excluir e pausar cronômetro de outro técnico)']
+      ['os.ajustar_tempo', 'Ajustar tempo de mão de obra (lançar, corrigir, excluir e pausar cronômetro de outro técnico)'],
+      ['checklist.gerenciar', 'Gerenciar checklists de manutenção e os valores padrão da preventiva']
     ];
     const PERFIS_SISTEMA = ['ADMIN', 'GESTOR', 'OPERADOR', 'CONSULTA'];
-    const PERMISSOES_PADRAO_PERFIL = { ADMIN: PERMISSOES_SISTEMA.map(p => p[0]), GESTOR: ['config.tags', 'catalogo.gerenciar', 'os.reabrir', 'os.ajustar_tempo'], OPERADOR: [], CONSULTA: [] };
+    const PERMISSOES_PADRAO_PERFIL = { ADMIN: PERMISSOES_SISTEMA.map(p => p[0]), GESTOR: ['config.tags', 'catalogo.gerenciar', 'os.reabrir', 'os.ajustar_tempo', 'checklist.gerenciar'], OPERADOR: [], CONSULTA: [] };
     let mascarasTag = [];
     let tagManual = false;
     let _avisouSessao = false;
@@ -8091,7 +8173,7 @@ abaAgenda.appendRow([
 
     function aplicarPermissoesUI() {
       const item = document.getElementById('itemMenuConfig');
-      if (item) item.style.display = (temPermissao('config.tags') || temPermissao('config.usuarios') || temPermissao('auditoria.ver')) ? '' : 'none';
+      if (item) item.style.display = (temPermissao('config.tags') || temPermissao('config.usuarios') || temPermissao('auditoria.ver') || temPermissao('checklist.gerenciar')) ? '' : 'none';
       const cat = document.getElementById('btnNavCatalogos');
       if (cat) cat.style.display = temPermissao('catalogo.gerenciar') ? '' : 'none';
       const av = document.getElementById('avisoSessao');
@@ -8123,7 +8205,7 @@ abaAgenda.appendRow([
     // ----- janela de configurações -----
     function abrirConfiguracoes() {
       document.getElementById("menuAjudaDropdown")?.classList.add("hidden");
-      const abas = [['tags', 'config.tags', 'cfgBtnTags'], ['usuarios', 'config.usuarios', 'cfgBtnUsuarios'], ['auditoria', 'auditoria.ver', 'cfgBtnAuditoria']];
+      const abas = [['tags', 'config.tags', 'cfgBtnTags'], ['usuarios', 'config.usuarios', 'cfgBtnUsuarios'], ['checklists', 'checklist.gerenciar', 'cfgBtnChecklists'], ['auditoria', 'auditoria.ver', 'cfgBtnAuditoria']];
       const permitidas = abas.filter(a => temPermissao(a[1]));
       if (!permitidas.length) { showToast("Você não tem permissão para acessar as configurações.", "error"); return; }
       abas.forEach(a => { document.getElementById(a[2]).style.display = temPermissao(a[1]) ? '' : 'none'; });
@@ -8133,13 +8215,357 @@ abaAgenda.appendRow([
     function fecharConfiguracoes() { document.getElementById('modalConfig')?.classList.remove('active'); }
 
     function mudarAbaConfig(aba) {
-      ['tags', 'usuarios', 'auditoria'].forEach(n => {
+      ['tags', 'usuarios', 'checklists', 'auditoria'].forEach(n => {
         const painel = document.getElementById('cfgPainel' + n.charAt(0).toUpperCase() + n.slice(1));
         if (painel) painel.style.display = n === aba ? '' : 'none';
         const btn = document.getElementById('cfgBtn' + n.charAt(0).toUpperCase() + n.slice(1));
         if (btn) btn.style.borderColor = n === aba ? '#38bdf8' : '';
       });
-      if (aba === 'tags') carregarMascarasConfig(); else if (aba === 'usuarios') carregarUsuariosAdmin(); else carregarAuditoria();
+      if (aba === 'tags') carregarMascarasConfig(); else if (aba === 'usuarios') carregarUsuariosAdmin(); else if (aba === 'checklists') abrirAbaChecklists_(); else carregarAuditoria();
+    }
+
+    // ---------- Checklists de manutenção (engrenagem) ----------
+    // Uma versão PUBLICADA não muda; para editar, o sistema cria uma nova versão em RASCUNHO.
+    const CK_TIPOS = { VERIFICACAO: 'Conforme / Não conforme / N/A', MEDICAO: 'Medição (número)', TEXTO: 'Texto livre' };
+    let ckItens = [], ckAtual = null, ckAlterado = false;
+
+    function ckNovoId_() { return novoUuid_(); }
+    function ckSujo() { ckAlterado = true; }
+    function ckEditavel_() { return !!ckAtual && ckAtual.situacao === 'RASCUNHO'; }
+
+    async function carregarChecklists() {
+      const tb = document.getElementById('ckCorpo'), e = escAttr_;
+      tb.innerHTML = '<tr><td colspan="6" class="td-center text-slate-500 py-6">Carregando...</td></tr>';
+      const r = await rpcPriv('checklist_listar', { p_termo: document.getElementById('ckBusca').value || '', p_inativos: document.getElementById('ckInativos').checked });
+      if (!r.ok) { tb.innerHTML = `<tr><td colspan="6" class="td-center text-rose-400 py-6">${e(textoErroPriv(r))}</td></tr>`; return; }
+      ckItens = r.itens || [];
+      if (!ckItens.length) { tb.innerHTML = '<tr><td colspan="6" class="td-center text-slate-500 py-6">Nenhum checklist cadastrado. Clique em "Novo checklist" ou importe um CSV.</td></tr>'; return; }
+      tb.innerHTML = ckItens.map(c => {
+        const sit = c.publicado_id
+          ? `<span class="eq-chip verde">Publicado v${c.publicado_versao}</span>${c.rascunho_id ? ` <span class="eq-chip ambar">v${c.rascunho_versao} em edição</span>` : ''}`
+          : `<span class="eq-chip ambar">Rascunho v${c.rascunho_versao}</span>`;
+        return `<tr${c.ativo ? '' : ' style="opacity:.55;"'}>
+          <td class="td-center"><b>${c.codigo}</b></td><td>${e(c.nome)}${c.ativo ? '' : ' <span class="eq-chip cinza">inativo</span>'}</td>
+          <td>${e(c.vale_para || '')}</td><td class="td-center">${c.itens}</td><td class="td-center">${sit}</td>
+          <td style="white-space:nowrap; text-align:right;">
+            <button type="button" class="eq-link" data-id="${e(c.rascunho_id || c.publicado_id)}" onclick="abrirChecklist(this.dataset.id)">${c.rascunho_id ? 'Editar' : 'Abrir'}</button>
+            <button type="button" class="eq-link" data-c="${c.codigo}" data-a="${c.ativo ? 0 : 1}" onclick="ativarChecklist(+this.dataset.c, this.dataset.a === '1')">${c.ativo ? 'Desativar' : 'Ativar'}</button>
+          </td></tr>`;
+      }).join('');
+    }
+
+    async function ativarChecklist(codigo, ativo) {
+      if (!ativo) {
+        const c = await confirmarAcao({ titulo: 'Desativar checklist', rotuloBotao: 'Desativar',
+          texto: 'O checklist deixa de ser sugerido nas novas O.S. As O.S. que já usaram continuam com ele.' });
+        if (!c.ok) return;
+      }
+      const r = await rpcPriv('checklist_ativar', { p_codigo: codigo, p_ativo: ativo });
+      if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); return; }
+      carregarChecklists();
+    }
+
+    function mostrarEditorChecklist_(sim) {
+      document.getElementById('ckLista').style.display = sim ? 'none' : '';
+      document.getElementById('ckEditor').style.display = sim ? '' : 'none';
+      document.getElementById('ckCardPadrao').style.display = sim ? 'none' : '';
+    }
+
+    async function voltarListaChecklists() {
+      if (ckAlterado && ckEditavel_()) {
+        const c = await confirmarAcao({ titulo: 'Sair sem salvar?', rotuloBotao: 'Sair sem salvar', texto: 'As alterações deste checklist ainda não foram salvas.' });
+        if (!c.ok) return;
+      }
+      ckAtual = null; ckAlterado = false;
+      mostrarEditorChecklist_(false);
+      carregarChecklists();
+    }
+
+    function novoChecklist(estrutura, nome) {
+      ckAtual = { id: null, codigo: null, versao: 1, situacao: 'RASCUNHO', nome: nome || '', descricao: '', versoes: [],
+                  vp: { todos: false, grupos: [], tipos: [] },
+                  estrutura: estrutura || [{ id: ckNovoId_(), titulo: '', itens: [{ id: ckNovoId_(), texto: '', tipo: 'VERIFICACAO', obrigatorio: true }] }] };
+      ckAlterado = !!estrutura;
+      renderEditorChecklist_();
+    }
+
+    async function abrirChecklist(id) {
+      const r = await rpcPriv('checklist_obter', { p_id: id });
+      if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); return; }
+      const m = r.modelo, vp = m.vale_para || {};
+      ckAtual = { id: m.id, codigo: m.codigo, versao: m.versao, situacao: m.situacao, nome: m.nome, descricao: m.descricao || '',
+                  versoes: r.versoes || [], publicado_em: m.publicado_em, publicado_por_nome: m.publicado_por_nome,
+                  vp: { todos: !!vp.todos, grupos: (vp.grupos || []).map(x => ({ id: x.id, nome: x.nome })), tipos: (vp.tipos || []).map(x => ({ id: x.id, nome: x.nome })) },
+                  estrutura: JSON.parse(JSON.stringify(m.estrutura || [])) };
+      ckAlterado = false;
+      renderEditorChecklist_();
+    }
+
+    function renderEditorChecklist_() {
+      const a = ckAtual, ed = ckEditavel_(), e = escAttr_;
+      mostrarEditorChecklist_(true);
+      document.getElementById('ckEditor').classList.toggle('ck-ro', !ed);
+      document.getElementById('ckEdTitulo').textContent = a.codigo ? `Checklist ${a.codigo} · versão ${a.versao}` : 'Novo checklist';
+      const sit = document.getElementById('ckEdSituacao');
+      sit.className = 'eq-chip ' + (a.situacao === 'PUBLICADO' ? 'verde' : a.situacao === 'RASCUNHO' ? 'ambar' : 'cinza');
+      sit.textContent = a.situacao === 'PUBLICADO' ? 'Publicado' : a.situacao === 'RASCUNHO' ? 'Rascunho' : 'Substituído';
+      const outras = (a.versoes || []).filter(v => v.id !== a.id);
+      document.getElementById('ckEdVersoes').innerHTML = outras.length
+        ? 'Outras versões: ' + outras.map(v => `<button type="button" class="eq-link" data-id="${e(v.id)}" onclick="abrirChecklist(this.dataset.id)">v${v.versao}${v.situacao === 'PUBLICADO' ? ' (publicada)' : v.situacao === 'RASCUNHO' ? ' (rascunho)' : ''}</button>`).join(' ')
+        : '';
+      const av = document.getElementById('ckEdAviso');
+      const msgs = {
+        PUBLICADO: `Versão publicada${a.publicado_em ? ' em ' + fmtBR(a.publicado_em) + (a.publicado_por_nome ? ' por ' + a.publicado_por_nome : '') : ''}. Ela não pode ser alterada: as O.S. que a usaram ficam guardadas como foram. Para mudar, crie uma nova versão.`,
+        SUBSTITUIDO: 'Esta versão foi substituída por uma mais nova. Ela fica guardada só para consulta.'
+      };
+      av.style.display = msgs[a.situacao] ? '' : 'none'; av.textContent = msgs[a.situacao] || '';
+      const nome = document.getElementById('ckNome'), desc = document.getElementById('ckDescricao');
+      nome.value = a.nome; desc.value = a.descricao; nome.disabled = !ed; desc.disabled = !ed;
+      document.querySelectorAll('input[name="ckVpModo"]').forEach(r => { r.disabled = !ed; r.checked = r.value === (a.vp.todos ? 'todos' : 'alguns'); });
+      if (!combos.ckVpGrupo) {
+        combos.ckVpGrupo = new Combo('ckVpGrupo', { catalogo: 'grupos_equipamento', aoMudar: x => ckAddValePara_('grupos', x, 'ckVpGrupo') });
+        combos.ckVpTipo = new Combo('ckVpTipo', { catalogo: 'tipos_equipamento', subItem: x => x.grupo_nome ? 'grupo ' + x.grupo_nome : 'sem grupo', aoMudar: x => ckAddValePara_('tipos', x, 'ckVpTipo') });
+      }
+      combos.ckVpGrupo.input.disabled = !ed; combos.ckVpTipo.input.disabled = !ed;
+      ckRenderValePara_();
+      ckRenderSecoes_();
+      // ações
+      const acoes = ed
+        ? `${a.id ? `<button type="button" class="eq-btn" onclick="excluirRascunhoChecklist()"><i class="fa-solid fa-trash"></i> Excluir rascunho</button>` : '<span></span>'}
+           <span style="display:flex; gap:8px; flex-wrap:wrap;">
+             <button type="button" class="eq-btn" id="ckBtnSalvar" onclick="salvarChecklist(false)"><i class="fa-solid fa-floppy-disk"></i> Salvar rascunho</button>
+             <button type="button" class="btn-submit" id="ckBtnPublicar" onclick="salvarChecklist(true)"><i class="fa-solid fa-circle-check"></i> Salvar e publicar</button></span>`
+        : `<button type="button" class="eq-btn" onclick="duplicarChecklist()"><i class="fa-solid fa-copy"></i> Duplicar como novo checklist</button>
+           ${a.situacao === 'PUBLICADO' ? '<button type="button" class="btn-submit" onclick="novaVersaoChecklist()"><i class="fa-solid fa-code-branch"></i> Nova versão para editar</button>' : '<span></span>'}`;
+      document.getElementById('ckEdAcoes').innerHTML = acoes;
+    }
+
+    // ----- "vale para" do checklist -----
+    function ckModoValePara() {
+      const m = document.querySelector('input[name="ckVpModo"]:checked');
+      if (!ckAtual || !m) return;
+      ckAtual.vp.todos = m.value === 'todos'; ckSujo(); ckRenderValePara_();
+    }
+    function ckAddValePara_(lista, it, comboId) {
+      if (!it || !ckAtual) return;
+      if (!ckAtual.vp[lista].some(x => x.id === it.id)) { ckAtual.vp[lista].push({ id: it.id, nome: it.nome }); ckSujo(); }
+      setTimeout(() => { if (combos[comboId]) combos[comboId].limpar(); }, 0);
+      ckRenderValePara_();
+    }
+    function ckRemoverValePara(lista, id) { if (!ckEditavel_()) return; ckAtual.vp[lista] = ckAtual.vp[lista].filter(x => x.id !== id); ckSujo(); ckRenderValePara_(); }
+    function ckRenderValePara_() {
+      const e = escAttr_, vp = ckAtual.vp, ed = ckEditavel_();
+      document.getElementById('ckVpAlguns').style.display = vp.todos ? 'none' : '';
+      const chips = (lista, rot) => vp[lista].map(x => `<span class="eq-chip azul">${rot}: ${e(x.nome)}${ed ? `<button type="button" class="os-vp-x" aria-label="Remover ${e(x.nome)}" data-l="${lista}" data-id="${e(x.id)}" onclick="ckRemoverValePara(this.dataset.l, this.dataset.id)">×</button>` : ''}</span>`).join('');
+      const html = chips('grupos', 'Grupo') + chips('tipos', 'Tipo');
+      document.getElementById('ckVpChips').innerHTML = html || '<span class="eq-k">Nenhum grupo ou tipo escolhido.</span>';
+    }
+
+    // ----- seções e itens -----
+    function ckContar_() { return ckAtual.estrutura.reduce((s, x) => s + x.itens.length, 0); }
+    function ckRenderSecoes_() {
+      const e = escAttr_, ed = ckEditavel_(), est = ckAtual.estrutura, dis = ed ? '' : 'disabled';
+      let n = 0;
+      document.getElementById('ckSecoes').innerHTML = est.map((s, si) => `
+        <div class="ck-secao">
+          <div class="ck-secao-h">
+            <span class="eq-chip cinza">Seção ${si + 1}</span>
+            <input type="text" value="${e(s.titulo)}" placeholder="Título da seção (ex.: INSPEÇÃO VISUAL)" maxlength="150" ${dis}
+              aria-label="Título da seção ${si + 1}" oninput="ckCampoSecao(${si}, this.value)" />
+            <button type="button" class="ck-ico" title="Subir seção" aria-label="Subir seção" onclick="ckMoverSecao(${si}, -1)" ${si === 0 ? 'disabled' : ''}><i class="fa-solid fa-arrow-up"></i></button>
+            <button type="button" class="ck-ico" title="Descer seção" aria-label="Descer seção" onclick="ckMoverSecao(${si}, 1)" ${si === est.length - 1 ? 'disabled' : ''}><i class="fa-solid fa-arrow-down"></i></button>
+            <button type="button" class="ck-ico del" title="Remover seção" aria-label="Remover seção" onclick="ckRemoverSecao(${si})"><i class="fa-solid fa-trash"></i></button>
+          </div>
+          ${s.itens.map((it, ii) => { n++; return `
+            <div class="ck-item">
+              <span class="n">${n}</span>
+              <input type="text" value="${e(it.texto)}" placeholder="O que verificar (ex.: Integridade do cabo de força)" maxlength="500" ${dis}
+                aria-label="Item ${n}" oninput="ckCampoItem(${si}, ${ii}, 'texto', this.value)" />
+              <select ${dis} aria-label="Tipo de resposta do item ${n}" onchange="ckCampoItem(${si}, ${ii}, 'tipo', this.value, true)">
+                ${Object.entries(CK_TIPOS).map(([k, r]) => `<option value="${k}" ${it.tipo === k ? 'selected' : ''}>${r}</option>`).join('')}</select>
+              <span class="ck-acoes">
+                <label style="display:flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;" title="Resposta obrigatória"><input type="checkbox" style="width:auto;" ${it.obrigatorio !== false ? 'checked' : ''} ${dis}
+                  onchange="ckCampoItem(${si}, ${ii}, 'obrigatorio', this.checked)" /> obrig.</label>
+                <button type="button" class="ck-ico" title="Subir item" aria-label="Subir item" onclick="ckMoverItem(${si}, ${ii}, -1)" ${si === 0 && ii === 0 ? 'disabled' : ''}><i class="fa-solid fa-arrow-up"></i></button>
+                <button type="button" class="ck-ico" title="Descer item" aria-label="Descer item" onclick="ckMoverItem(${si}, ${ii}, 1)" ${si === est.length - 1 && ii === s.itens.length - 1 ? 'disabled' : ''}><i class="fa-solid fa-arrow-down"></i></button>
+                <button type="button" class="ck-ico del" title="Remover item" aria-label="Remover item" onclick="ckRemoverItem(${si}, ${ii})"><i class="fa-solid fa-xmark"></i></button>
+              </span>
+              ${it.tipo === 'MEDICAO' ? `<div class="med">
+                <span>Unidade</span><input type="text" value="${e(it.unidade || '')}" placeholder="ex.: µA, mmHg, °C" maxlength="20" ${dis} aria-label="Unidade" oninput="ckCampoItem(${si}, ${ii}, 'unidade', this.value)" />
+                <span>Mínimo</span><input type="text" inputmode="decimal" value="${it.min ?? ''}" placeholder="sem limite" ${dis} aria-label="Valor mínimo" oninput="ckCampoItem(${si}, ${ii}, 'min', this.value)" />
+                <span>Máximo</span><input type="text" inputmode="decimal" value="${it.max ?? ''}" placeholder="sem limite" ${dis} aria-label="Valor máximo" oninput="ckCampoItem(${si}, ${ii}, 'max', this.value)" />
+                <span class="eq-k">Fora dos limites = não conforme</span></div>` : ''}
+            </div>`; }).join('')}
+          <div class="ck-add-item" style="margin-top:8px;"><button type="button" class="eq-link" onclick="ckAddItem(${si})">+ Adicionar item</button></div>
+        </div>`).join('');
+      document.getElementById('ckEdContagem').textContent = `${est.length} seç${est.length === 1 ? 'ão' : 'ões'} · ${ckContar_()} ite${ckContar_() === 1 ? 'm' : 'ns'}`;
+    }
+    function ckCampoSecao(si, v) { ckAtual.estrutura[si].titulo = v; ckSujo(); }
+    function ckCampoItem(si, ii, campo, v, render) { ckAtual.estrutura[si].itens[ii][campo] = v; ckSujo(); if (render) ckRenderSecoes_(); }
+    function ckAddSecao() {
+      if (!ckEditavel_()) return;
+      ckAtual.estrutura.push({ id: ckNovoId_(), titulo: '', itens: [{ id: ckNovoId_(), texto: '', tipo: 'VERIFICACAO', obrigatorio: true }] });
+      ckSujo(); ckRenderSecoes_();
+      const ins = document.querySelectorAll('#ckSecoes .ck-secao-h input'); if (ins.length) ins[ins.length - 1].focus();
+    }
+    function ckAddItem(si) {
+      if (!ckEditavel_()) return;
+      ckAtual.estrutura[si].itens.push({ id: ckNovoId_(), texto: '', tipo: 'VERIFICACAO', obrigatorio: true });
+      ckSujo(); ckRenderSecoes_();
+      const sec = document.querySelectorAll('#ckSecoes .ck-secao')[si];
+      const ins = sec ? sec.querySelectorAll('.ck-item > input[type="text"]') : []; if (ins.length) ins[ins.length - 1].focus();
+    }
+    function ckMoverSecao(si, d) {
+      const est = ckAtual.estrutura, j = si + d; if (j < 0 || j >= est.length) return;
+      [est[si], est[j]] = [est[j], est[si]]; ckSujo(); ckRenderSecoes_();
+    }
+    function ckMoverItem(si, ii, d) {
+      const est = ckAtual.estrutura, it = est[si].itens[ii];
+      let sj = si, ij = ii + d;
+      if (ij < 0) { if (si === 0) return; sj = si - 1; ij = est[sj].itens.length; }        // sobe para o fim da seção anterior
+      else if (ij >= est[si].itens.length) { if (si === est.length - 1) return; sj = si + 1; ij = 0; }   // desce para o início da próxima
+      est[si].itens.splice(ii, 1);
+      if (sj === si) est[si].itens.splice(ij, 0, it); else est[sj].itens.splice(ij, 0, it);
+      ckSujo(); ckRenderSecoes_();
+    }
+    async function ckRemoverSecao(si) {
+      const s = ckAtual.estrutura[si];
+      if (s.itens.some(x => (x.texto || '').trim())) {
+        const c = await confirmarAcao({ titulo: 'Remover seção', rotuloBotao: 'Remover', texto: `Remover a seção "${s.titulo || 'sem título'}" e os ${s.itens.length} itens dela?` });
+        if (!c.ok) return;
+      }
+      ckAtual.estrutura.splice(si, 1); ckSujo(); ckRenderSecoes_();
+    }
+    function ckRemoverItem(si, ii) {
+      ckAtual.estrutura[si].itens.splice(ii, 1);
+      if (!ckAtual.estrutura[si].itens.length) ckAtual.estrutura[si].itens.push({ id: ckNovoId_(), texto: '', tipo: 'VERIFICACAO', obrigatorio: true });
+      ckSujo(); ckRenderSecoes_();
+    }
+
+    // ----- salvar / publicar / versões -----
+    function ckDados_() {
+      const est = ckAtual.estrutura
+        .map(s => ({ ...s, titulo: (s.titulo || '').trim(), itens: s.itens.filter(it => (it.texto || '').trim()) }))
+        .filter(s => s.titulo || s.itens.length);
+      return { nome: document.getElementById('ckNome').value.trim(), descricao: document.getElementById('ckDescricao').value.trim(),
+               vale_para: { todos: ckAtual.vp.todos, grupos: ckAtual.vp.grupos.map(x => x.id), tipos: ckAtual.vp.tipos.map(x => x.id) },
+               estrutura: est };
+    }
+
+    async function salvarChecklist(publicar) {
+      if (!ckEditavel_()) return;
+      const d = ckDados_();
+      if (d.nome.length < 3) { showToast('Informe o nome do checklist.', 'error'); document.getElementById('ckNome').focus(); return; }
+      if (!d.vale_para.todos && !d.vale_para.grupos.length && !d.vale_para.tipos.length) { showToast('Escolha para quais equipamentos o checklist vale.', 'error'); return; }
+      if (publicar) {
+        const c = await confirmarAcao({ titulo: 'Publicar checklist', rotuloBotao: 'Publicar',
+          texto: 'Depois de publicada, esta versão não pode mais ser alterada e passa a ser usada nas novas O.S. Para mudar depois, será criada uma nova versão.' });
+        if (!c.ok) return;
+      }
+      const btns = [document.getElementById('ckBtnSalvar'), document.getElementById('ckBtnPublicar')];
+      btns.forEach(b => { if (b) b.disabled = true; });
+      try {
+        let r = await rpcPriv('checklist_salvar', { p_id: ckAtual.id, p_dados: d });
+        if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); return; }
+        const id = r.id;
+        ckAlterado = false;
+        if (publicar) {
+          r = await rpcPriv('checklist_publicar', { p_id: id });
+          if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); await abrirChecklist(id); return; }
+          showToast(`Checklist ${r.codigo} publicado (versão ${r.versao}).`, 'success');
+        } else showToast('Rascunho salvo.', 'success');
+        await abrirChecklist(id);
+      } finally { btns.forEach(b => { if (b) b.disabled = false; }); }
+    }
+
+    async function novaVersaoChecklist() {
+      const r = await rpcPriv('checklist_nova_versao', { p_id: ckAtual.id });
+      if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); return; }
+      showToast(r.existente ? 'Já existia uma versão em edição: abrindo.' : 'Nova versão criada em rascunho.', 'success');
+      abrirChecklist(r.id);
+    }
+    async function duplicarChecklist() {
+      const r = await rpcPriv('checklist_duplicar', { p_id: ckAtual.id });
+      if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); return; }
+      showToast('Cópia criada em rascunho.', 'success');
+      abrirChecklist(r.id);
+    }
+    async function excluirRascunhoChecklist() {
+      const c = await confirmarAcao({ titulo: 'Excluir rascunho', rotuloBotao: 'Excluir', texto: 'O rascunho será apagado. Versões já publicadas não são afetadas.' });
+      if (!c.ok) return;
+      const r = await rpcPriv('checklist_excluir_rascunho', { p_id: ckAtual.id });
+      if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); return; }
+      showToast('Rascunho excluído.', 'success');
+      ckAlterado = false; voltarListaChecklists();
+    }
+
+    // ----- importar CSV (abre no editor para revisar) -----
+    function ckLerCsv_(texto) {
+      const linhas = texto.replace(/^\uFEFF/, '').split(/\r?\n/).filter(l => l.trim());
+      if (!linhas.length) return [];
+      const sep = (linhas[0].match(/;/g) || []).length >= (linhas[0].match(/,/g) || []).length ? ';' : ',';
+      const quebrar = l => { const out = []; let cur = '', q = false;
+        for (let i = 0; i < l.length; i++) { const ch = l[i];
+          if (ch === '"') { if (q && l[i + 1] === '"') { cur += '"'; i++; } else q = !q; }
+          else if (ch === sep && !q) { out.push(cur); cur = ''; } else cur += ch; }
+        out.push(cur); return out.map(x => x.trim()); };
+      const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+      const cab = quebrar(linhas[0]).map(norm);
+      const col = nomes => cab.findIndex(c => nomes.includes(c));
+      const ix = { secao: col(['secao', 'seção', 'grupo', 'etapa']), item: col(['item', 'descricao', 'pergunta', 'texto']), tipo: col(['tipo', 'resposta']),
+                   unidade: col(['unidade', 'un']), min: col(['minimo', 'min', 'limite_min']), max: col(['maximo', 'max', 'limite_max']), obrig: col(['obrigatorio', 'obrig']) };
+      if (ix.item < 0) throw new Error('o arquivo precisa ter a coluna "item"');
+      const est = [], porTitulo = {};
+      linhas.slice(1).forEach(l => {
+        const c = quebrar(l), g = i => (i >= 0 ? (c[i] || '') : '');
+        const texto = g(ix.item); if (!texto) return;
+        const tit = (g(ix.secao) || 'GERAL').toUpperCase();
+        let s = porTitulo[tit]; if (!s) { s = { id: ckNovoId_(), titulo: tit, itens: [] }; porTitulo[tit] = s; est.push(s); }
+        const t = norm(g(ix.tipo));
+        const tipo = /^(med|leit|num|m$)/.test(t) ? 'MEDICAO' : /^(text|t$|livre)/.test(t) ? 'TEXTO' : 'VERIFICACAO';
+        const ob = norm(g(ix.obrig));
+        s.itens.push({ id: ckNovoId_(), texto, tipo, unidade: tipo === 'MEDICAO' ? g(ix.unidade) : '', min: tipo === 'MEDICAO' ? g(ix.min) : '',
+                       max: tipo === 'MEDICAO' ? g(ix.max) : '', obrigatorio: !['nao', 'n', '0', 'false', 'opcional'].includes(ob) });
+      });
+      return est;
+    }
+    function importarChecklistCsv(input) {
+      const f = input.files && input.files[0]; input.value = '';
+      if (!f) return;
+      const fr = new FileReader();
+      fr.onload = () => {
+        try {
+          const est = ckLerCsv_(String(fr.result || ''));
+          if (!est.length) { showToast('Nenhum item encontrado no arquivo.', 'error'); return; }
+          novoChecklist(est, f.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').toUpperCase());
+          showToast(`${est.reduce((s, x) => s + x.itens.length, 0)} itens importados. Revise, escolha o "Vale para" e salve.`, 'success');
+        } catch (err) { showToast('⚠️ Não foi possível ler o CSV: ' + (err.message || err), 'error'); }
+      };
+      fr.readAsText(f, 'utf-8');
+    }
+
+    // ----- preventiva: ocorrência e causa padrão -----
+    async function carregarPreventivaPadrao() {
+      if (!combos.cmbCfgPrevOc) {
+        combos.cmbCfgPrevOc = new Combo('cmbCfgPrevOc', { catalogo: 'tipos_ocorrencia', tipo: () => OS_SEM_TIPO, subItem: subValePara_,
+          dicaVazio: 'Cadastre em Catálogos uma ocorrência que valha para todos os equipamentos (ex.: Manutenção preventiva).' });
+        combos.cmbCfgPrevCa = new Combo('cmbCfgPrevCa', { catalogo: 'causas' });
+      }
+      const r = await rpcPriv('config_obter', {});
+      const p = (r.ok && r.config && r.config.preventiva_padrao) || {};
+      combos.cmbCfgPrevOc.definir(p.ocorrencia_id ? { id: p.ocorrencia_id, nome: p.ocorrencia_nome } : null);
+      combos.cmbCfgPrevCa.definir(p.causa_id ? { id: p.causa_id, nome: p.causa_nome } : null);
+    }
+    async function salvarPreventivaPadrao() {
+      const r = await rpcPriv('config_salvar', { p_chave: 'preventiva_padrao', p_valor: { ocorrencia_id: combos.cmbCfgPrevOc.valor, causa_id: combos.cmbCfgPrevCa.valor } });
+      if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); return; }
+      showToast('Valores padrão da preventiva salvos.', 'success');
+    }
+
+    function abrirAbaChecklists_() {
+      if (!ckAtual) mostrarEditorChecklist_(false);
+      carregarPreventivaPadrao();
+      if (!ckAtual) carregarChecklists();
     }
 
     // ----- máscaras de TAG (configuração) -----
