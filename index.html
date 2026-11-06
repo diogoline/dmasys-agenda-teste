@@ -3350,11 +3350,43 @@ abaAgenda.appendRow([
       usuario: r => ({ nome: str_(r.nome) || str_(r.usuario).toUpperCase(), usuario: str_(r.usuario), assinaturaUrl: str_(r.assinatura_url), ultimoAcesso: fmtBR(r.ultimo_acesso), online: !!r.ultimo_acesso && (Date.now() - new Date(r.ultimo_acesso).getTime()) < 120000 })
     };
 
+    // ---------- Acesso às tabelas pela sessão (Etapa S) ----------
+    // Imita a parte do dbSeguro(...) que a tela usa (select/eq/ilike/order/range/limit/insert/update),
+    // mas tudo passa por dados_ler / dados_gravar, que conferem a sessão e o perfil no banco.
+    function dbSeguro(tabela) {
+      const q = { tabela, colunas: null, filtros: [], ordem: null, asc: true, offset: 0, limite: 1000, acao: 'ler', dados: null };
+      const api = {
+        select(cols) { if (cols && cols !== '*') q.colunas = String(cols).split(',').map(s => s.trim()).filter(Boolean); return api; },
+        eq(col, val) { q.filtros.push({ op: 'eq', col, val: val == null ? null : String(val) }); return api; },
+        ilike(col, val) { q.filtros.push({ op: 'ilike', col, val: String(val) }); return api; },
+        order(col, o) { q.ordem = col; q.asc = !(o && o.ascending === false); return api; },
+        range(a, b) { q.offset = a; q.limite = b - a + 1; return api; },
+        limit(n) { q.limite = n; return api; },
+        insert(obj) { q.acao = 'inserir'; q.dados = obj; return api; },
+        update(obj) { q.acao = 'alterar'; q.dados = obj; return api; },
+        then(ok, falha) { return executar_().then(ok, falha); }
+      };
+      async function executar_() {
+        let r;
+        if (q.acao === 'ler') {
+          r = await rpcPriv('dados_ler', { p_tabela: q.tabela, p_colunas: q.colunas, p_filtros: q.filtros, p_ordem: q.ordem,
+                                          p_asc: q.asc, p_offset: q.offset, p_limite: q.limite });
+        } else {
+          const f = q.filtros.find(x => x.op === 'eq');
+          r = await rpcPriv('dados_gravar', { p_tabela: q.tabela, p_acao: q.acao, p_dados: q.dados,
+                                             p_chave: q.acao === 'alterar' && f ? { [f.col]: f.val } : null });
+        }
+        if (!r || r.erro) return { data: null, error: { message: textoErroPriv(r), code: r && r.codigo } };
+        return { data: q.acao === 'ler' ? (r.linhas || []) : null, error: null };
+      }
+      return api;
+    }
+
     async function lerTabela(nome, ordem, asc) {
       const TAM = 1000, MAX_PAGINAS = 20;
       let rows = [];
       for (let pg = 0; pg < MAX_PAGINAS; pg++) {
-        let q = supabaseClient.from(nome).select('*');
+        let q = dbSeguro(nome).select('*');
         if (ordem) q = q.order(ordem, { ascending: asc !== false });
         const { data, error } = await q.range(pg * TAM, pg * TAM + TAM - 1);
         if (error) { console.error("Erro ao ler " + nome + ":", error); return { rows, erro: error }; }
@@ -3365,11 +3397,10 @@ abaAgenda.appendRow([
     }
 
     async function lerUsuarios() {
-      const { data, error } = await supabaseClient.rpc('listar_usuarios');
-      if (!error && Array.isArray(data)) return data;
-      if (error) console.warn("listar_usuarios indisponível, tentando leitura direta:", error.message);
-      const r = await supabaseClient.from('usuarios').select('nome,usuario,assinatura_url,ultimo_acesso,ativo');
-      return r.data || [];
+      const data = await rpcPriv('listar_usuarios', {});
+      if (Array.isArray(data)) return data;
+      console.warn("listar_usuarios indisponível:", data && data.erro);
+      return [];
     }
 
 
@@ -3384,8 +3415,8 @@ abaAgenda.appendRow([
     async function buscarEquipamentosServidor(termo, limite) {
       const t = termoBuscaEq(termo);
       if (t.length < 2) return [];
-      const { data, error } = await supabaseClient.rpc('buscar_equipamentos', { p_termo: t, p_limite: limite || 30 });
-      if (error) { console.error("Erro na busca de equipamentos:", error); return []; }
+      const data = await rpcPriv('buscar_equipamentos', { p_termo: t, p_limite: limite || 30 });
+      if (!Array.isArray(data)) { console.error("Erro na busca de equipamentos:", data && data.erro); return []; }
       const lista = (data || []).map(mapa.equipamento);
       bancoDados.equipamentos = bancoDados.equipamentos || [];
       const cache = bancoDados.equipamentos;
@@ -3407,7 +3438,7 @@ abaAgenda.appendRow([
 
     // ---------- Protocolos sequenciais (REQ0001, PT0001, ...) ----------
     async function proximoProtocolo(tabela, coluna, prefixo, largura) {
-      const { data, error } = await supabaseClient.from(tabela).select(coluna)
+      const { data, error } = await dbSeguro(tabela).select(coluna)
         .ilike(coluna, prefixo + '%').order(coluna, { ascending: false }).limit(1000);
       if (error) throw error;
       const re = new RegExp('^' + prefixo + '-?(\\d+)$', 'i');
@@ -3422,7 +3453,7 @@ abaAgenda.appendRow([
     async function inserirComProtocolo(tabela, coluna, prefixo, largura, montar) {
       for (let i = 0; i < 4; i++) {
         const protocolo = await proximoProtocolo(tabela, coluna, prefixo, largura);
-        const { error } = await supabaseClient.from(tabela).insert(montar(protocolo));
+        const { error } = await dbSeguro(tabela).insert(montar(protocolo));
         if (!error) return protocolo;
         if (error.code !== '23505') throw error;
       }
@@ -3742,13 +3773,13 @@ abaAgenda.appendRow([
 
     // ---------- Ações (mesmo contrato de resposta que o Apps Script tinha) ----------
     async function acaoPingPresenca(d) {
-      const { error } = await supabaseClient.rpc('ping_presenca', { p_usuario: str_(d.usuario) });
-      return error ? { status: "erro", mensagem: error.message } : { status: "sucesso" };
+      const r = await rpcPriv('ping_presenca_sessao', {});   // a presença é sempre de quem está logado
+      return r && r.ok ? { status: "sucesso" } : { status: "erro", mensagem: textoErroPriv(r) };
     }
 
     async function acaoCriarAgendamento(d) {
       const iso = dataHoraParaISO(d.dataHora);
-      const { data: existentes, error: e1 } = await supabaseClient.from('agenda')
+      const { data: existentes, error: e1 } = await dbSeguro('agenda')
         .select('protocolo,tecnico,tag,status').eq('data_hora', iso);
       if (e1) throw e1;
       const tecNovo = up_(d.tecnico), tagNova = up_(d.tag);
@@ -3772,7 +3803,7 @@ abaAgenda.appendRow([
     }
 
     async function acaoAtualizarAgenda(d) {
-      const { error } = await supabaseClient.from('agenda')
+      const { error } = await dbSeguro('agenda')
         .update({ cliente: d.cliente || "", observacao: d.observacao || "" }).eq('protocolo', d.protocolo);
       return error ? { status: "erro", mensagem: error.message } : { status: "sucesso" };
     }
@@ -3795,24 +3826,24 @@ abaAgenda.appendRow([
         const blob = await htmlParaPdfBlob(html, [12, 12, 12, 12], 703);
         const r = await guardarPdf(blob, `requisicoes/Requisicao_${protocolo}_${tokenArquivo()}.pdf`);
         pdfUrlReq = r.url; aviso = r.aviso;
-        if (r.persistido) await supabaseClient.from('requisicoes').update({ pdf_url: r.url }).eq('protocolo', protocolo);
+        if (r.persistido) await dbSeguro('requisicoes').update({ pdf_url: r.url }).eq('protocolo', protocolo);
       } catch (err) { console.error("Erro ao gerar PDF da requisição:", err); aviso = err.message || String(err); }
       return { status: "sucesso", protocoloReq: protocolo, pdfUrlReq, avisoPdf: aviso };
     }
 
     async function acaoRecusarRequisicao(d) {
-      const { data, error } = await supabaseClient.from('requisicoes').select('motivo').eq('protocolo', d.protocoloReq).limit(1);
+      const { data, error } = await dbSeguro('requisicoes').select('motivo').eq('protocolo', d.protocoloReq).limit(1);
       if (error) return { status: "erro", mensagem: error.message };
       if (!data || !data.length) return { status: "erro", mensagem: "Requisição não encontrada." };
       const motivoAtual = str_(data[0].motivo);
       const novo = (motivoAtual ? motivoAtual + " | " : "") + "MOTIVO RECUSA: " + (d.motivoRecusa || "");
-      const up = await supabaseClient.from('requisicoes').update({ status: "RECUSADO", motivo: novo }).eq('protocolo', d.protocoloReq);
+      const up = await dbSeguro('requisicoes').update({ status: "RECUSADO", motivo: novo }).eq('protocolo', d.protocoloReq);
       return up.error ? { status: "erro", mensagem: up.error.message } : { status: "sucesso" };
     }
 
     async function atenderRequisicao_(protocoloReq, protocoloTermo) {
       const alvo = up_(protocoloReq), termo = str_(protocoloTermo).trim();
-      const { data, error } = await supabaseClient.from('requisicoes').select('protocolo,status,protocolo_termo');
+      const { data, error } = await dbSeguro('requisicoes').select('protocolo,status,protocolo_termo');
       if (error) return { ok: false, mensagem: error.message };
       const linhas = (data || []).filter(r => up_(r.protocolo) === alvo);
       if (!linhas.length) return { ok: false, mensagem: "Requisição " + alvo + " não encontrada." };
@@ -3821,7 +3852,7 @@ abaAgenda.appendRow([
       if (up_(r.status) === "ATENDIDO" && up_(r.protocolo_termo) && up_(r.protocolo_termo) !== up_(termo)) {
         return { ok: false, mensagem: "Requisição " + alvo + " já foi atendida pelo termo " + r.protocolo_termo + "." };
       }
-      const up = await supabaseClient.from('requisicoes').update({ status: "ATENDIDO", protocolo_termo: termo }).eq('protocolo', r.protocolo);
+      const up = await dbSeguro('requisicoes').update({ status: "ATENDIDO", protocolo_termo: termo }).eq('protocolo', r.protocolo);
       return up.error ? { ok: false, mensagem: up.error.message } : { ok: true };
     }
 
@@ -3867,13 +3898,13 @@ abaAgenda.appendRow([
         const r = await guardarPdf(blob, `termos/Termo_${protocolo}_${limparNomeArquivo(d.cliente)}_${tokenArquivo()}.pdf`);
         pdfUrl = r.url;
         if (r.persistido) {
-          await supabaseClient.from('termos_emitidos').update({ pdf_url: r.url }).eq('protocolo', protocolo);
+          await dbSeguro('termos_emitidos').update({ pdf_url: r.url }).eq('protocolo', protocolo);
         } else {
-          await supabaseClient.from('termos_emitidos').update({ log_erro: "ERRO PDF (upload): " + r.aviso }).eq('protocolo', protocolo);
+          await dbSeguro('termos_emitidos').update({ log_erro: "ERRO PDF (upload): " + r.aviso }).eq('protocolo', protocolo);
         }
       } catch (err) {
         console.error("Erro ao gerar PDF do termo:", err);
-        await supabaseClient.from('termos_emitidos').update({ log_erro: "ERRO PDF: " + (err.message || err) }).eq('protocolo', protocolo);
+        await dbSeguro('termos_emitidos').update({ log_erro: "ERRO PDF: " + (err.message || err) }).eq('protocolo', protocolo);
       }
       return { status: "sucesso", protocolo, pdfUrl, vinculo };
     }
@@ -3916,7 +3947,7 @@ abaAgenda.appendRow([
     }
 
     async function acaoCriarAuxiliar(d) {
-      const { error } = await supabaseClient.from('cad_auxiliares').insert({
+      const { error } = await dbSeguro('cad_auxiliares').insert({
         descricao: d.descricao || "", modelo: d.modelo || "", fabricante: d.fabricante || ""
       });
       return error ? { status: "erro", mensagem: error.message } : { status: "sucesso" };
@@ -3924,7 +3955,7 @@ abaAgenda.appendRow([
 
     async function acaoAtualizarLocacao(d) {
       const id = str_(d.id).trim();
-      const { data, error } = await supabaseClient.from('locacoes').select('qtd_contratada,observacao_log').eq('id', id).limit(1);
+      const { data, error } = await dbSeguro('locacoes').select('qtd_contratada,observacao_log').eq('id', id).limit(1);
       if (error) return { status: "erro", mensagem: error.message };
       if (!data || !data.length) return { status: "erro", mensagem: "ID de locação não encontrado." };
       const qtdFisica = Number(d.qtdFisica) || 0;
@@ -3934,7 +3965,7 @@ abaAgenda.appendRow([
       const novoLog = "[" + fmtBR(new Date()) + " - " + (d.usuarioNome || "Sistema") + "] Qtd Física: " + qtdFisica +
         " | R$ " + valTotal.toFixed(2) + (d.observacao ? " | " + d.observacao : "");
       const logAnterior = str_(data[0].observacao_log);
-      const up = await supabaseClient.from('locacoes').update({
+      const up = await dbSeguro('locacoes').update({
         qtd_fisica: qtdFisica, saldo, valor_unitario: valUnit, valor_total: valTotal,
         observacao_log: logAnterior ? novoLog + " \n " + logAnterior : novoLog
       }).eq('id', id);
@@ -3957,14 +3988,14 @@ abaAgenda.appendRow([
 
     // ---------- Chat interno ----------
     async function acaoEnviarMensagemChat(d) {
-      const { error } = await supabaseClient.from('mensagens_chat').insert({
+      const { error } = await dbSeguro('mensagens_chat').insert({
         remetente: d.remetente || "", destinatario: d.destinatario || "GERAL", mensagem: d.mensagem || ""
       });
       return error ? { status: "erro", mensagem: error.message } : { status: "sucesso" };
     }
 
     async function acaoBuscarMensagensChat(d) {
-      const { data, error } = await supabaseClient.from('mensagens_chat').select('*')
+      const { data, error } = await dbSeguro('mensagens_chat').select('*')
         .order('created_at', { ascending: false }).limit(300);
       if (error) return { status: "erro", mensagem: error.message };
       const eu = str_(d.usuario).toLowerCase().trim();
@@ -8067,13 +8098,13 @@ abaAgenda.appendRow([
 
     // ---------- Catálogos padronizados (fabricantes, modelos, tipos, fornecedores, clientes, setores, unidades) ----------
     async function buscarCatalogo(catalogo, termo, pai, limite, offset, somenteAtivos, tipo) {
-      const { data, error } = await supabaseClient.rpc('buscar_catalogo', {
+      const data = await rpcPriv('buscar_catalogo', {
         p_catalogo: catalogo, p_termo: termo || '', p_pai: pai || null,
         p_somente_ativos: somenteAtivos !== false, p_limite: limite || 30, p_offset: offset || 0, p_tipo: tipo || null
       });
-      if (error || !data || data.erro) {
-        console.error("Erro ao buscar catálogo:", error || data);
-        return { total: 0, itens: [], erro: (error && error.message) || (data && data.erro) || 'Erro ao buscar.' };
+      if (!data || data.erro) {
+        console.error("Erro ao buscar catálogo:", data);
+        return { total: 0, itens: [], erro: textoErroPriv(data) || 'Erro ao buscar.' };
       }
       return data;
     }
@@ -9406,7 +9437,7 @@ abaAgenda.appendRow([
       lista.style.display = 'none';
       ficha.style.display = '';
       ficha.innerHTML = '<div class="card text-slate-500">Carregando histórico...</div>';
-      const { data, error } = await supabaseClient.from('ordens_servico').select('*')
+      const { data, error } = await dbSeguro('ordens_servico').select('*')
         .eq('tag', eq.tag).order('data_abertura', { ascending: false }).limit(200);
       if (error) console.error("Erro ao carregar histórico de O.S.:", error);
       ficha.innerHTML = htmlFichaEquipamento(eq, (data || []).map(mapa.os), !!error);
