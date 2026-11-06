@@ -1121,6 +1121,38 @@ html.light :is(main, .modal-box, #mainSidebar, header, footer, #menuAjudaDropdow
     .os-anexo figcaption { margin-top: 6px; display: grid; gap: 3px; }
     .os-anexo-leg { width: 100%; padding: 6px 8px !important; font-size: 12px !important; min-height: 0 !important; }
     .os-visor { width: 920px; }
+    .ckc { margin-top: 10px; padding: 14px; border-radius: 12px; border: 1px solid #334155; }
+    .ckc-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .ckc-prog { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 8px 0 4px; }
+    .ckc-bar { width: 160px; height: 8px; border-radius: 99px; background: rgba(148, 163, 184, .25); overflow: hidden; }
+    .ckc-bar span { display: block; height: 100%; background: #10b981; border-radius: 99px; }
+    .ckc-desc { margin: 6px 0; padding: 8px 10px; border-radius: 8px; background: rgba(56, 189, 248, .07); font-size: 12.5px; white-space: pre-wrap; }
+    .cks { margin-top: 12px; }
+    .cks-t { font-size: 11.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #94a3b8; padding-bottom: 4px; border-bottom: 1px solid rgba(148, 163, 184, .3); }
+    .ckr { padding: 10px 0 10px 8px; border-bottom: 1px solid rgba(148, 163, 184, .18); border-left: 3px solid transparent; }
+    .ckr.ok { border-left-color: #10b981; }
+    .ckr.nc { border-left-color: #f43f5e; background: rgba(244, 63, 94, .05); }
+    .ckr-top { display: flex; gap: 10px; align-items: flex-start; }
+    .ckr-n { flex: none; min-width: 22px; font-size: 11px; color: #94a3b8; padding-top: 2px; text-align: right; }
+    .ckr-txt { flex: 1; min-width: 0; font-size: 13.5px; }
+    .ckr-req { color: #f43f5e; font-weight: 800; }
+    .ckr-res { flex: none; }
+    .ckr-resp { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0 0 32px; }
+    .ckr-resp .ckr-val { width: 120px; }
+    .ckr-resp .ckr-txt-in { flex: 1 1 260px; }
+    .ckr-obs { margin: 8px 0 0 32px; display: grid; gap: 6px; }
+    .ckb { min-height: 40px; padding: 8px 14px; border-radius: 10px; border: 1.5px solid #475569; background: transparent; color: inherit; font-weight: 700; font-size: 13px; cursor: pointer; }
+    .ckb:disabled { cursor: default; opacity: .6; }
+    .ckb.ok.on { background: #10b981; border-color: #10b981; color: #fff; }
+    .ckb.nc.on { background: #f43f5e; border-color: #f43f5e; color: #fff; }
+    .ckb.na.on { background: #64748b; border-color: #64748b; color: #fff; }
+    .ckb:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }
+    .eq-chip.vermelho { background: rgba(244, 63, 94, .15); color: #fb7185; border-color: rgba(244, 63, 94, .4); }
+    html.light .ckc { border-color: #cbd5e1; background: #fff; }
+    html.light .cks-t { color: #475569; border-bottom-color: #cbd5e1; }
+    html.light .ckb { border-color: #94a3b8; }
+    html.light .eq-chip.vermelho { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+    @media (max-width: 720px) { .ckr-resp, .ckr-obs { margin-left: 0; } .ckb { flex: 1 1 auto; } .ckc-bar { width: 100%; } }
     .os-ass-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
     .os-ass { padding: 14px; border-radius: 12px; border: 1px solid #334155; display: grid; gap: 6px; align-content: start; }
     .os-ass.ok { border-color: rgba(16, 185, 129, .55); }
@@ -2881,10 +2913,15 @@ abaAgenda.appendRow([
 
       <!-- ETAPA 2: DIAGNÓSTICO -->
       <section class="os-etapa" id="osEtapa2">
-        <div class="os-etapa-tit"><span class="n">2</span><div><b>Diagnóstico</b><div class="eq-k">O que o técnico analisou e encontrou</div></div></div>
-        <div class="eq-g">
+        <div class="os-etapa-tit"><span class="n">2</span><div><b id="osEt2Tit">Diagnóstico</b><div class="eq-k" id="osEt2Sub">O que o técnico analisou e encontrou</div></div></div>
+        <div class="eq-g" id="osDiagBloco">
           <div class="form-group combo c12" id="cmbOsAnalise"><label>Análise realizada *</label><input type="text" class="combo-input" autocomplete="off" placeholder="Ex: Inspeção visual, Teste funcional..." /><div class="combo-lista" role="listbox"></div></div>
           <div class="form-group c12"><label>Complemento do diagnóstico <span class="text-slate-500">(opcional)</span></label><textarea id="osfDiagnostico" rows="3" oninput="marcarSujoOS()" placeholder="Detalhes do que foi encontrado"></textarea></div>
+        </div>
+        <div id="osCkBloco">
+          <div class="os-sub" id="osCkTit">Checklist</div>
+          <div id="osCkLista"></div>
+          <div id="osCkAdd" style="margin-top:10px;"><button type="button" class="eq-btn" onclick="abrirAdicionarChecklistOS()"><i class="fa-solid fa-plus"></i> Adicionar procedimento</button><div id="osCkDisp"></div></div>
         </div>
         <div class="os-etapa-pe">
           <button type="button" class="eq-btn" onclick="irEtapaOS(0)">Voltar</button>
@@ -6444,7 +6481,8 @@ abaAgenda.appendRow([
     async function abrirFichaOS(protocolo) {
       garantirCombosOS();
       osTempos = null; osTrechosAbertos = false; osEtapaVendo = -1; osEtapaManual = false; osSujo = false;
-      osAnexos = null; osAnexoUrls = {}; osAnexoUrlsEm = 0; osValid = null; cancelarColetaAssinatura();
+      osAnexos = null; osAnexoUrls = {}; osAnexoUrlsEm = 0; osValid = null; cancelarColetaAssinatura(); osChecklists = null; osCkObsAberta = {};
+      document.getElementById('osCkLista').innerHTML = ''; document.getElementById('osCkDisp').innerHTML = '';
       document.getElementById('osAnexoGaleria').innerHTML = '';
       document.getElementById('osAnexoProgresso').textContent = '';
       document.getElementById('modalOS').classList.add('active');
@@ -6459,6 +6497,7 @@ abaAgenda.appendRow([
       renderFichaOS();
       carregarTemposOS();
       carregarAnexosOS();
+      carregarChecklistsOS();
     }
 
     async function fecharFichaOS(forcar) {
@@ -6468,7 +6507,7 @@ abaAgenda.appendRow([
         if (!c.ok) return false;
       }
       document.getElementById('modalOS')?.classList.remove('active');
-      osAtual = null; osSujo = false; osEtapaVendo = -1; osAnexos = null; osAnexoUrls = {}; osValid = null; cancelarColetaAssinatura();
+      osAtual = null; osSujo = false; osEtapaVendo = -1; osAnexos = null; osAnexoUrls = {}; osValid = null; cancelarColetaAssinatura(); osChecklists = null;
       pararRelogioOS_(); osTempos = null; osTrechosAbertos = false;
       buscarAtualizacoesSilenciosas();
       return true;
@@ -6477,7 +6516,7 @@ abaAgenda.appendRow([
     async function recarregarFichaOS() {
       if (!osAtual) return;
       const r = await rpcPriv('os_obter', { p_protocolo: osAtual.os.protocolo });
-      if (r.ok) { osAtual = r; renderFichaOS(); carregarTemposOS(); carregarAnexosOS(); } else showToast("⚠️ " + textoErroPriv(r), "error");
+      if (r.ok) { osAtual = r; renderFichaOS(); carregarTemposOS(); carregarAnexosOS(); carregarChecklistsOS(); } else showToast("⚠️ " + textoErroPriv(r), "error");
     }
 
     function renderFichaOS() {
@@ -6506,7 +6545,9 @@ abaAgenda.appendRow([
         (o.cliente ? `<span>${e(o.cliente)}</span>` : '') +
         `<span>${e(o.tipo_manutencao || '')}${o.prioridade ? ', prioridade ' + e(String(o.prioridade).toLowerCase()) : ''}</span>` +
         `<span class="eq-k">Aberta em ${e(fmtBR(o.data_abertura))}</span>` +
-        (o.tag ? `<button type="button" class="eq-link" onclick="abrirEquipamentoDaOS()">ver ficha do equipamento</button>` : '');
+        (o.tag ? `<button type="button" class="eq-link" onclick="abrirEquipamentoDaOS()">ver ficha do equipamento</button>` : '') +
+        (o.origem_protocolo ? `<span class="eq-k">Originada da <button type="button" class="eq-link" data-p="${e(o.origem_protocolo)}" onclick="abrirOsVinculada(this.dataset.p)">${e(o.origem_protocolo)}</button></span>` : '') +
+        ((o.vinculadas || []).length ? `<span class="eq-k">Corretivas geradas: ${o.vinculadas.map(v => `<button type="button" class="eq-link" data-p="${e(v.protocolo)}" onclick="abrirOsVinculada(this.dataset.p)">${e(v.protocolo)}</button> (${v.status === 'FECHADA' ? 'fechada' : 'aberta'})`).join(', ')}</span>` : '');
 
       // etapa 1
       set('osfAbertura', fmtBR(o.data_abertura)); set('osfFechamento', fechada ? fmtBR(o.data_fechamento) : '—');
@@ -6541,12 +6582,13 @@ abaAgenda.appendRow([
       const rodando = validos.filter(a => !a.fim);
       const anexosCarregados = !!osAnexos, fotos = osAnexos ? (osAnexos.fotos || 0) : 0;
       const corretiva = String(o.tipo_manutencao || '').toUpperCase() === 'CORRETIVA';
-      const feitas = [!!(o.ocorrencia_id && o.causa_id), !!o.analise_id,
+      const ck = estadoChecklistsOS_(), prev = String(o.tipo_manutencao || '').toUpperCase() === 'PREVENTIVA';
+      const feitas = [!!(o.ocorrencia_id && o.causa_id), prev ? (ck.ok && ck.tem) : (!!o.analise_id && ck.ok),
                       carregado && tempoMs > 0 && !semDesc.length && !rodando.length,
                       anexosCarregados && (!corretiva || fotos >= 1),
                       !!osValid && !!assinaturaOS_('SETOR') && !!assinaturaOS_('TECNICO'), o.status === 'FECHADA'];
       let atual = feitas.indexOf(false); if (atual < 0) atual = 5;
-      return { feitas, atual, carregado, tempoMs, semDesc, rodando, anexosCarregados, fotos, corretiva, validCarregada: !!osValid };
+      return { feitas, atual, carregado, tempoMs, semDesc, rodando, anexosCarregados, fotos, corretiva, validCarregada: !!osValid, ck, prev };
     }
 
     function atualizarPassosOS_() {
@@ -6554,7 +6596,9 @@ abaAgenda.appendRow([
       const st = estadoOS_(), fechada = osAtual.os.status === 'FECHADA';
       // enquanto o usuário não escolhe outra etapa, a ficha acompanha a primeira pendente (tempos e anexos chegam depois)
       if (!osEtapaManual || osEtapaVendo < 0 || osEtapaVendo > st.atual) osEtapaVendo = st.atual;
-      document.getElementById('osPassos').innerHTML = OS_ETAPAS.map((p, i) => {
+      const nomes = i => i === 1 && st.prev ? { nome: 'Checklist', sub: 'Procedimento' } : OS_ETAPAS[i];
+      document.getElementById('osPassos').innerHTML = OS_ETAPAS.map((p0, i) => {
+        const p = { ...p0, ...nomes(i) };
         const cls = st.feitas[i] ? 'feito' : (!fechada && i === st.atual ? 'atual' : '');
         const vendo = !fechada && i === osEtapaVendo;
         const pode = fechada || i <= st.atual;
@@ -6564,6 +6608,9 @@ abaAgenda.appendRow([
           <span class="t">${p.nome}<span class="s">${p.sub}</span></span></button></li>`;
       }).join('');
       document.querySelectorAll('#modalOS .os-etapa').forEach((sec, i) => sec.classList.toggle('ativa', fechada || i === osEtapaVendo));
+      document.getElementById('osEt2Tit').textContent = st.prev ? 'Checklist' : 'Diagnóstico';
+      document.getElementById('osEt2Sub').textContent = st.prev ? 'Procedimento de manutenção preventiva' : 'O que o técnico analisou e encontrou';
+      document.getElementById('osDiagBloco').style.display = st.prev ? 'none' : '';
       renderConferenciaOS_(st);
     }
 
@@ -6597,6 +6644,11 @@ abaAgenda.appendRow([
       const d = dadosEtapaOS_(n);
       if (n === 1 && !d.ocorrencia_id) { showToast('Escolha a ocorrência (motivo do chamado).', 'error'); combos.cmbOcTipo.input.focus(); return; }
       if (n === 1 && !d.causa_id) { showToast('Escolha a causa.', 'error'); combos.cmbOcCausa.input.focus(); return; }
+      if (n === 2) {
+        const sc = estadoChecklistsOS_();
+        if (!sc.ok) { showToast(sc.msg, 'warning'); return; }
+        if (ehPreventivaOS_()) { osSujo = false; osEtapaVendo = 2; osEtapaManual = true; atualizarPassosOS_(); return; }   // respostas já gravadas item a item
+      }
       if (n === 2 && !d.analise_id) { showToast('Escolha a análise realizada.', 'error'); combos.cmbOsAnalise.input.focus(); return; }
       const btn = document.getElementById('osBtnEtapa' + n); btn.disabled = true;
       const r = await rpcPriv('os_atualizar', { p_protocolo: osAtual.os.protocolo, p_dados: d });
@@ -6656,7 +6708,9 @@ abaAgenda.appendRow([
       const itens = [
         [!!o.ocorrencia_id, 'Ocorrência', o.ocorrencia_nome],
         [!!o.causa_id, 'Causa', o.causa_nome],
-        [!!o.analise_id, 'Análise realizada', o.analise_nome],
+        ...(st.prev ? [] : [[!!o.analise_id, 'Análise realizada', o.analise_nome]]),
+        ...(st.prev || (st.ck.carregado && st.ck.tem) ? [[st.ck.ok && (st.ck.tem || !st.prev), 'Checklist completo',
+          !st.ck.carregado ? 'carregando...' : st.ck.tem ? `${st.ck.resp} de ${st.ck.total} respondidos${st.ck.nc ? ', ' + st.ck.nc + ' não conforme' + (st.ck.nc > 1 ? 's' : '') : ''}` : 'nenhum checklist']] : []),
         [st.carregado && st.tempoMs > 0, 'Mão de obra registrada', st.carregado ? (st.tempoMs > 0 ? fmtHoras_(st.tempoMs) : '') : 'carregando...'],
         [st.carregado && !st.semDesc.length, 'Todo o tempo com descrição do serviço', st.semDesc.length ? st.semDesc.length + ' trecho(s) sem descrição' : ''],
         [st.carregado && !st.rodando.length, 'Nenhum cronômetro rodando', st.rodando.map(a => a.tecnico_nome).join(', ')]
@@ -6727,6 +6781,191 @@ abaAgenda.appendRow([
             ${x.observacao ? `<div class="os-ev-obs">${e(x.observacao)}</div>` : ''}
             <div class="eq-k">${e(x.criado_por_nome) || ''}${x.atualizado_em ? ` · corrigido por ${e(x.atualizado_por_nome)} em ${e(fmtBR(x.atualizado_em))}` : ''}</div>
           </div></div>`).join('');
+    }
+
+    // ----- checklist dentro da O.S. -----
+    // Na preventiva, a etapa 2 é o checklist (substitui a análise realizada). Nos outros tipos, checklist é opcional.
+    // Cada resposta é gravada na hora; o servidor calcula o resultado (inclusive se a medição ficou nos limites).
+    let osChecklists = null, osCkObsAberta = {};
+
+    function ehPreventivaOS_() { return !!osAtual && String(osAtual.os.tipo_manutencao || '').toUpperCase() === 'PREVENTIVA'; }
+
+    function estadoChecklistsOS_() {
+      if (!osChecklists) return { carregado: false, ok: false, tem: false, msg: 'Aguarde carregar o checklist.' };
+      const tem = osChecklists.length > 0;
+      const pend = osChecklists.reduce((s, c) => s + (c.resumo.pendentes || 0), 0);
+      const ncObs = osChecklists.reduce((s, c) => s + (c.resumo.nc_sem_obs || 0), 0);
+      const total = osChecklists.reduce((s, c) => s + (c.resumo.total || 0), 0);
+      const nc = osChecklists.reduce((s, c) => s + (c.resumo.nao_conformes || 0), 0);
+      const resp = osChecklists.reduce((s, c) => s + (c.resumo.respondidos || 0), 0);
+      let msg = '';
+      if (ehPreventivaOS_() && !tem) msg = 'A preventiva precisa de um checklist: use "Adicionar procedimento".';
+      else if (pend) msg = `Faltam ${pend} ite${pend === 1 ? 'm obrigatório' : 'ns obrigatórios'} no checklist.`;
+      else if (ncObs) msg = 'Descreva a não conformidade dos itens marcados como "Não conforme".';
+      return { carregado: true, tem, pend, ncObs, total, nc, resp, ok: !msg, msg };
+    }
+
+    async function carregarChecklistsOS() {
+      if (!osAtual) return;
+      const p = osAtual.os.protocolo;
+      const r = await rpcPriv('os_checklists_obter', { p_protocolo: p });
+      if (!osAtual || osAtual.os.protocolo !== p) return;
+      if (!r.ok) { document.getElementById('osCkLista').innerHTML = `<div class="eq-k">${escAttr_(textoErroPriv(r))}</div>`; return; }
+      osChecklists = r.itens || [];
+      renderChecklistsOS_();
+      atualizarPassosOS_();
+    }
+
+    function faixaCk_(it) {
+      const u = it.unidade ? ' ' + it.unidade : '';
+      if (it.min != null && it.max != null) return `${it.min} a ${it.max}${u}`;
+      if (it.min != null) return `mínimo ${it.min}${u}`;
+      if (it.max != null) return `máximo ${it.max}${u}`;
+      return it.unidade ? `em ${it.unidade} (sem limite)` : 'sem limite';
+    }
+    function chipResultadoCk_(res, obrig) {
+      if (res === 'CONFORME') return '<span class="eq-chip verde">Conforme</span>';
+      if (res === 'NAO_CONFORME') return '<span class="eq-chip vermelho">Não conforme</span>';
+      if (res === 'NA') return '<span class="eq-chip cinza">N/A</span>';
+      if (res === 'PREENCHIDO') return '<span class="eq-chip verde">Preenchido</span>';
+      return obrig === false ? '<span class="eq-chip cinza">Opcional</span>' : '<span class="eq-chip ambar">Pendente</span>';
+    }
+
+    function linhaCkOS_(c, it, n, ro) {
+      const e = escAttr_, r = c.respostas[it.id] || {}, res = r.resultado || null, chave = c.id + '|' + it.id;
+      const dis = ro ? 'disabled' : '', obrig = it.obrigatorio !== false;
+      const obsVisivel = res === 'NAO_CONFORME' || (r.observacao || '').trim() || osCkObsAberta[chave];
+      let resp = '';
+      if (it.tipo === 'VERIFICACAO') {
+        resp = [['CONFORME', 'Conforme', 'ok'], ['NAO_CONFORME', 'Não conforme', 'nc'], ['NA', 'N/A', 'na']].map(([v, rot, cls]) =>
+          `<button type="button" class="ckb ${cls}${r.resposta === v ? ' on' : ''}" aria-pressed="${r.resposta === v}" ${dis}
+             data-c="${e(c.id)}" data-i="${e(it.id)}" data-v="${v}" onclick="responderCkOS(this.dataset.c, this.dataset.i, {resposta: this.classList.contains('on') ? '' : this.dataset.v})">${rot}</button>`).join('');
+      } else if (it.tipo === 'MEDICAO') {
+        resp = `<input type="text" inputmode="decimal" class="ckr-val" value="${r.valor ?? ''}" placeholder="valor" ${dis || (r.resposta === 'NA' ? 'disabled' : '')}
+                  aria-label="Valor medido" data-c="${e(c.id)}" data-i="${e(it.id)}" onchange="responderCkOS(this.dataset.c, this.dataset.i, {valor: this.value, resposta: ''})" />
+                <span class="eq-k">${e(it.unidade || '')}</span>
+                <button type="button" class="ckb na${r.resposta === 'NA' ? ' on' : ''}" aria-pressed="${r.resposta === 'NA'}" ${dis}
+                  data-c="${e(c.id)}" data-i="${e(it.id)}" onclick="responderCkOS(this.dataset.c, this.dataset.i, {resposta: this.classList.contains('on') ? '' : 'NA', valor: ''})">N/A</button>`;
+      } else {
+        resp = `<textarea class="ckr-txt-in" rows="2" maxlength="2000" placeholder="Escreva aqui" ${dis || (r.resposta === 'NA' ? 'disabled' : '')} aria-label="Resposta"
+                  data-c="${e(c.id)}" data-i="${e(it.id)}" onchange="responderCkOS(this.dataset.c, this.dataset.i, {texto: this.value, resposta: ''})">${e(r.texto || '')}</textarea>
+                <button type="button" class="ckb na${r.resposta === 'NA' ? ' on' : ''}" aria-pressed="${r.resposta === 'NA'}" ${dis}
+                  data-c="${e(c.id)}" data-i="${e(it.id)}" onclick="responderCkOS(this.dataset.c, this.dataset.i, {resposta: this.classList.contains('on') ? '' : 'NA', texto: ''})">N/A</button>`;
+      }
+      const corretiva = res === 'NAO_CONFORME'
+        ? (r.corretiva ? `<div class="eq-k">Corretiva aberta: <button type="button" class="eq-link" data-p="${e(r.corretiva)}" onclick="abrirOsVinculada(this.dataset.p)">${e(r.corretiva)}</button></div>`
+                       : (ro ? '' : `<button type="button" class="eq-link" data-c="${e(c.id)}" data-i="${e(it.id)}" onclick="abrirCorretivaCkOS(this.dataset.c, this.dataset.i)">Abrir O.S. corretiva para este item</button>`))
+        : '';
+      return `<div class="ckr${res === 'NAO_CONFORME' ? ' nc' : res ? ' ok' : ''}" id="ckr-${e(c.id)}-${e(it.id)}">
+        <div class="ckr-top"><span class="ckr-n">${n}</span>
+          <div class="ckr-txt">${e(it.texto)}${obrig ? ' <span class="ckr-req" title="Obrigatório">*</span>' : ''}${it.tipo === 'MEDICAO' ? `<div class="eq-k">Faixa aceita: ${e(faixaCk_(it))}</div>` : ''}</div>
+          <span class="ckr-res">${chipResultadoCk_(res, obrig)}</span></div>
+        <div class="ckr-resp">${resp}
+          ${!ro && !obsVisivel ? `<button type="button" class="eq-link ckr-obs-link" data-k="${e(chave)}" data-c="${e(c.id)}" onclick="osCkObsAberta[this.dataset.k] = true; renderChecklistsOS_()">+ observação</button>` : ''}</div>
+        <div class="ckr-obs" style="display:${obsVisivel ? '' : 'none'};">
+          <textarea rows="2" maxlength="1000" ${dis} placeholder="${res === 'NAO_CONFORME' ? 'Descreva a não conformidade *' : 'Observação (opcional)'}" aria-label="Observação"
+            data-c="${e(c.id)}" data-i="${e(it.id)}" onchange="responderCkOS(this.dataset.c, this.dataset.i, {observacao: this.value})">${e(r.observacao || '')}</textarea>
+          ${corretiva}</div>
+      </div>`;
+    }
+
+    function renderChecklistsOS_() {
+      if (!osAtual || !osChecklists) return;
+      const e = escAttr_, fechada = osAtual.os.status === 'FECHADA';
+      const consulta = usuarioLogado && usuarioLogado.perfil === 'CONSULTA', ro = fechada || consulta;
+      const prev = ehPreventivaOS_();
+      document.getElementById('osCkTit').textContent = prev ? 'Checklist da preventiva' : 'Procedimentos / checklists (opcional)';
+      document.getElementById('osCkAdd').style.display = ro ? 'none' : '';
+      if (!osChecklists.length) {
+        document.getElementById('osCkLista').innerHTML = `<div class="eq-k" style="padding:4px 0 8px;">${prev
+          ? 'Nenhum checklist publicado vale para este equipamento. Publique um na engrenagem (Checklists de manutenção) ou adicione um procedimento.'
+          : 'Nenhum checklist anexado.'}</div>`;
+        return;
+      }
+      document.getElementById('osCkLista').innerHTML = osChecklists.map(c => {
+        const rs = c.resumo, pct = rs.total ? Math.round(rs.respondidos * 100 / rs.total) : 0;
+        let n = 0;
+        return `<div class="ckc" id="ckc-${e(c.id)}">
+          <div class="ckc-h">
+            <div style="min-width:0;"><b>${c.codigo} · ${e(c.nome)}</b> <span class="eq-k">versão ${c.versao}${c.origem === 'AUTOMATICO' ? ' · anexado automaticamente' : ''}</span></div>
+            ${ro ? '' : `<button type="button" class="eq-link" data-c="${e(c.id)}" onclick="removerChecklistOS(this.dataset.c)">Remover</button>`}
+          </div>
+          <div class="ckc-prog"><div class="ckc-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${pct}%"></span></div>
+            <span class="eq-k">${rs.respondidos} de ${rs.total} respondidos</span>
+            <span class="eq-chip verde">${rs.conformes} conforme${rs.conformes === 1 ? '' : 's'}</span>
+            ${rs.nao_conformes ? `<span class="eq-chip vermelho">${rs.nao_conformes} não conforme${rs.nao_conformes === 1 ? '' : 's'}</span>` : ''}
+            ${rs.na ? `<span class="eq-chip cinza">${rs.na} N/A</span>` : ''}
+            ${rs.pendentes ? `<span class="eq-chip ambar">${rs.pendentes} obrigatório${rs.pendentes === 1 ? '' : 's'} pendente${rs.pendentes === 1 ? '' : 's'}</span>` : ''}</div>
+          ${c.descricao ? `<div class="ckc-desc">${e(c.descricao)}</div>` : ''}
+          ${(c.estrutura || []).map(s => `<div class="cks"><div class="cks-t">${e(s.titulo)}</div>${s.itens.map(it => linhaCkOS_(c, it, ++n, ro)).join('')}</div>`).join('')}
+        </div>`;
+      }).join('');
+    }
+
+    async function responderCkOS(ckId, itemId, mudanca) {
+      const c = (osChecklists || []).find(x => x.id === ckId); if (!c) return;
+      const atual = c.respostas[itemId] || {};
+      const d = { resposta: atual.resposta || '', valor: atual.valor ?? '', texto: atual.texto || '', observacao: atual.observacao || '', ...mudanca };
+      const r = await rpcPriv('os_checklist_responder', { p_id: ckId, p_item: itemId, p_dados: d });
+      if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); renderChecklistsOS_(); return; }
+      c.respostas[itemId] = { ...atual, resposta: d.resposta || null, valor: d.valor === '' ? null : String(d.valor).replace(',', '.'),
+                              texto: d.texto || null, observacao: (d.observacao || '').trim() || null, resultado: r.resultado };
+      c.resumo = r.resumo;
+      // redesenha sem tirar o foco de quem ainda está digitando em outro campo
+      const ativo = document.activeElement, linha = document.getElementById(`ckr-${ckId}-${itemId}`);
+      const foco = ativo && ativo.dataset && ativo.dataset.c ? { c: ativo.dataset.c, i: ativo.dataset.i, cls: ativo.className, tag: ativo.tagName } : null;
+      renderChecklistsOS_();
+      if (foco && linha) {
+        const alvo = [...document.querySelectorAll(`#ckr-${foco.c}-${foco.i} ${foco.tag.toLowerCase()}`)].find(x => x.className === foco.cls);
+        if (alvo) alvo.focus();
+      }
+      atualizarPassosOS_();
+    }
+
+    async function abrirAdicionarChecklistOS() {
+      if (!osAtual) return;
+      const box = document.getElementById('osCkDisp'), e = escAttr_;
+      box.innerHTML = '<div class="eq-k">Carregando...</div>';
+      const r = await rpcPriv('os_checklist_modelos_disponiveis', { p_protocolo: osAtual.os.protocolo });
+      if (!r.ok) { box.innerHTML = `<div class="eq-k">${e(textoErroPriv(r))}</div>`; return; }
+      box.innerHTML = (r.itens || []).length
+        ? '<div class="eq-k" style="margin:8px 0 4px;">Checklists publicados que valem para este equipamento:</div>' + r.itens.map(m =>
+            `<button type="button" class="eq-btn" style="margin:4px 6px 0 0;" data-m="${e(m.id)}" onclick="adicionarChecklistOS(this.dataset.m)">${m.codigo} · ${e(m.nome)} (v${m.versao}, ${m.itens} itens)</button>`).join('')
+          + ' <button type="button" class="eq-link" onclick="document.getElementById(\'osCkDisp\').innerHTML=\'\'">fechar</button>'
+        : '<div class="eq-k" style="margin-top:8px;">Nenhum outro checklist publicado vale para este equipamento.</div>';
+    }
+    async function adicionarChecklistOS(modeloId) {
+      const r = await rpcPriv('os_checklist_adicionar', { p_protocolo: osAtual.os.protocolo, p_modelo: modeloId });
+      if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); return; }
+      document.getElementById('osCkDisp').innerHTML = '';
+      showToast('Checklist adicionado.', 'success');
+      carregarChecklistsOS();
+    }
+    async function removerChecklistOS(ckId) {
+      const c = (osChecklists || []).find(x => x.id === ckId); if (!c) return;
+      const conf = await confirmarAcao({ titulo: 'Remover checklist', rotuloBotao: 'Remover', motivo: true, minimo: 5,
+        texto: `Remover "${c.nome}" desta O.S.? Fica registrado com o seu nome e o motivo.` });
+      if (!conf.ok) return;
+      const r = await rpcPriv('os_checklist_remover', { p_id: ckId, p_motivo: conf.motivo });
+      if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); return; }
+      showToast('Checklist removido.', 'success');
+      carregarChecklistsOS();
+    }
+    async function abrirCorretivaCkOS(ckId, itemId) {
+      const c = (osChecklists || []).find(x => x.id === ckId); if (!c) return;
+      const it = (c.estrutura || []).flatMap(s => s.itens).find(x => x.id === itemId);
+      const conf = await confirmarAcao({ titulo: 'Abrir O.S. corretiva', rotuloBotao: 'Abrir corretiva',
+        texto: `Será aberta uma O.S. corretiva para o mesmo equipamento, ligada a esta O.S., com a não conformidade: "${it ? it.texto : ''}".` });
+      if (!conf.ok) return;
+      const r = await rpcPriv('os_checklist_abrir_corretiva', { p_id: ckId, p_item: itemId });
+      if (!r.ok) { showToast('⚠️ ' + textoErroPriv(r), 'error'); return; }
+      showToast(`O.S. corretiva ${r.protocolo} aberta e vinculada.`, 'success');
+      await recarregarFichaOS();
+    }
+    async function abrirOsVinculada(protocolo) {
+      if (!protocolo) return;
+      if (!(await fecharFichaOS())) return;
+      abrirFichaOS(protocolo);
     }
 
     // ----- fotos e anexos -----
@@ -7065,12 +7304,13 @@ abaAgenda.appendRow([
         rpcPriv('os_anexos_listar', { p_protocolo: p }),
         rpcPriv('os_validacao_obter', { p_protocolo: p }),
         chamarFuncaoAnexos_({ acao: 'leitura', protocolo: p })]);
+      const rc = await rpcPriv('os_checklists_obter', { p_protocolo: p });
       const urls = rl.ok ? (rl.urls || {}) : {};
       const anexos = ra.ok ? (ra.itens || []) : [];
       const assin = rv.ok ? (rv.assinaturas || []) : [];
       const img = {};
       await Promise.all([...anexos.filter(a => a.eh_foto), ...assin].map(async x => { img[x.id] = await urlParaDataUrl_(urls[x.id]); }));
-      return { anexos, assin, img, falhaLinks: !rl.ok };
+      return { anexos, assin, img, falhaLinks: !rl.ok, cks: rc.ok ? (rc.itens || []) : [] };
     }
 
     // fotos em linhas de 2 (cada linha é um bloco que não se divide entre páginas)
@@ -7091,7 +7331,7 @@ abaAgenda.appendRow([
       const e = escAttr_, o = osAtual.os, fechada = o.status === 'FECHADA';
       const val = v => (v === null || v === undefined || String(v).trim() === '') ? '<span class="r-vazio">Não informado</span>' : e(v);
       const campo = (rot, v, largo) => `<div class="r-campo${largo ? ' largo' : ''}"><div class="r-rot">${rot}</div><div class="r-val">${val(v)}</div></div>`;
-      const secao = (n, tit, corpo, extra) => `<section class="r-sec"><div class="r-sec-h"><span class="r-num">${n}</span><span class="r-sec-t">${tit}</span>${extra || ''}</div>${corpo}</section>`;
+      const secao = (n, tit, corpo, extra, livre) => `<section class="${livre ? 'r-secl' : 'r-sec'}"><div class="r-sec-h"><span class="r-num">${n}</span><span class="r-sec-t">${tit}</span>${extra || ''}</div>${corpo}</section>`;
 
       const trechos = trechosValidosOS_().filter(a => a.fim).sort((p, q) => new Date(p.inicio) - new Date(q.inicio));
       const totalMs = trechos.reduce((s, a) => s + duracaoMs_(a), 0);
@@ -7099,6 +7339,26 @@ abaAgenda.appendRow([
       const fotos = D.anexos.filter(a => a.eh_foto), docs = D.anexos.filter(a => !a.eh_foto);
       const assin = p => D.assin.find(a => a.papel === p) || null;
       const servico = fechada ? o.servico_realizado : servicoMontadoOS_();
+      let sn = 0; const nx = () => String(++sn).padStart(2, '0');
+      const prevR = String(o.tipo_manutencao || '').toUpperCase() === 'PREVENTIVA', cks = D.cks || [];
+      const ckTot = cks.reduce((a, c) => ({ t: a.t + c.resumo.total, ok: a.ok + c.resumo.conformes, nc: a.nc + c.resumo.nao_conformes, na: a.na + c.resumo.na }), { t: 0, ok: 0, nc: 0, na: 0 });
+      const blocoChecklist = c => {
+        const rs = c.resumo;
+        const corpo = `<div class="r-ck-meta">Procedimento ${c.codigo}, versão ${c.versao} · ${rs.total} itens · ${rs.conformes} conformes · ${rs.nao_conformes} não conformes · ${rs.na} N/A</div>
+          <div class="r-ckl h"><div class="r-ckl-i">Item verificado</div><div class="r-ckl-r">Resultado</div><div class="r-ckl-o">Observação</div></div>` +
+          (c.estrutura || []).map(s => `<div class="r-ck-st">${e(s.titulo)}</div>` + s.itens.map(it => {
+            const r = c.respostas[it.id] || {}, res = r.resultado;
+            const val = it.tipo === 'MEDICAO' && r.valor != null ? `${e(String(r.valor).replace('.', ','))}${it.unidade ? ' ' + e(it.unidade) : ''}`
+                      : (it.tipo === 'TEXTO' && r.texto ? e(r.texto) : '');
+            const chip = res === 'CONFORME' ? '<span class="r-res ok">Conforme</span>' : res === 'NAO_CONFORME' ? '<span class="r-res nc">Não conforme</span>'
+                       : res === 'NA' ? '<span class="r-res na">N/A</span>' : res === 'PREENCHIDO' ? ''
+                       : it.obrigatorio === false ? '<span class="r-vazio">—</span>' : '<span class="r-res pend">Sem resposta</span>';
+            return `<div class="r-ckl"><div class="r-ckl-i">${e(it.texto)}${it.tipo === 'MEDICAO' ? `<span class="r-faixa">Faixa aceita: ${e(faixaCk_(it))}</span>` : ''}</div>
+              <div class="r-ckl-r">${val ? `<b>${val}</b> ` : ''}${chip}</div>
+              <div class="r-ckl-o">${e(r.observacao || '')}${r.corretiva ? `<span>Corretiva aberta: ${e(r.corretiva)}</span>` : ''}</div></div>`;
+          }).join('')).join('');
+        return secao(nx(), 'Checklist · ' + e(c.nome), corpo, '', true);
+      };
 
       const figs = fotos.map((f, i) => `<figure class="r-foto">
           <div class="r-foto-img">${D.img[f.id] ? `<img src="${D.img[f.id]}" />` : '<span class="r-vazio">Imagem indisponível</span>'}</div>
@@ -7176,6 +7436,27 @@ abaAgenda.appendRow([
         .r-doc .r-nota { margin-top: 10px; font-size: 9px; color: ${C.suave}; text-align: center; }
         .r-doc .r-rodape { margin-top: 24px; padding-top: 10px; border-top: 1px solid ${C.linha}; font-size: 8.5px; line-height: 1.5; color: ${C.suave}; text-align: center; }
         .r-doc .r-rodape b { color: ${C.texto}; }
+        .r-doc .r-secl { margin-top: 20px; }
+        .r-doc .r-tab th { background: ${C.fundo} !important; color: ${C.suave} !important; }
+        .r-doc .r-tab td { background: #fff !important; }
+        .r-doc .r-hero-ck { margin-top: 10px; font-size: 10.5px; color: ${C.texto}; }
+        .r-doc .r-hero-ck b { color: ${C.tinta}; }
+        .r-doc .r-hero-ck .ok { color: #047857; font-weight: 700; }
+        .r-doc .r-hero-ck .nc { color: #b91c1c; font-weight: 700; }
+        .r-doc .r-ck-meta { margin-bottom: 8px; font-size: 9.5px; color: ${C.suave}; }
+        .r-doc .r-ck-st { margin-top: 10px; padding: 6px 8px; border-radius: 6px; background: ${C.fundo}; font-size: 9px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: ${C.tinta}; page-break-after: avoid; }
+        .r-doc .r-ckl { display: flex; gap: 10px; padding: 6px 8px; border-bottom: 1px solid ${C.linha}; page-break-inside: avoid; }
+        .r-doc .r-ckl.h { padding-top: 2px; font-size: 8.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: ${C.suave}; border-bottom-color: #d1d5db; }
+        .r-doc .r-ckl-i { flex: 1 1 0; min-width: 0; color: ${C.tinta}; }
+        .r-doc .r-ckl-r { flex: 0 0 150px; color: ${C.tinta}; }
+        .r-doc .r-ckl-o { flex: 0 0 170px; font-size: 9.5px; color: ${C.texto}; word-break: break-word; }
+        .r-doc .r-ckl-o span { display: block; color: ${C.destaque}; font-weight: 700; }
+        .r-doc .r-faixa { display: block; font-size: 9px; color: ${C.suave}; }
+        .r-doc .r-res { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 8.5px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; }
+        .r-doc .r-res.ok { color: #047857; background: #ecfdf5; }
+        .r-doc .r-res.nc { color: #b91c1c; background: #fef2f2; }
+        .r-doc .r-res.na { color: #4b5563; background: #f3f4f6; }
+        .r-doc .r-res.pend { color: #92400e; background: #fffbeb; }
       </style></head><body><div class="r-doc">
         <header class="r-head">
           <img src="${PDF_LOGO_SRC}" />
@@ -7194,27 +7475,29 @@ abaAgenda.appendRow([
             <div class="r-kpi acc"><div class="k">Tempo de atendimento</div><div class="v">${fechada ? duracaoTxt_(atendMs) : '—'}</div></div>
             <div class="r-kpi"><div class="k">Mão de obra</div><div class="v">${fmtHoras_(totalMs)}</div></div>
           </div>
+          ${cks.length ? `<div class="r-hero-ck">Checklist: <b>${ckTot.t} itens</b> · <span class="ok">${ckTot.ok} conformes</span> · <span class="${ckTot.nc ? 'nc' : ''}">${ckTot.nc} não conforme${ckTot.nc === 1 ? '' : 's'}</span> · ${ckTot.na} N/A</div>` : ''}
         </div>
 
-        ${secao('01', 'Dados do chamado', `<div class="r-grade">
+        ${secao(nx(), 'Dados do chamado', `<div class="r-grade">
             ${campo('Cliente / unidade', o.cliente)}${campo('Solicitante', o.solicitante)}${campo('Técnico responsável', o.tecnico)}
             ${campo('Execução', o.execucao)}${campo('Prioridade', o.prioridade)}${campo('Reaberturas', o.reaberturas > 0 ? o.reaberturas + 'x' : 'Nenhuma')}</div>`)}
 
-        ${secao('02', 'Requisição', `<div class="r-grade">${campo('Ocorrência', o.ocorrencia_nome)}${campo('Causa', o.causa_nome)}${campo('Observação', o.defeito_relatado)}</div>`)}
+        ${secao(nx(), 'Requisição', `<div class="r-grade">${campo('Ocorrência', o.ocorrencia_nome)}${campo('Causa', o.causa_nome)}${campo('Observação', o.defeito_relatado)}</div>`)}
 
-        ${secao('03', 'Diagnóstico', `<div class="r-grade">${campo('Análise realizada', o.analise_nome)}${campo('Complemento', o.diagnostico_tecnico, true)}</div>`)}
+        ${prevR ? '' : secao(nx(), 'Diagnóstico', `<div class="r-grade">${campo('Análise realizada', o.analise_nome)}${campo('Complemento', o.diagnostico_tecnico, true)}</div>`)}
+        ${cks.map(blocoChecklist).join('')}
 
-        ${secao('04', 'Mão de obra', trechos.length ? `<table class="r-tab"><thead><tr><th>Técnico</th><th>Início</th><th>Fim</th><th>Serviço executado</th><th style="text-align:right">Tempo</th></tr></thead><tbody>
+        ${secao(nx(), 'Mão de obra', trechos.length ? `<table class="r-tab"><thead><tr><th>Técnico</th><th>Início</th><th>Fim</th><th>Serviço executado</th><th style="text-align:right">Tempo</th></tr></thead><tbody>
             ${trechos.map(a => `<tr><td><b>${e(a.tecnico_nome)}</b></td><td class="dt">${e(fmtBR(a.inicio))}</td><td class="dt">${e(fmtBR(a.fim))}</td><td>${e(a.descricao) || '—'}</td><td class="num">${fmtHoras_(duracaoMs_(a))}</td></tr>`).join('')}
             </tbody><tfoot><tr><td colspan="4" style="text-align:right">Total</td><td class="num">${fmtHoras_(totalMs)}</td></tr></tfoot></table>`
           : '<div class="r-texto">Nenhuma mão de obra registrada.</div>', `<span class="r-sec-x">${trechos.length} registro${trechos.length === 1 ? '' : 's'}</span>`)}
 
-        ${secao('05', 'Serviço realizado', `<div class="r-texto">${e(servico) || 'Não informado.'}</div>`)}
+        ${secao(nx(), 'Serviço realizado', `<div class="r-texto">${e(servico) || 'Não informado.'}</div>`)}
 
-        ${linhas.length ? `<section class="r-sec"><div class="r-sec-h"><span class="r-num">06</span><span class="r-sec-t">Registro fotográfico</span><span class="r-sec-x">${fotos.length} foto${fotos.length === 1 ? '' : 's'}</span></div>${linhas[0]}</section>${linhas.slice(1).join('')}` : ''}
-        ${docs.length ? secao(linhas.length ? '07' : '06', 'Documentos anexos', `<table class="r-tab"><tbody>${docs.map(d => `<tr><td><b>${e(d.nome)}</b>${d.legenda ? ' · ' + e(d.legenda) : ''}</td><td class="dt" style="text-align:right">${e(d.criado_por_nome)} · ${e(fmtBR(d.criado_em))}</td></tr>`).join('')}</tbody></table>`) : ''}
+        ${linhas.length ? `<section class="r-sec"><div class="r-sec-h"><span class="r-num">${nx()}</span><span class="r-sec-t">Registro fotográfico</span><span class="r-sec-x">${fotos.length} foto${fotos.length === 1 ? '' : 's'}</span></div>${linhas[0]}</section>${linhas.slice(1).join('')}` : ''}
+        ${docs.length ? secao(nx(), 'Documentos anexos', `<table class="r-tab"><tbody>${docs.map(d => `<tr><td><b>${e(d.nome)}</b>${d.legenda ? ' · ' + e(d.legenda) : ''}</td><td class="dt" style="text-align:right">${e(d.criado_por_nome)} · ${e(fmtBR(d.criado_em))}</td></tr>`).join('')}</tbody></table>`) : ''}
 
-        <section class="r-sec"><div class="r-sec-h"><span class="r-num">${String(5 + (linhas.length ? 1 : 0) + (docs.length ? 1 : 0) + 1).padStart(2, '0')}</span><span class="r-sec-t">Validação</span></div>
+        <section class="r-sec"><div class="r-sec-h"><span class="r-num">${nx()}</span><span class="r-sec-t">Validação</span></div>
           <div class="r-asss">${blocoAss('SETOR')}${blocoAss('TECNICO')}</div>
           <div class="r-nota">Assinaturas coletadas eletronicamente no DMA SYS, com registro de data, hora e usuário.</div></section>
 
@@ -7240,7 +7523,7 @@ abaAgenda.appendRow([
           html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, scrollX: 0, scrollY: 0 },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
           // 'avoid' só em blocos comuns: a biblioteca insere um espaçador antes do elemento evitado
-          pagebreak: { mode: ['css', 'legacy'], avoid: ['.r-sec', '.r-fotolin', '.r-hero'] }
+          pagebreak: { mode: ['css', 'legacy'], avoid: ['.r-sec', '.r-fotolin', '.r-hero', '.r-ckl'] }
         }).from(holder.querySelector('.r-doc')).toPdf().get('pdf');
         const n = pdf.internal.getNumberOfPages(), W = pdf.internal.pageSize.getWidth(), H = pdf.internal.pageSize.getHeight();
         for (let i = 1; i <= n; i++) {
@@ -7524,7 +7807,7 @@ abaAgenda.appendRow([
       garantirCombosNovaOS();
       const ocorrencia = combos.cmbNovaOsOc.valor;
       if (!g('osTag') || g('osTag') === '-') { showToast('Escolha o equipamento da O.S.', 'error'); document.getElementById('osBuscaEquip').focus(); return false; }
-      if (!ocorrencia) { showToast('Escolha a ocorrência (motivo do chamado).', 'error'); combos.cmbNovaOsOc.input.focus(); return false; }
+      if (!ocorrencia && g('osTipo').toUpperCase() !== 'PREVENTIVA') { showToast('Escolha a ocorrência (motivo do chamado).', 'error'); combos.cmbNovaOsOc.input.focus(); return false; }
       const btn = document.getElementById('btnSalvarOS');
       btn.disabled = true;
       postAPI({
